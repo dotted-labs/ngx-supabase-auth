@@ -7,12 +7,14 @@ import { PasswordResetComponent as SupPasswordResetComponent } from '@dotted-lab
   standalone: true,
   imports: [SupPasswordResetComponent],
   template: `
-    <div class="max-w-md mx-auto p-8 rounded-lg shadow-md bg-white">
-      <sup-password-reset
-        title="Reset Your Password"
-        subtitle="Enter your email and we'll send you a reset link"
-        (backToLogin)="onBackToLogin()"
-      ></sup-password-reset>
+    <div class="max-w-md mx-auto card card-border bg-base-100 border-base-300 card-sm">
+      <div class="card-body">
+        <sup-password-reset
+          title="Reset Your Password"
+          subtitle="Enter your email and we'll send you a reset link"
+          (backToLogin)="onBackToLogin()"
+        ></sup-password-reset>
+      </div>
     </div>
   `,
   styles: [

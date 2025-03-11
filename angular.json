@@ -37,7 +37,7 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "scss"
+          "style": "css"
         }
       },
       "root": "projects/demo-app",
@@ -52,7 +52,7 @@
             "browser": "projects/demo-app/src/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "projects/demo-app/tsconfig.app.json",
-            "inlineStyleLanguage": "scss",
+            "inlineStyleLanguage": "css",
             "assets": [
               {
                 "glob": "**/*",
@@ -60,7 +60,7 @@
                 "output": "/"
               }
             ],
-            "styles": ["projects/demo-app/src/styles.scss"],
+            "styles": ["projects/demo-app/src/styles.css"],
             "scripts": []
           },
           "configurations": {
@@ -107,7 +107,7 @@
           "options": {
             "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "projects/demo-app/tsconfig.spec.json",
-            "inlineStyleLanguage": "scss",
+            "inlineStyleLanguage": "css",
             "assets": [
               {
                 "glob": "**/*",
@@ -115,7 +115,7 @@
                 "output": "/"
               }
             ],
-            "styles": ["projects/demo-app/src/styles.scss"],
+            "styles": ["projects/demo-app/src/styles.css"],
             "scripts": []
           }
         }

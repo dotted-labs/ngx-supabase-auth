@@ -6,14 +6,16 @@ import { ProfileComponent as SupProfileComponent } from '@dotted-labs/ngx-supaba
   standalone: true,
   imports: [SupProfileComponent],
   template: `
-    <div class="max-w-md mx-auto p-8 rounded-lg shadow-md bg-white">
-      <sup-profile
-        title="Your Profile"
-        subtitle="Manage your account information here"
-        [showAvatarSection]="true"
-        [showPasswordSection]="true"
-        [showSignOut]="true"
-      ></sup-profile>
+    <div class="max-w-md mx-auto card card-border bg-base-100 border-base-300 card-sm">
+      <div class="card-body">
+        <sup-profile
+          title="Your Profile"
+          subtitle="Manage your account information here"
+          [showAvatarSection]="true"
+          [showPasswordSection]="true"
+          [showSignOut]="true"
+        ></sup-profile>
+      </div>
     </div>
   `,
   styles: [

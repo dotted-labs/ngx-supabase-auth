@@ -7,19 +7,24 @@ import { SUPABASE_AUTH_CONFIG } from '../../config/supabase-auth.config';
 import { SocialLoginComponent } from '../social-login/social-login.component';
 
 /**
- * Login component to handle email/password and social login
+ * Signup component to handle email/password registration and social signup
  */
 @Component({
-  selector: 'sup-login',
+  selector: 'sup-signup',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, SocialLoginComponent],
-  templateUrl: './login.component.html',
+  templateUrl: './signup.component.html',
 })
-export class LoginComponent implements OnInit {
+export class SignupComponent implements OnInit {
   /**
-   * Login form group
+   * Event emitted when user clicks login
    */
-  public loginForm: FormGroup;
+  public login = output<void>();
+
+  /**
+   * Signup form group
+   */
+  public signupForm: FormGroup;
 
   /**
    * Auth store instance
@@ -42,7 +47,7 @@ export class LoginComponent implements OnInit {
   public AuthProvider = AuthProvider;
 
   /**
-   * Providers habilitados desde la configuración
+   * Providers enabled from configuration
    */
   public enabledProviders: AuthProvider[] = [];
 
@@ -50,16 +55,6 @@ export class LoginComponent implements OnInit {
    * Flag to show email/password form
    */
   public showEmailPasswordForm = false;
-
-  /**
-   * Event emitted when user clicks forgot password
-   */
-  public forgotPassword = output<void>();
-
-  /**
-   * Event emitted when user clicks signup
-   */
-  public signup = output<void>();
 
   /**
    * Computed to check if there are social providers enabled
@@ -73,36 +68,56 @@ export class LoginComponent implements OnInit {
    */
   private fb = inject(FormBuilder);
 
+  public backToLogin = output<void>();
   constructor() {
-    this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-    });
+    this.signupForm = this.fb.group(
+      {
+        email: ['', [Validators.required, Validators.email]],
+        password: ['', [Validators.required, Validators.minLength(6)]],
+        confirmPassword: ['', [Validators.required]],
+      },
+      { validator: this.passwordMatchValidator },
+    );
   }
 
   public ngOnInit(): void {
-    // Obtener los providers habilitados de la configuración
+    // Get enabled providers from configuration
     this.enabledProviders = this.config.enabledAuthProviders || [];
 
-    // Verificar si el email/password está habilitado
+    // Check if email/password is enabled
     this.showEmailPasswordForm = this.enabledProviders.includes(AuthProvider.EMAIL_PASSWORD);
   }
 
   /**
-   * Submit the login form
+   * Custom validator to check if password and confirm password match
+   */
+  private passwordMatchValidator(form: FormGroup) {
+    const password = form.get('password')?.value;
+    const confirmPassword = form.get('confirmPassword')?.value;
+
+    if (password !== confirmPassword) {
+      form.get('confirmPassword')?.setErrors({ passwordMismatch: true });
+      return { passwordMismatch: true };
+    }
+
+    return null;
+  }
+
+  /**
+   * Submit the signup form
    */
   public onSubmit(): void {
-    if (this.loginForm.valid) {
-      const { email, password } = this.loginForm.value;
-      this.authStore.signInWithEmail(email, password);
+    if (this.signupForm.valid) {
+      const { email, password } = this.signupForm.value;
+      this.authStore.signUpWithEmail(email, password);
     }
   }
 
   /**
-   * Login with a social provider
+   * Signup with a social provider
    * @param provider Social auth provider
    */
-  public loginWithSocialProvider(provider: AuthProvider | SocialAuthProvider): void {
+  public signupWithSocialProvider(provider: AuthProvider | SocialAuthProvider): void {
     this.authStore.signInWithSocialProvider(provider as SocialAuthProvider);
   }
 
@@ -115,7 +130,7 @@ export class LoginComponent implements OnInit {
     return this.enabledProviders.includes(provider);
   }
 
-  public onGoToSignup(): void {
-    this.signup.emit();
+  public onBackToLogin(): void {
+    this.backToLogin.emit();
   }
 }

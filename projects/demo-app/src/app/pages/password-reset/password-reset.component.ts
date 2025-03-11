@@ -7,8 +7,7 @@ import { PasswordResetComponent as SupPasswordResetComponent } from '@dotted-lab
   standalone: true,
   imports: [SupPasswordResetComponent],
   template: `
-    <div class="container">
-      <h1 class="app-title">Demo Application</h1>
+    <div class="max-w-md mx-auto p-8 rounded-lg shadow-md bg-white">
       <sup-password-reset
         title="Reset Your Password"
         subtitle="Enter your email and we'll send you a reset link"

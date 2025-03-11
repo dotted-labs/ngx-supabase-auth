@@ -1,13 +1,10 @@
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, computed, effect, inject, input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { UserProfileUpdate } from '../../models/auth.models';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { UserProfileUpdate, SupabaseUser } from '../../models/auth.models';
 import { AuthStore } from '../../store/auth.store';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { SupabaseAuthService } from '../../services/auth.service';
 
 /**
  * User profile component for managing user information
@@ -20,65 +17,75 @@ import { AuthStore } from '../../store/auth.store';
 })
 export class ProfileComponent implements OnInit {
   /**
-   * Title for the profile component
-   */
-  @Input() title = 'User Profile';
-
-  /**
-   * Subtitle for the profile component
-   */
-  @Input() subtitle?: string;
-
-  /**
    * Whether to show the avatar section
    */
-  @Input() showAvatarSection = true;
+  public showAvatarSection = input(true);
 
   /**
    * Whether to show the password section
    */
-  @Input() showPasswordSection = true;
+  public showPasswordSection = input(true);
 
   /**
    * Whether to show the sign out button
    */
-  @Input() showSignOut = true;
+  public showSignOut = input(true);
 
   /**
    * Whether to allow changing the email
    */
-  @Input() allowEmailChange = false;
+  public allowEmailChange = input(false);
 
   /**
    * Profile form group
    */
-  profileForm: FormGroup;
+  public profileForm: FormGroup;
 
   /**
    * Password form group
    */
-  passwordForm: FormGroup;
+  public passwordForm: FormGroup;
 
   /**
    * Whether the profile update was successful
    */
-  updateSuccess = false;
+  public updateSuccess = signal(false);
 
   /**
    * Whether the password update was successful
    */
-  passwordUpdateSuccess = false;
+  public passwordUpdateSuccess = signal(false);
+
+  /**
+   * Loading state for user data
+   */
+  public isLoading = computed(() => this.authStore.loading());
+
+  /**
+   * User data signal
+   */
+  public userData = computed(() => this.authStore.user());
 
   /**
    * URL for the user avatar
    */
-  avatarUrl =
-    'https://ui-avatars.com/api/?name=User&color=7F9CF5&background=EBF4FF&size=100';
+  public avatarUrl = computed(() => {
+    const user = this.userData();
+    if (user?.user_metadata?.['avatar_url']) {
+      return user.user_metadata['avatar_url'];
+    }
+    return 'https://ui-avatars.com/api/?name=User&color=7F9CF5&background=EBF4FF&size=100';
+  });
 
   /**
    * Auth store instance
    */
-  authStore = inject(AuthStore);
+  public authStore = inject(AuthStore);
+
+  /**
+   * Auth service for direct user data access
+   */
+  private authService = inject(SupabaseAuthService);
 
   /**
    * Form builder
@@ -88,10 +95,7 @@ export class ProfileComponent implements OnInit {
   constructor() {
     this.profileForm = this.fb.group({
       name: ['', [Validators.required]],
-      email: [
-        { value: '', disabled: !this.allowEmailChange },
-        [Validators.required, Validators.email],
-      ],
+      email: [{ value: '', disabled: !this.allowEmailChange() }, [Validators.required, Validators.email]],
     });
 
     this.passwordForm = this.fb.group(
@@ -99,43 +103,37 @@ export class ProfileComponent implements OnInit {
         password: ['', [Validators.required, Validators.minLength(6)]],
         confirmPassword: ['', [Validators.required]],
       },
-      { validators: this.passwordMatchValidator }
+      { validators: this.passwordMatchValidator },
     );
+
+    // Subscribe to user changes from authStore
+    effect(() => {
+      const user = this.authStore.user();
+      if (user) {
+        this.updateFormWithUserData(user);
+      }
+    });
+  }
+
+  /**
+   * Update form with user data
+   */
+  private updateFormWithUserData(user: SupabaseUser): void {
+    this.profileForm.patchValue({
+      name: user?.user_metadata?.['name'] || '',
+      email: user?.email || '',
+    });
   }
 
   /**
    * Initialize the component
    */
-  ngOnInit(): void {
-    // Set form values from user data
-    if (this.authStore.user()) {
-      const user = this.authStore.user();
-
-      // Update profile form
-      this.profileForm.patchValue({
-        name: user?.user_metadata?.['name'] || '',
-        email: user?.email || '',
-      });
-
-      // Update avatar URL if available
-      if (user?.user_metadata?.['avatar_url']) {
-        this.avatarUrl = user.user_metadata['avatar_url'];
-      } else if (user?.email) {
-        // Generate avatar from email if no avatar URL is available
-        const name = user.user_metadata?.['name'] || user.email.split('@')[0];
-        this.avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-          name
-        )}&color=7F9CF5&background=EBF4FF&size=100`;
-      }
-    }
-  }
+  public ngOnInit(): void {}
 
   /**
    * Password match validator
    */
-  private passwordMatchValidator(
-    group: FormGroup
-  ): { [key: string]: any } | null {
+  private passwordMatchValidator(group: FormGroup): { [key: string]: any } | null {
     const password = group.get('password')?.value;
     const confirmPassword = group.get('confirmPassword')?.value;
 
@@ -145,22 +143,22 @@ export class ProfileComponent implements OnInit {
   /**
    * Submit the profile form
    */
-  onSubmit(): void {
+  public onSubmit(): void {
     if (this.profileForm.valid) {
       const update: UserProfileUpdate = {
         name: this.profileForm.value.name,
       };
 
-      if (this.allowEmailChange && this.profileForm.get('email')?.enabled) {
+      if (this.allowEmailChange() && this.profileForm.get('email')?.enabled) {
         update.email = this.profileForm.value.email;
       }
 
       this.authStore.updateProfile(update);
 
       // Show success message temporarily
-      this.updateSuccess = true;
+      this.updateSuccess.set(true);
       setTimeout(() => {
-        this.updateSuccess = false;
+        this.updateSuccess.set(false);
       }, 3000);
     }
   }
@@ -168,16 +166,16 @@ export class ProfileComponent implements OnInit {
   /**
    * Submit the password form
    */
-  onPasswordSubmit(): void {
+  public onPasswordSubmit(): void {
     if (this.passwordForm.valid) {
       this.authStore.updatePassword({
         password: this.passwordForm.value.password,
       });
 
       // Show success message temporarily
-      this.passwordUpdateSuccess = true;
+      this.passwordUpdateSuccess.set(true);
       setTimeout(() => {
-        this.passwordUpdateSuccess = false;
+        this.passwordUpdateSuccess.set(false);
         this.passwordForm.reset();
       }, 3000);
     }
@@ -186,16 +184,64 @@ export class ProfileComponent implements OnInit {
   /**
    * Handle change avatar click
    */
-  onChangeAvatar(): void {
-    // In a real implementation, you would show a file picker dialog
-    // and upload the image to storage, then update the user metadata
-    alert('Avatar upload functionality would be implemented here');
+  public onChangeAvatar(): void {
+    // Create a file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+
+    // Handle file selection
+    fileInput.onchange = async (event) => {
+      const target = event.target as HTMLInputElement;
+      const file = target.files?.[0];
+
+      if (file) {
+        try {
+          // Get the user ID
+          const userId = this.userData()?.id;
+          if (!userId) {
+            throw new Error('User not authenticated');
+          }
+
+          // Generate a unique file name
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Date.now()}.${fileExt}`;
+          const filePath = `avatars/${userId}/${fileName}`;
+
+          // Upload the file and get its URL (loading is handled by updateProfile)
+          const { url, error } = await this.authService.uploadFile('avatars', filePath, file);
+
+          if (error) {
+            throw error;
+          }
+
+          if (url) {
+            // Update the user's avatar URL in metadata
+            await this.authStore.updateProfile({
+              avatar_url: url,
+            });
+
+            // Show success message temporarily
+            this.updateSuccess.set(true);
+            setTimeout(() => {
+              this.updateSuccess.set(false);
+            }, 3000);
+          }
+        } catch (error) {
+          console.error('Error uploading avatar:', error);
+          alert('Failed to upload avatar. Please try again.');
+        }
+      }
+    };
+
+    // Trigger file selection dialog
+    fileInput.click();
   }
 
   /**
    * Handle sign out click
    */
-  onSignOut(): void {
+  public onSignOut(): void {
     this.authStore.signOut();
   }
 }

@@ -6,8 +6,7 @@ import { ProfileComponent as SupProfileComponent } from '@dotted-labs/ngx-supaba
   standalone: true,
   imports: [SupProfileComponent],
   template: `
-    <div class="container">
-      <h1 class="app-title">Demo Application</h1>
+    <div class="max-w-md mx-auto p-8 rounded-lg shadow-md bg-white">
       <sup-profile
         title="Your Profile"
         subtitle="Manage your account information here"

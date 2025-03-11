@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthStore } from '@dotted-labs/ngx-supabase-auth';
@@ -8,127 +8,40 @@ import { AuthStore } from '@dotted-labs/ngx-supabase-auth';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="container">
-      <h1 class="app-title">Dashboard</h1>
+    <div class="max-w-md mx-auto p-8 rounded-lg shadow-md bg-white">
+      <h1 class="mb-8 text-3xl text-center text-gray-800">Dashboard</h1>
 
-      <div class="dashboard-content">
-        @if (authStore.user()) {
-        <div class="user-info">
-          <h2>Welcome, {{ getUserName() }}</h2>
-          <p>Email: {{ authStore.user()?.email }}</p>
-          <p>
-            Last Sign In: {{ formatDate(authStore.user()?.last_sign_in_at) }}
-          </p>
+      @if (user()) {
+        <div class="mb-8">
+          <h2 class="text-2xl text-gray-800 mb-4">Welcome, {{ username() }}</h2>
+          <p class="text-gray-600 mb-2">Email: {{ email() }}</p>
+          <p class="text-gray-600 mb-2">Last Sign In: {{ lastSignIn() }}</p>
         </div>
-        }
+      }
 
-        <div class="actions">
-          <button class="btn btn-profile" (click)="navigateToProfile()">
-            View Profile
-          </button>
-          <button class="btn btn-logout" (click)="logout()">Sign Out</button>
-        </div>
+      <div class="flex gap-4 justify-start">
+        <button class="px-6 py-3 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600" (click)="navigateToProfile()">
+          View Profile
+        </button>
+        <button class="px-6 py-3 bg-red-500 text-white font-medium rounded-md hover:bg-red-600" (click)="logout()">Sign Out</button>
       </div>
     </div>
   `,
-  styles: [
-    `
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem;
-      }
-
-      .app-title {
-        margin-bottom: 2rem;
-        color: #333;
-        text-align: center;
-        font-size: 2rem;
-      }
-
-      .dashboard-content {
-        background-color: white;
-        border-radius: 8px;
-        padding: 2rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
-
-      .user-info {
-        margin-bottom: 2rem;
-      }
-
-      .user-info h2 {
-        color: #333;
-        margin-bottom: 1rem;
-        font-size: 1.5rem;
-      }
-
-      .user-info p {
-        color: #666;
-        margin-bottom: 0.5rem;
-        font-size: 1rem;
-      }
-
-      .actions {
-        display: flex;
-        gap: 1rem;
-        justify-content: flex-start;
-      }
-
-      .btn {
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 4px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background-color 0.2s;
-      }
-
-      .btn-profile {
-        background-color: #3498db;
-        color: white;
-      }
-
-      .btn-profile:hover {
-        background-color: #2980b9;
-      }
-
-      .btn-logout {
-        background-color: #e74c3c;
-        color: white;
-      }
-
-      .btn-logout:hover {
-        background-color: #c0392b;
-      }
-    `,
-  ],
 })
 export class DashboardComponent {
-  authStore = inject(AuthStore);
+  private router = inject(Router);
+  public authStore = inject(AuthStore);
 
-  constructor(private router: Router) {}
+  public user = computed(() => this.authStore.user());
+  public username = computed(() => this.user()?.user_metadata?.['name'] || this.user()?.email?.split('@')[0] || 'User');
+  public lastSignIn = computed(() => this.user()?.last_sign_in_at);
+  public email = computed(() => this.user()?.email);
 
-  getUserName(): string {
-    const user = this.authStore.user();
-    // Try to get the user name from metadata
-    return (
-      user?.user_metadata?.['name'] || user?.email?.split('@')[0] || 'User'
-    );
-  }
-
-  formatDate(dateString?: string): string {
-    if (!dateString) return 'Never';
-
-    const date = new Date(dateString);
-    return date.toLocaleString();
-  }
-
-  navigateToProfile(): void {
+  public navigateToProfile(): void {
     this.router.navigate(['/profile']);
   }
 
-  logout(): void {
+  public logout(): void {
     this.authStore.signOut();
   }
 }

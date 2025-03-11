@@ -1,7 +1,7 @@
 import { Injectable, inject, effect, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { patchState, signalStore, withHooks, withMethods, withState } from '@ngrx/signals';
 import {
   AuthState,
   SocialAuthProvider,
@@ -34,31 +34,26 @@ export const AuthStore = signalStore(
       authService = inject(SupabaseAuthService),
       router = inject(Router),
       config = inject(SUPABASE_AUTH_CONFIG),
-      destroyRef = inject(DestroyRef)
+      destroyRef = inject(DestroyRef),
     ) => {
-      // Initialize the store
-      effect(() => {
-        initializeStore();
-      });
-
-      /**
-       * Initialize store and set up auth state listeners
-       */
-      async function initializeStore() {
-        patchState(store, { loading: true });
-        try {
-          const user = await authService.getCurrentUser();
-          patchState(store, { user, loading: false });
-        } catch (error) {
-          patchState(store, {
-            user: null,
-            loading: false,
-            error: (error as Error).message,
-          });
-        }
-      }
-
       return {
+        /**
+         * Initialize store and set up auth state listeners
+         */
+        async initializeStore() {
+          patchState(store, { loading: true });
+          try {
+            const user = await authService.getCurrentUser();
+            patchState(store, { user, loading: false });
+          } catch (error) {
+            patchState(store, {
+              user: null,
+              loading: false,
+              error: (error as Error).message,
+            });
+          }
+        },
+
         /**
          * Sign in with email and password
          * @param email User email
@@ -68,10 +63,7 @@ export const AuthStore = signalStore(
           patchState(store, { loading: true, error: null });
 
           try {
-            const { user, error } = await authService.signInWithEmail(
-              email,
-              password
-            );
+            const { user, error } = await authService.signInWithEmail(email, password);
 
             if (error) {
               patchState(store, {
@@ -102,10 +94,7 @@ export const AuthStore = signalStore(
           patchState(store, { loading: true, error: null });
 
           try {
-            const { user, error } = await authService.signUpWithEmail(
-              email,
-              password
-            );
+            const { user, error } = await authService.signUpWithEmail(email, password);
 
             if (error) {
               patchState(store, {
@@ -135,9 +124,7 @@ export const AuthStore = signalStore(
           patchState(store, { loading: true, error: null });
 
           try {
-            const { error } = await authService.signInWithSocialProvider(
-              provider
-            );
+            const { error } = await authService.signInWithSocialProvider(provider);
 
             if (error) {
               patchState(store, {
@@ -260,6 +247,11 @@ export const AuthStore = signalStore(
           }
         },
       };
-    }
-  )
+    },
+  ),
+  withHooks({
+    onInit(store) {
+      store.initializeStore();
+    },
+  }),
 );

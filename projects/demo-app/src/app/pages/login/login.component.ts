@@ -7,14 +7,8 @@ import { LoginComponent as SupLoginComponent } from '@dotted-labs/ngx-supabase-a
   standalone: true,
   imports: [SupLoginComponent],
   template: `
-    <div class="container">
-      <h1 class="app-title text-2xl font-bold">Demo Application</h1>
-      <sup-login
-        title="Welcome Back"
-        subtitle="Log in to access your account"
-        (forgotPassword)="onForgotPassword()"
-        (signUp)="onSignUp()"
-      ></sup-login>
+    <div class="max-w-md mx-auto p-8 rounded-lg shadow-md bg-white">
+      <sup-login (forgotPassword)="onForgotPassword()" (signUp)="onSignUp()"></sup-login>
     </div>
   `,
 })
@@ -27,8 +21,6 @@ export class LoginPageComponent {
 
   onSignUp() {
     // En una aplicación real, esto podría redirigir a una página de registro
-    alert(
-      'Sign up functionality would be implemented here in a real application'
-    );
+    alert('Sign up functionality would be implemented here in a real application');
   }
 }

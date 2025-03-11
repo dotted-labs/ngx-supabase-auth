@@ -31,6 +31,11 @@ export interface SupabaseAuthConfig {
    * Redirect path when user should not be authenticated
    */
   authRedirectIfAuthenticated?: string;
+
+  /**
+   * Enabled authentication providers
+   */
+  enabledAuthProviders?: AuthProvider[];
 }
 
 /**
@@ -56,7 +61,20 @@ export interface AuthState {
 }
 
 /**
+ * Auth providers enum
+ */
+export enum AuthProvider {
+  EMAIL_PASSWORD = 'email_password',
+  GOOGLE = 'google',
+  FACEBOOK = 'facebook',
+  TWITTER = 'twitter',
+  GITHUB = 'github',
+  DISCORD = 'discord',
+}
+
+/**
  * Social auth providers enum
+ * @deprecated Use AuthProvider instead
  */
 export enum SocialAuthProvider {
   GOOGLE = 'google',

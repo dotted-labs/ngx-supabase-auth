@@ -23,10 +23,7 @@ export class SupabaseAuthService {
   private router = inject(Router);
 
   constructor() {
-    this.supabase = createClient(
-      this.config.supabaseUrl,
-      this.config.supabaseKey
-    );
+    this.supabase = createClient(this.config.supabaseUrl, this.config.supabaseKey);
 
     // Set up auth state change listener
     this.supabase.auth.onAuthStateChange((_, session) => {
@@ -60,10 +57,7 @@ export class SupabaseAuthService {
    * @param password User password
    * @returns Promise with sign in result
    */
-  async signInWithEmail(
-    email: string,
-    password: string
-  ): Promise<{ user: SupabaseUser | null; error: Error | null }> {
+  async signInWithEmail(email: string, password: string): Promise<{ user: SupabaseUser | null; error: Error | null }> {
     try {
       const { data, error } = await this.supabase.auth.signInWithPassword({
         email,
@@ -90,10 +84,7 @@ export class SupabaseAuthService {
    * @param password User password
    * @returns Promise with sign up result
    */
-  async signUpWithEmail(
-    email: string,
-    password: string
-  ): Promise<{ user: SupabaseUser | null; error: Error | null }> {
+  async signUpWithEmail(email: string, password: string): Promise<{ user: SupabaseUser | null; error: Error | null }> {
     try {
       const { data, error } = await this.supabase.auth.signUp({
         email,
@@ -115,9 +106,7 @@ export class SupabaseAuthService {
    * @param provider Social auth provider
    * @returns Promise with sign in result
    */
-  async signInWithSocialProvider(
-    provider: SocialAuthProvider
-  ): Promise<{ error: Error | null }> {
+  async signInWithSocialProvider(provider: SocialAuthProvider): Promise<{ error: Error | null }> {
     try {
       const { error } = await this.supabase.auth.signInWithOAuth({
         provider: provider,
@@ -134,13 +123,9 @@ export class SupabaseAuthService {
    * @param request Password reset request
    * @returns Promise with result
    */
-  async sendPasswordResetEmail(
-    request: PasswordResetRequest
-  ): Promise<{ error: Error | null }> {
+  async sendPasswordResetEmail(request: PasswordResetRequest): Promise<{ error: Error | null }> {
     try {
-      const { error } = await this.supabase.auth.resetPasswordForEmail(
-        request.email
-      );
+      const { error } = await this.supabase.auth.resetPasswordForEmail(request.email);
       return { error };
     } catch (err) {
       return { error: err as Error };
@@ -152,9 +137,7 @@ export class SupabaseAuthService {
    * @param request Update password request
    * @returns Promise with result
    */
-  async updatePassword(
-    request: UpdatePasswordRequest
-  ): Promise<{ error: Error | null }> {
+  async updatePassword(request: UpdatePasswordRequest): Promise<{ error: Error | null }> {
     try {
       const { error } = await this.supabase.auth.updateUser({
         password: request.password,
@@ -171,9 +154,7 @@ export class SupabaseAuthService {
    * @param update User profile update data
    * @returns Promise with result
    */
-  async updateProfile(
-    update: UserProfileUpdate
-  ): Promise<{ error: Error | null }> {
+  async updateProfile(update: UserProfileUpdate): Promise<{ error: Error | null }> {
     try {
       const { error } = await this.supabase.auth.updateUser({
         data: update,
@@ -200,6 +181,33 @@ export class SupabaseAuthService {
       return { error };
     } catch (err) {
       return { error: err as Error };
+    }
+  }
+
+  /**
+   * Upload a file to Supabase storage
+   * @param bucketName The storage bucket name
+   * @param filePath The path where the file will be stored
+   * @param file The file to upload
+   * @returns Promise with upload result
+   */
+  async uploadFile(bucketName: string, filePath: string, file: File): Promise<{ url: string | null; error: Error | null }> {
+    try {
+      // Upload the file
+      const { error: uploadError } = await this.supabase.storage.from(bucketName).upload(filePath, file, {
+        upsert: true,
+      });
+
+      if (uploadError) {
+        return { url: null, error: uploadError };
+      }
+
+      // Get the public URL
+      const { data } = this.supabase.storage.from(bucketName).getPublicUrl(filePath);
+
+      return { url: data.publicUrl, error: null };
+    } catch (err) {
+      return { url: null, error: err as Error };
     }
   }
 }

@@ -1,13 +1,9 @@
-import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
+import { Component, inject, input, output, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { SocialAuthProvider } from '../../models/auth.models';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AuthProvider, SocialAuthProvider } from '../../models/auth.models';
 import { AuthStore } from '../../store/auth.store';
+import { SUPABASE_AUTH_CONFIG } from '../../config/supabase-auth.config';
 
 /**
  * Login component to handle email/password and social login
@@ -18,68 +14,73 @@ import { AuthStore } from '../../store/auth.store';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.component.html',
 })
-export class LoginComponent {
-  /**
-   * Title for the login component
-   */
-  @Input() title = 'Login';
-
-  /**
-   * Subtitle for the login component
-   */
-  @Input() subtitle?: string;
-
+export class LoginComponent implements OnInit {
   /**
    * Whether to show social login options
    */
-  @Input() showSocialLogins = true;
+  public showSocialLogins = input(true);
 
   /**
    * Whether to show the forgot password link
    */
-  @Input() showForgotPassword = true;
+  public showForgotPassword = input(true);
 
   /**
    * Whether to show the sign up link
    */
-  @Input() showSignUpLink = true;
-
-  /**
-   * Array of social providers to enable
-   * Default includes all available providers
-   */
-  @Input() enabledSocialProviders: SocialAuthProvider[] = [
-    SocialAuthProvider.GOOGLE,
-    SocialAuthProvider.FACEBOOK,
-    SocialAuthProvider.GITHUB,
-    SocialAuthProvider.TWITTER,
-    SocialAuthProvider.DISCORD,
-  ];
+  public showSignUpLink = input(true);
 
   /**
    * Event emitted when user clicks forgot password
    */
-  @Output() forgotPassword = new EventEmitter<void>();
+  public forgotPassword = output<void>();
 
   /**
    * Event emitted when user clicks sign up
    */
-  @Output() signUp = new EventEmitter<void>();
+  public signUp = output<void>();
 
   /**
    * Login form group
    */
-  loginForm: FormGroup;
+  public loginForm: FormGroup;
 
   /**
    * Auth store instance
    */
-  authStore = inject(AuthStore);
+  public authStore = inject(AuthStore);
+
+  /**
+   * Config instance
+   */
+  public config = inject(SUPABASE_AUTH_CONFIG);
 
   /**
    * Social auth provider enum
    */
-  SocialAuthProvider = SocialAuthProvider;
+  public SocialAuthProvider = SocialAuthProvider;
+
+  /**
+   * Auth provider enum
+   */
+  public AuthProvider = AuthProvider;
+
+  /**
+   * Providers habilitados desde la configuración
+   */
+  public enabledProviders: AuthProvider[] = [];
+
+  /**
+   * Flag to show email/password form
+   */
+  public showEmailPasswordForm = false;
+
+  /**
+   * Computed to check if there are social providers enabled
+   */
+  public hasSocialProviders = computed(() => {
+    return this.enabledProviders.length > 0 && this.enabledProviders.some((p) => p !== AuthProvider.EMAIL_PASSWORD);
+  });
 
   /**
    * Form builder
@@ -93,10 +94,18 @@ export class LoginComponent {
     });
   }
 
+  public ngOnInit(): void {
+    // Obtener los providers habilitados de la configuración
+    this.enabledProviders = this.config.enabledAuthProviders || [];
+
+    // Verificar si el email/password está habilitado
+    this.showEmailPasswordForm = this.enabledProviders.includes(AuthProvider.EMAIL_PASSWORD);
+  }
+
   /**
    * Submit the login form
    */
-  onSubmit(): void {
+  public onSubmit(): void {
     if (this.loginForm.valid) {
       const { email, password } = this.loginForm.value;
       this.authStore.signInWithEmail(email, password);
@@ -107,21 +116,30 @@ export class LoginComponent {
    * Login with a social provider
    * @param provider Social auth provider
    */
-  loginWithSocialProvider(provider: SocialAuthProvider): void {
-    this.authStore.signInWithSocialProvider(provider);
+  public loginWithSocialProvider(provider: AuthProvider | SocialAuthProvider): void {
+    this.authStore.signInWithSocialProvider(provider as SocialAuthProvider);
   }
 
   /**
    * Handle forgot password click
    */
-  onForgotPassword(): void {
+  public onForgotPassword(): void {
     this.forgotPassword.emit();
   }
 
   /**
    * Handle sign up click
    */
-  onSignUp(): void {
+  public onSignUp(): void {
     this.signUp.emit();
+  }
+
+  /**
+   * Helper to check if a provider is enabled
+   * @param provider Auth provider
+   * @returns True if the provider is enabled, false otherwise
+   */
+  public isProviderEnabled(provider: AuthProvider): boolean {
+    return this.enabledProviders.includes(provider);
   }
 }

@@ -4,11 +4,11 @@ An Angular library for handling authentication with Supabase. This library provi
 
 ## Features
 
-- 🔑 Authentication components (Login, Password Reset, Profile)
+- 🔑 Authentication components (Login, Signup, Password Reset, Profile)
 - 🔒 Authentication guards for route protection
 - 📊 State management using ngrx/signals
-- 🌈 Social login support (Google, Facebook, Twitter, GitHub)
-- 📱 Responsive design
+- 🌈 Social login support (Google, Facebook, Twitter, GitHub, Discord)
+- 📱 Responsive design with Tailwind CSS and DaisyUI
 - 🎨 Customizable components
 - 📝 TypeScript types for all features
 
@@ -37,11 +37,26 @@ export const appConfig: ApplicationConfig = {
       redirectAfterLogin: '/dashboard',
       redirectAfterLogout: '/login',
       authRequiredRedirect: '/login',
-      authRedirectIfAuthenticated: '/dashboard'
+      authRedirectIfAuthenticated: '/dashboard',
+      enabledAuthProviders: ['email_password', 'google', 'github']
     })
   ]
 };
 ```
+
+## Configuration Options
+
+The following table describes all available options for the `provideSupabaseAuth` function:
+
+| Option | Default Value | Description |
+| ------ | ------------- | ----------- |
+| `supabaseUrl` | - | Your Supabase project URL |
+| `supabaseKey` | - | Your Supabase API key |
+| `redirectAfterLogin` | '/' | Path to redirect to after successful login |
+| `redirectAfterLogout` | '/login' | Path to redirect to after logout |
+| `authRequiredRedirect` | '/login' | Path to redirect to when authentication is required |
+| `authRedirectIfAuthenticated` | '/' | Path to redirect to when user should not be authenticated |
+| `enabledAuthProviders` | [] | Array of enabled authentication providers. Available options: AuthProvider.EMAIL_PASSWORD, AuthProvider.GOOGLE, AuthProvider.GITHUB, AuthProvider.TWITTER, AuthProvider.DISCORD |
 
 ## Quick Start
 
@@ -57,20 +72,13 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [LoginComponent],
   template: `
-    <div class="container">
+    <div class="container mx-auto p-4">
       <sup-login
         (forgotPassword)="onForgotPassword()"
         (signUp)="onSignUp()"
       ></sup-login>
     </div>
-  `,
-  styles: [`
-    .container {
-      padding: 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-  `]
+  `
 })
 export class LoginPageComponent {
   constructor(private router: Router) {}
@@ -85,7 +93,35 @@ export class LoginPageComponent {
 }
 ```
 
-### 2. Create Password Reset Page
+### 2. Create Signup Page
+
+```typescript
+import { Component } from '@angular/core';
+import { SignupComponent } from '@dotted-labs/ngx-supabase-auth';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-signup',
+  standalone: true,
+  imports: [SignupComponent],
+  template: `
+    <div class="container mx-auto p-4">
+      <sup-signup
+        (backToLogin)="onBackToLogin()"
+      ></sup-signup>
+    </div>
+  `
+})
+export class SignupPageComponent {
+  constructor(private router: Router) {}
+
+  onBackToLogin() {
+    this.router.navigate(['/login']);
+  }
+}
+```
+
+### 3. Create Password Reset Page
 
 ```typescript
 import { Component } from '@angular/core';
@@ -97,19 +133,12 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [PasswordResetComponent],
   template: `
-    <div class="container">
+    <div class="container mx-auto p-4">
       <sup-password-reset
         (backToLogin)="onBackToLogin()"
       ></sup-password-reset>
     </div>
-  `,
-  styles: [`
-    .container {
-      padding: 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-  `]
+  `
 })
 export class PasswordResetPageComponent {
   constructor(private router: Router) {}
@@ -120,7 +149,7 @@ export class PasswordResetPageComponent {
 }
 ```
 
-### 3. Create Profile Page
+### 4. Create Profile Page
 
 ```typescript
 import { Component } from '@angular/core';
@@ -131,26 +160,20 @@ import { ProfileComponent } from '@dotted-labs/ngx-supabase-auth';
   standalone: true,
   imports: [ProfileComponent],
   template: `
-    <div class="container">
+    <div class="container mx-auto p-4">
       <sup-profile></sup-profile>
     </div>
-  `,
-  styles: [`
-    .container {
-      padding: 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-  `]
+  `
 })
 export class ProfilePageComponent {}
 ```
 
-### 4. Set Up Routes
+### 5. Set Up Routes
 
 ```typescript
 import { Routes } from '@angular/router';
 import { LoginPageComponent } from './pages/login-page.component';
+import { SignupPageComponent } from './pages/signup-page.component';
 import { PasswordResetPageComponent } from './pages/password-reset-page.component';
 import { ProfilePageComponent } from './pages/profile-page.component';
 import { DashboardComponent } from './pages/dashboard.component';
@@ -160,6 +183,11 @@ export const routes: Routes = [
   { 
     path: 'login', 
     component: LoginPageComponent,
+    canActivate: [unauthGuard]
+  },
+  { 
+    path: 'signup', 
+    component: SignupPageComponent,
     canActivate: [unauthGuard]
   },
   { 
@@ -195,18 +223,20 @@ For detailed documentation and API references, please see the [library README](.
 
 ## Demo Application
 
-Este repositorio incluye una aplicación de demostración que muestra cómo implementar la biblioteca en un proyecto real. Para más detalles, consulta el [README de la aplicación demo](./projects/demo-app/README.md).
+This repository includes a demo application that shows how to implement the library in a real project. For more details, check out the [demo app README](./projects/demo-app/README.md).
 
-Para ejecutar la aplicación de demostración:
+To run the demo application:
 
 ```bash
-# Instalar dependencias
+# Install dependencies
 npm install
 
-# Ejecutar la aplicación de demostración
+# Run the demo application
 ng serve demo-app
 ```
 
-Luego, abre tu navegador en `http://localhost:4200`.
+Then, open your browser at `http://localhost:4200`.
 
 ## License
+
+MIT

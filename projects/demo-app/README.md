@@ -1,61 +1,63 @@
 # ngx-supabase-auth Demo Application
 
-Esta es una aplicación de demostración que muestra cómo utilizar la biblioteca ngx-supabase-auth en un proyecto Angular.
+This is a demo application that shows how to use the ngx-supabase-auth library in an Angular project.
 
-## Características
+## Features
 
-- Página de inicio de sesión con opciones de inicio de sesión social
-- Página de restablecimiento de contraseña
-- Página de perfil de usuario
-- Dashboard protegido con información del usuario
-- Implementación de guards de autenticación
-- Uso del AuthStore para gestionar el estado de autenticación
+- Login page with social login options
+- Signup page for new user registration
+- Password reset page
+- User profile page
+- Protected dashboard with user information
+- Implementation of authentication guards
+- Use of AuthStore for managing authentication state
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 /demo-app
   /src
     /app
       /pages
-        /dashboard      - Página principal después del inicio de sesión
-        /login          - Página de inicio de sesión
-        /password-reset - Página de recuperación de contraseña
-        /profile        - Página de perfil de usuario
-      app.component.ts  - Componente raíz de la aplicación
-      app.config.ts     - Configuración de la aplicación, incluida la configuración de Supabase
-      app.routes.ts     - Configuración de rutas con guards de autenticación
+        /dashboard      - Main page after login
+        /login          - Login page
+        /signup         - Signup page
+        /password-reset - Password recovery page
+        /profile        - User profile page
+      app.component.ts  - Root application component
+      app.config.ts     - Application configuration, including Supabase setup
+      app.routes.ts     - Route configuration with authentication guards
 ```
 
-## Cómo Ejecutar
+## How to Run
 
-Para ejecutar esta aplicación de demostración:
+To run this demo application:
 
-1. Asegúrate de tener Node.js y npm instalados
-2. Configura tus credenciales de Supabase en `app.config.ts`
-3. Ejecuta los siguientes comandos:
+1. Make sure you have Node.js and npm installed
+2. Configure your Supabase credentials in `app.config.ts`
+3. Run the following commands:
 
 ```bash
-# Navegar al directorio raíz del proyecto
+# Navigate to the project root directory
 cd ngx-supabase-auth
 
-# Instalar dependencias
+# Install dependencies
 npm install
 
-# Ejecutar la aplicación de demostración
+# Run the demo application
 ng serve demo-app
 ```
 
-4. Abre tu navegador en `http://localhost:4200`
+4. Open your browser at `http://localhost:4200`
 
-## Ejemplos de Uso
+## Usage Examples
 
-### Uso de Componentes
+### Using Components
 
-La aplicación demuestra cómo usar los componentes proporcionados por la biblioteca:
+The application demonstrates how to use the components provided by the library:
 
 ```typescript
-// En un componente
+// In a component
 import { LoginComponent } from '@dotted-labs/ngx-supabase-auth';
 
 @Component({
@@ -64,10 +66,22 @@ import { LoginComponent } from '@dotted-labs/ngx-supabase-auth';
 })
 ```
 
-### Uso del AuthStore
+### Using the Signup Component
 
 ```typescript
-// En un componente
+// In a component
+import { SignupComponent } from '@dotted-labs/ngx-supabase-auth';
+
+@Component({
+  imports: [SignupComponent],
+  template: `<sup-signup (backToLogin)="onBackToLogin()"></sup-signup>`
+})
+```
+
+### Using the AuthStore
+
+```typescript
+// In a component
 import { AuthStore } from '@dotted-labs/ngx-supabase-auth';
 
 @Component({
@@ -81,34 +95,43 @@ export class MyComponent {
   logout() {
     this.authStore.signOut();
   }
+  
+  register(email: string, password: string) {
+    this.authStore.signUpWithEmail(email, password);
+  }
 }
 ```
 
-### Protección de Rutas
+### Route Protection
 
 ```typescript
-// En la configuración de rutas
+// In the route configuration
 import { authGuard, unauthGuard } from '@dotted-labs/ngx-supabase-auth';
 
 export const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardComponent,
-    canActivate: [authGuard] // Ruta protegida, requiere autenticación
+    canActivate: [authGuard] // Protected route, requires authentication
   },
   {
     path: 'login',
     component: LoginComponent,
-    canActivate: [unauthGuard] // Ruta solo accesible si NO está autenticado
+    canActivate: [unauthGuard] // Route only accessible if NOT authenticated
+  },
+  {
+    path: 'signup',
+    component: SignupComponent,
+    canActivate: [unauthGuard] // Route only accessible if NOT authenticated
   }
 ];
 ```
 
-## Notas
+## Notes
 
-Esta es una aplicación de demostración y no debe usarse en producción sin realizar las modificaciones necesarias. En un entorno de producción, deberías:
+This is a demo application and should not be used in production without making the necessary modifications. In a production environment, you should:
 
-- Almacenar las credenciales de Supabase en variables de entorno
-- Implementar un manejo de errores más robusto
-- Considerar características adicionales como registro de usuarios, verificación de correo electrónico, etc.
-- Personalizar la UI según tus necesidades 
+- Store Supabase credentials in environment variables
+- Implement more robust error handling
+- Consider additional features like email verification, account deletion, etc.
+- Customize the UI according to your needs 

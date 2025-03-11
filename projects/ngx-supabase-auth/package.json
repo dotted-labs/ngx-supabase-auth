@@ -1,0 +1,39 @@
+{
+  "name": "@dotted-labs/ngx-supabase-auth",
+  "version": "0.0.1",
+  "description": "Angular library for authentication with Supabase, including ready-to-use components, services, and guards",
+  "keywords": [
+    "angular",
+    "supabase",
+    "authentication",
+    "auth",
+    "login",
+    "angular-library",
+    "tailwind"
+  ],
+  "author": {
+    "name": "Dotted Labs",
+    "url": "https://github.com/dotted-labs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dotted-labs/ngx-supabase-auth"
+  },
+  "homepage": "https://github.com/dotted-labs/ngx-supabase-auth",
+  "bugs": {
+    "url": "https://github.com/dotted-labs/ngx-supabase-auth/issues"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "@angular/common": "^19.2.0",
+    "@angular/core": "^19.2.0",
+    "@supabase/supabase-js": "^2.38.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}

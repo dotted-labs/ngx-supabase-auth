@@ -1,0 +1,193 @@
+<div class="max-w-xl mx-auto p-8 rounded-lg shadow-md bg-white">
+  <div class="text-center mb-8">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-2">{{ title }}</h2>
+    @if (subtitle) {
+    <p class="text-gray-600 text-sm">{{ subtitle }}</p>
+    }
+  </div>
+
+  @if (showAvatarSection) {
+  <div class="flex justify-center mb-8">
+    <div class="relative w-24 h-24">
+      <img
+        [src]="avatarUrl"
+        alt="User Avatar"
+        class="w-full h-full rounded-full object-cover border-3 border-gray-100"
+      />
+      <button
+        (click)="onChangeAvatar()"
+        class="absolute bottom-0 right-0 bg-blue-500 text-white text-xs rounded-full py-1 px-2 hover:bg-blue-600 transition-colors"
+      >
+        Change
+      </button>
+    </div>
+  </div>
+  }
+
+  <!-- Profile Form -->
+  <form
+    [formGroup]="profileForm"
+    (ngSubmit)="onSubmit()"
+    class="flex flex-col gap-5 mb-6"
+  >
+    <div class="flex flex-col gap-2">
+      <label for="name" class="text-sm font-medium text-gray-700">Name</label>
+      <input
+        type="text"
+        id="name"
+        formControlName="name"
+        placeholder="Your name"
+        class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+      />
+      @if ( profileForm.get('name')?.invalid && (profileForm.get('name')?.dirty
+      || profileForm.get('name')?.touched) ) {
+      <div class="text-red-500 text-sm mt-1">
+        @if (profileForm.get('name')?.errors?.['required']) {
+        <span>Name is required</span>
+        }
+      </div>
+      }
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="email" class="text-sm font-medium text-gray-700">Email</label>
+      <input
+        type="email"
+        id="email"
+        formControlName="email"
+        placeholder="Email"
+        [readonly]="!allowEmailChange"
+        class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
+      />
+      @if ( profileForm.get('email')?.invalid &&
+      (profileForm.get('email')?.dirty || profileForm.get('email')?.touched) ) {
+      <div class="text-red-500 text-sm mt-1">
+        @if (profileForm.get('email')?.errors?.['required']) {
+        <span>Email is required</span>
+        } @if (profileForm.get('email')?.errors?.['email']) {
+        <span>Please enter a valid email</span>
+        }
+      </div>
+      }
+    </div>
+
+    @if (authStore.error()) {
+    <div class="text-red-500 text-sm mt-1">
+      {{ authStore.error() }}
+    </div>
+    } @if (updateSuccess) {
+    <div class="text-green-600 text-sm mt-1">Profile updated successfully!</div>
+    }
+
+    <button
+      type="submit"
+      class="py-3 px-4 bg-blue-500 text-white rounded-md font-medium transition-colors hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed"
+      [disabled]="
+        profileForm.invalid || authStore.loading() || !profileForm.dirty
+      "
+    >
+      @if (!authStore.loading()) {
+      <span>Update Profile</span>
+      } @else {
+      <span>Updating...</span>
+      }
+    </button>
+  </form>
+
+  <!-- Password Change Section -->
+  @if (showPasswordSection) {
+  <div class="mt-8">
+    <div class="flex items-center my-4">
+      <div class="flex-grow border-t border-gray-200"></div>
+      <span class="mx-3 text-sm text-gray-500">Password</span>
+      <div class="flex-grow border-t border-gray-200"></div>
+    </div>
+
+    <form
+      [formGroup]="passwordForm"
+      (ngSubmit)="onPasswordSubmit()"
+      class="flex flex-col gap-5 mb-6"
+    >
+      <div class="flex flex-col gap-2">
+        <label for="password" class="text-sm font-medium text-gray-700"
+          >New Password</label
+        >
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          placeholder="New password"
+          class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+        />
+        @if ( passwordForm.get('password')?.invalid &&
+        (passwordForm.get('password')?.dirty ||
+        passwordForm.get('password')?.touched) ) {
+        <div class="text-red-500 text-sm mt-1">
+          @if (passwordForm.get('password')?.errors?.['required']) {
+          <span>Password is required</span>
+          } @if (passwordForm.get('password')?.errors?.['minlength']) {
+          <span>Password must be at least 6 characters</span>
+          }
+        </div>
+        }
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="confirmPassword" class="text-sm font-medium text-gray-700"
+          >Confirm Password</label
+        >
+        <input
+          type="password"
+          id="confirmPassword"
+          formControlName="confirmPassword"
+          placeholder="Confirm password"
+          class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+        />
+        @if ( passwordForm.get('confirmPassword')?.invalid &&
+        (passwordForm.get('confirmPassword')?.dirty ||
+        passwordForm.get('confirmPassword')?.touched) ) {
+        <div class="text-red-500 text-sm mt-1">
+          @if (passwordForm.get('confirmPassword')?.errors?.['required']) {
+          <span>Confirm Password is required</span>
+          }
+        </div>
+        } @if (passwordForm.errors?.['passwordMismatch']) {
+        <div class="text-red-500 text-sm mt-1">Passwords do not match</div>
+        }
+      </div>
+
+      @if (passwordUpdateSuccess) {
+      <div class="text-green-600 text-sm mt-1">
+        Password updated successfully!
+      </div>
+      }
+
+      <button
+        type="submit"
+        class="py-3 px-4 bg-blue-500 text-white rounded-md font-medium transition-colors hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed"
+        [disabled]="passwordForm.invalid || authStore.loading()"
+      >
+        @if (!authStore.loading()) {
+        <span>Update Password</span>
+        } @else {
+        <span>Updating...</span>
+        }
+      </button>
+    </form>
+  </div>
+  }
+
+  <!-- Logout Button -->
+  @if (showSignOut) {
+  <div class="mt-8 flex justify-center">
+    <button
+      type="button"
+      class="py-3 px-4 bg-red-500 text-white rounded-md font-medium transition-colors hover:bg-red-600 disabled:bg-red-300 disabled:cursor-not-allowed"
+      (click)="onSignOut()"
+      [disabled]="authStore.loading()"
+    >
+      Sign Out
+    </button>
+  </div>
+  }
+</div>

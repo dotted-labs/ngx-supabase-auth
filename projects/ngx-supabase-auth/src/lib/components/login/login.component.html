@@ -1,0 +1,164 @@
+<div class="max-w-md mx-auto p-8 rounded-lg shadow-md bg-white">
+  <div class="text-center mb-8">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-2">{{ title }}</h2>
+    @if (subtitle) {
+    <p class="text-gray-600 text-sm">{{ subtitle }}</p>
+    }
+  </div>
+
+  <!-- Email Login Form -->
+  <form
+    [formGroup]="loginForm"
+    (ngSubmit)="onSubmit()"
+    class="flex flex-col gap-5 mb-6"
+  >
+    <div class="flex flex-col gap-2">
+      <label for="email" class="text-sm font-medium text-gray-700">Email</label>
+      <input
+        type="email"
+        id="email"
+        formControlName="email"
+        placeholder="Email"
+        autocomplete="email"
+        class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+      />
+      @if ( loginForm.get('email')?.invalid && (loginForm.get('email')?.dirty ||
+      loginForm.get('email')?.touched) ) {
+      <div class="text-red-500 text-sm mt-1">
+        @if (loginForm.get('email')?.errors?.['required']) {
+        <span>Email is required</span>
+        } @if (loginForm.get('email')?.errors?.['email']) {
+        <span>Please enter a valid email</span>
+        }
+      </div>
+      }
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="password" class="text-sm font-medium text-gray-700"
+        >Password</label
+      >
+      <input
+        type="password"
+        id="password"
+        formControlName="password"
+        placeholder="Password"
+        autocomplete="current-password"
+        class="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+      />
+      @if ( loginForm.get('password')?.invalid &&
+      (loginForm.get('password')?.dirty || loginForm.get('password')?.touched) )
+      {
+      <div class="text-red-500 text-sm mt-1">
+        @if (loginForm.get('password')?.errors?.['required']) {
+        <span>Password is required</span>
+        } @if (loginForm.get('password')?.errors?.['minlength']) {
+        <span>Password must be at least 6 characters</span>
+        }
+      </div>
+      }
+    </div>
+
+    @if (authStore.error()) {
+    <div class="text-red-500 text-sm mt-1">
+      {{ authStore.error() }}
+    </div>
+    }
+
+    <button
+      type="submit"
+      class="py-3 px-4 bg-blue-500 text-white rounded-md font-medium transition-colors hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed"
+      [disabled]="loginForm.invalid || authStore.loading()"
+    >
+      @if (!authStore.loading()) {
+      <span>Login</span>
+      } @else {
+      <span>Loading...</span>
+      }
+    </button>
+
+    @if (showForgotPassword) {
+    <div class="flex justify-end">
+      <a
+        (click)="onForgotPassword()"
+        class="text-sm text-blue-500 cursor-pointer hover:underline"
+        >Forgot Password?</a
+      >
+    </div>
+    }
+  </form>
+
+  <!-- Social Logins -->
+  @if (showSocialLogins) {
+  <div class="mt-6">
+    <div class="flex items-center my-4">
+      <div class="flex-grow border-t border-gray-200"></div>
+      <span class="mx-3 text-sm text-gray-500">Or login with</span>
+      <div class="flex-grow border-t border-gray-200"></div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      @if (enabledSocialProviders.includes(SocialAuthProvider.GOOGLE)) {
+      <button
+        type="button"
+        class="py-2.5 px-3 border border-gray-300 rounded-md text-sm font-medium bg-white hover:bg-gray-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
+        (click)="loginWithSocialProvider(SocialAuthProvider.GOOGLE)"
+        [disabled]="authStore.loading()"
+      >
+        Google
+      </button>
+      } @if (enabledSocialProviders.includes(SocialAuthProvider.FACEBOOK)) {
+      <button
+        type="button"
+        class="py-2.5 px-3 border border-gray-300 rounded-md text-sm font-medium bg-white hover:bg-gray-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
+        (click)="loginWithSocialProvider(SocialAuthProvider.FACEBOOK)"
+        [disabled]="authStore.loading()"
+      >
+        Facebook
+      </button>
+      } @if (enabledSocialProviders.includes(SocialAuthProvider.GITHUB)) {
+      <button
+        type="button"
+        class="py-2.5 px-3 border border-gray-300 rounded-md text-sm font-medium bg-white hover:bg-gray-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
+        (click)="loginWithSocialProvider(SocialAuthProvider.GITHUB)"
+        [disabled]="authStore.loading()"
+      >
+        GitHub
+      </button>
+      } @if (enabledSocialProviders.includes(SocialAuthProvider.TWITTER)) {
+      <button
+        type="button"
+        class="py-2.5 px-3 border border-gray-300 rounded-md text-sm font-medium bg-white hover:bg-gray-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
+        (click)="loginWithSocialProvider(SocialAuthProvider.TWITTER)"
+        [disabled]="authStore.loading()"
+      >
+        Twitter
+      </button>
+      } @if (enabledSocialProviders.includes(SocialAuthProvider.DISCORD)) {
+      <button
+        type="button"
+        class="py-2.5 px-3 border border-gray-300 rounded-md text-sm font-medium bg-white hover:bg-gray-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
+        (click)="loginWithSocialProvider(SocialAuthProvider.DISCORD)"
+        [disabled]="authStore.loading()"
+      >
+        Discord
+      </button>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- Sign Up Link -->
+  @if (showSignUpLink) {
+  <div class="mt-6 text-center">
+    <p class="text-gray-600 text-sm">
+      Don't have an account?
+      <a
+        (click)="onSignUp()"
+        class="text-blue-500 cursor-pointer hover:underline"
+        >Sign up</a
+      >
+    </p>
+  </div>
+  }
+</div>

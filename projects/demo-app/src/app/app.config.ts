@@ -1,5 +1,6 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
 
 import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
@@ -9,8 +10,10 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideClientHydration(),
+    // IMPORTANTE: Proporcionar HttpClient antes que SupabaseAuth
+    provideHttpClient(),
     // Add the Supabase Auth provider
-    provideSupabaseAuth({
+    ...provideSupabaseAuth({
       // NOTA: En un caso real, estas credenciales deberían estar en un archivo de entorno
       // Para esta demo, usamos valores de ejemplo
       supabaseUrl: 'https://chayrsrhmqflptnwdhuu.supabase.co',
@@ -21,6 +24,11 @@ export const appConfig: ApplicationConfig = {
       authRequiredRedirect: '/login',
       authRedirectIfAuthenticated: '/dashboard',
       enabledAuthProviders: [AuthProvider.EMAIL_PASSWORD, AuthProvider.GOOGLE],
+      // Configuración para comprobar si es la primera vez del usuario
+      firstTimeProfileRedirect: '/complete-profile',
+      // En un entorno real, esta sería una URL a un endpoint del backend
+      // Para esta demo, usaremos una URL de ejemplo
+      firstTimeCheckEndpoint: 'https://api.example.com/check-first-time',
     }),
   ],
 };

@@ -1,10 +1,11 @@
 import { Routes } from '@angular/router';
-import { authGuard, unauthGuard } from '@dotted-labs/ngx-supabase-auth';
+import { authGuard, unauthGuard, firstTimeProfileGuard } from '@dotted-labs/ngx-supabase-auth';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { LoginPageComponent } from './pages/login/login.component';
 import { PasswordResetPageComponent } from './pages/password-reset/password-reset.component';
 import { ProfilePageComponent } from './pages/profile/profile.component';
 import { SignupPageComponent } from './pages/signup/signup.component';
+import { CompleteProfilePageComponent } from './pages/complete-profile/complete-profile.component';
 
 export const routes: Routes = [
   {
@@ -25,6 +26,11 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardComponent,
+    canActivate: [authGuard, firstTimeProfileGuard],
+  },
+  {
+    path: 'complete-profile',
+    component: CompleteProfilePageComponent,
     canActivate: [authGuard],
   },
   {

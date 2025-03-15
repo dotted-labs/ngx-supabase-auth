@@ -36,6 +36,17 @@ export interface SupabaseAuthConfig {
    * Enabled authentication providers
    */
   enabledAuthProviders?: AuthProvider[];
+
+  /**
+   * Redirect path for first-time users to complete their profile
+   */
+  firstTimeProfileRedirect?: string;
+
+  /**
+   * Endpoint URL to check if it's the user's first time
+   * Should return a boolean (true if it's the first time)
+   */
+  firstTimeCheckEndpoint?: string | null;
 }
 
 /**

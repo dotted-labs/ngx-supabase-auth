@@ -84,7 +84,9 @@ export class SupabaseAuthService {
       return !!response;
     } catch (error) {
       console.error('❌ [SupabaseAuthService] Error checking first time status:', error);
-      return false;
+      // On error, treat as first time user
+      console.log('🚧 [SupabaseAuthService] Error detected, treating as first time user');
+      return true;
     }
   }
 

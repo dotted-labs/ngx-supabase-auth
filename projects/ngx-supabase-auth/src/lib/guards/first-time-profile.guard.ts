@@ -70,8 +70,9 @@ export const firstTimeProfileGuard: CanActivateFn = (route, state) => {
             }),
             catchError((error) => {
               console.error('❌ [FirstTimeProfileGuard] Error checking first time status:', error);
-              // On error, allow access to prevent blocking the user
-              return of(true);
+              // On error, treat as first time user and redirect
+              console.log(`🔄 [FirstTimeProfileGuard] Error detected, treating as first time user, redirecting to ${redirectPath}`);
+              return of(router.parseUrl(redirectPath));
             }),
           );
         }),
@@ -79,8 +80,9 @@ export const firstTimeProfileGuard: CanActivateFn = (route, state) => {
     }),
     catchError((error) => {
       console.error('❌ [FirstTimeProfileGuard] Error in guard execution:', error);
-      // In case of error, allow access
-      return of(true);
+      // In case of error, treat as first time user
+      console.log(`🔄 [FirstTimeProfileGuard] Fatal error detected, treating as first time user, redirecting to ${redirectPath}`);
+      return of(router.parseUrl(redirectPath));
     }),
   );
 };
@@ -136,8 +138,9 @@ export const firstTimeProfileMatch: CanMatchFn = (route, segments) => {
             }),
             catchError((error) => {
               console.error('❌ [FirstTimeProfileMatch] Error checking first time status:', error);
-              // On error, allow access to prevent blocking the user
-              return of(true);
+              // On error, treat as first time user and redirect
+              console.log(`🔄 [FirstTimeProfileMatch] Error detected, treating as first time user, redirecting to ${redirectPath}`);
+              return of(router.parseUrl(redirectPath));
             }),
           );
         }),
@@ -145,8 +148,9 @@ export const firstTimeProfileMatch: CanMatchFn = (route, segments) => {
     }),
     catchError((error) => {
       console.error('❌ [FirstTimeProfileMatch] Error in guard execution:', error);
-      // In case of error, allow access
-      return of(true);
+      // In case of error, treat as first time user
+      console.log(`🔄 [FirstTimeProfileMatch] Fatal error detected, treating as first time user, redirecting to ${redirectPath}`);
+      return of(router.parseUrl(redirectPath));
     }),
   );
 };

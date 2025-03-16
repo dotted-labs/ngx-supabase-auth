@@ -24,7 +24,7 @@ export const unauthGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const config = inject(SUPABASE_AUTH_CONFIG);
 
-  console.log(`🔓 [UnauthGuard] Checking if user is already authenticated for route: ${state.url}`);
+  console.log('[UnauthGuard] Checking if user is already authenticated for route: ' + state.url);
 
   // Get the custom redirect path from route data or use the default
   const routeData = route.data as UnauthGuardData;
@@ -33,18 +33,18 @@ export const unauthGuard: CanActivateFn = (route, state) => {
   return fromPromise(authService.isAuthenticated()).pipe(
     map((isAuthenticated) => {
       if (!isAuthenticated) {
-        console.log('✅ [UnauthGuard] User is not authenticated, access granted');
+        console.log('[UnauthGuard] User is not authenticated, access granted');
         return true;
       }
 
       // Redirect to home or dashboard
-      console.log(`🔄 [UnauthGuard] User is already authenticated, redirecting to ${redirectPath}`);
+      console.log('[UnauthGuard] User is already authenticated, redirecting to ' + redirectPath);
       return router.parseUrl(redirectPath);
     }),
     catchError((error) => {
       // In case of error, allow access
-      console.error('❌ [UnauthGuard] Error checking authentication:', error);
-      console.log('⚠️ [UnauthGuard] Allowing access due to error');
+      console.error('[UnauthGuard] Error checking authentication:', error);
+      console.log('[UnauthGuard] Allowing access due to error');
       return of(true);
     }),
   );
@@ -59,25 +59,25 @@ export const unauthMatch: CanMatchFn = (route, segments) => {
   const config = inject(SUPABASE_AUTH_CONFIG);
 
   const path = segments.map((segment) => segment.path).join('/');
-  console.log(`🔓 [UnauthMatch] Checking if user is already authenticated for path: ${path}`);
+  console.log('[UnauthMatch] Checking if user is already authenticated for path: ' + path);
 
   const redirectPath = config.authRedirectIfAuthenticated || '/';
 
   return fromPromise(authService.isAuthenticated()).pipe(
     map((isAuthenticated) => {
       if (!isAuthenticated) {
-        console.log('✅ [UnauthMatch] User is not authenticated, access granted');
+        console.log('[UnauthMatch] User is not authenticated, access granted');
         return true;
       }
 
       // Redirect to home or dashboard
-      console.log(`🔄 [UnauthMatch] User is already authenticated, redirecting to ${redirectPath}`);
+      console.log('[UnauthMatch] User is already authenticated, redirecting to ' + redirectPath);
       return router.parseUrl(redirectPath);
     }),
     catchError((error) => {
       // In case of error, allow access
-      console.error('❌ [UnauthMatch] Error checking authentication:', error);
-      console.log('⚠️ [UnauthMatch] Allowing access due to error');
+      console.error('[UnauthMatch] Error checking authentication:', error);
+      console.log('[UnauthMatch] Allowing access due to error');
       return of(true);
     }),
   );

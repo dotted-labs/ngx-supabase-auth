@@ -26,7 +26,7 @@ export class SupabaseAuthService {
   private readonly http = inject(HttpClient);
 
   constructor() {
-    console.log('🚀 [SupabaseAuthService] Initializing service');
+    console.log('[SupabaseAuthService] Initializing service');
     this.supabase = createClient(this.config.supabaseUrl, this.config.supabaseKey);
 
     // Set up auth state change listener
@@ -83,7 +83,7 @@ export class SupabaseAuthService {
       console.log(`🚧 [SupabaseAuthService] First time check result: ${!!response}`);
       return !!response;
     } catch (error) {
-      console.error('❌ [SupabaseAuthService] Error checking first time status:', error);
+      console.error('[SupabaseAuthService] Error checking first time status:', error);
       // On error, treat as first time user
       console.log('🚧 [SupabaseAuthService] Error detected, treating as first time user');
       return true;
@@ -114,7 +114,7 @@ export class SupabaseAuthService {
         await this.router.navigate([this.config.redirectAfterLogin]);
       }
     } catch (error) {
-      console.error('❌ [SupabaseAuthService] Error during auth redirect:', error);
+      console.error('[SupabaseAuthService] Error during auth redirect:', error);
 
       // Fallback to regular redirect
       if (this.config.redirectAfterLogin) {
@@ -139,12 +139,12 @@ export class SupabaseAuthService {
       });
 
       if (error) {
-        console.error('❌ [SupabaseAuthService] Sign in error:', error);
+        console.error('[SupabaseAuthService] Sign in error:', error);
         return { user: null, error };
       }
 
       if (!data.user) {
-        console.warn('⚠️ [SupabaseAuthService] User signed in but no user data returned');
+        console.warn('[SupabaseAuthService] User signed in but no user data returned');
         return { user: null, error: new Error('No user data returned') };
       }
 
@@ -154,7 +154,7 @@ export class SupabaseAuthService {
 
       return { user, error: null };
     } catch (err) {
-      console.error('❌ [SupabaseAuthService] Exception during sign in:', err);
+      console.error('[SupabaseAuthService] Exception during sign in:', err);
       return { user: null, error: err as Error };
     }
   }
@@ -174,12 +174,12 @@ export class SupabaseAuthService {
       });
 
       if (error) {
-        console.error('❌ [SupabaseAuthService] Sign up error:', error);
+        console.error('[SupabaseAuthService] Sign up error:', error);
         return { user: null, error };
       }
 
       if (!data.user) {
-        console.warn('⚠️ [SupabaseAuthService] User signed up but no user data returned');
+        console.warn('[SupabaseAuthService] User signed up but no user data returned');
         return { user: null, error: null };
       }
 
@@ -197,7 +197,7 @@ export class SupabaseAuthService {
 
       return { user, error: null };
     } catch (err) {
-      console.error('❌ [SupabaseAuthService] Exception during sign up:', err);
+      console.error('[SupabaseAuthService] Exception during sign up:', err);
       return { user: null, error: err as Error };
     }
   }
@@ -215,14 +215,14 @@ export class SupabaseAuthService {
       });
 
       if (error) {
-        console.error('❌ [SupabaseAuthService] Social sign in error:', error);
+        console.error('[SupabaseAuthService] Social sign in error:', error);
       } else {
         console.log(`✅ [SupabaseAuthService] Social sign in initiated successfully`);
       }
 
       return { error };
     } catch (err) {
-      console.error('❌ [SupabaseAuthService] Exception during social sign in:', err);
+      console.error('[SupabaseAuthService] Exception during social sign in:', err);
       return { error: err as Error };
     }
   }
@@ -238,14 +238,14 @@ export class SupabaseAuthService {
       const { error } = await this.supabase.auth.resetPasswordForEmail(request.email);
 
       if (error) {
-        console.error('❌ [SupabaseAuthService] Password reset email error:', error);
+        console.error('[SupabaseAuthService] Password reset email error:', error);
       } else {
         console.log(`✅ [SupabaseAuthService] Password reset email sent successfully`);
       }
 
       return { error };
     } catch (err) {
-      console.error('❌ [SupabaseAuthService] Exception during password reset:', err);
+      console.error('[SupabaseAuthService] Exception during password reset:', err);
       return { error: err as Error };
     }
   }
@@ -263,14 +263,14 @@ export class SupabaseAuthService {
       });
 
       if (error) {
-        console.error('❌ [SupabaseAuthService] Update password error:', error);
+        console.error('[SupabaseAuthService] Update password error:', error);
       } else {
         console.log(`✅ [SupabaseAuthService] Password updated successfully`);
       }
 
       return { error };
     } catch (err) {
-      console.error('❌ [SupabaseAuthService] Exception during password update:', err);
+      console.error('[SupabaseAuthService] Exception during password update:', err);
       return { error: err as Error };
     }
   }
@@ -288,14 +288,14 @@ export class SupabaseAuthService {
       });
 
       if (error) {
-        console.error('❌ [SupabaseAuthService] Update profile error:', error);
+        console.error('[SupabaseAuthService] Update profile error:', error);
       } else {
         console.log(`✅ [SupabaseAuthService] Profile updated successfully`);
       }
 
       return { error };
     } catch (err) {
-      console.error('❌ [SupabaseAuthService] Exception during profile update:', err);
+      console.error('[SupabaseAuthService] Exception during profile update:', err);
       return { error: err as Error };
     }
   }
@@ -310,7 +310,7 @@ export class SupabaseAuthService {
       const { error } = await this.supabase.auth.signOut();
 
       if (error) {
-        console.error('❌ [SupabaseAuthService] Sign out error:', error);
+        console.error('[SupabaseAuthService] Sign out error:', error);
       } else {
         console.log(`✅ [SupabaseAuthService] User signed out successfully`);
         if (this.config.redirectAfterLogout) {
@@ -321,7 +321,7 @@ export class SupabaseAuthService {
 
       return { error };
     } catch (err) {
-      console.error('❌ [SupabaseAuthService] Exception during sign out:', err);
+      console.error('[SupabaseAuthService] Exception during sign out:', err);
       return { error: err as Error };
     }
   }
@@ -342,7 +342,7 @@ export class SupabaseAuthService {
       });
 
       if (uploadError) {
-        console.error('❌ [SupabaseAuthService] File upload error:', uploadError);
+        console.error('[SupabaseAuthService] File upload error:', uploadError);
         return { url: null, error: uploadError };
       }
 
@@ -352,7 +352,7 @@ export class SupabaseAuthService {
 
       return { url: data.publicUrl, error: null };
     } catch (err) {
-      console.error('❌ [SupabaseAuthService] Exception during file upload:', err);
+      console.error('[SupabaseAuthService] Exception during file upload:', err);
       return { url: null, error: err as Error };
     }
   }

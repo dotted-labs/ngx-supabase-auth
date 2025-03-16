@@ -23,7 +23,7 @@ export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const config = inject(SUPABASE_AUTH_CONFIG);
 
-  console.log(`🔒 [AuthGuard] Checking authentication for route: ${state.url}`);
+  console.log('[AuthGuard] Checking authentication for route: ' + state.url);
 
   // Get the custom redirect path from route data or use the default
   const routeData = route.data as AuthGuardData;
@@ -32,16 +32,16 @@ export const authGuard: CanActivateFn = (route, state) => {
   return fromPromise(authService.isAuthenticated()).pipe(
     map((isAuthenticated) => {
       if (isAuthenticated) {
-        console.log('✅ [AuthGuard] User is authenticated, access granted');
+        console.log('[AuthGuard] User is authenticated, access granted');
         return true;
       }
 
       // Redirect to login
-      console.log(`🔄 [AuthGuard] User is not authenticated, redirecting to ${redirectPath}`);
+      console.log('[AuthGuard] User is not authenticated, redirecting to ' + redirectPath);
       return router.parseUrl(redirectPath);
     }),
     catchError((error) => {
-      console.error('❌ [AuthGuard] Error checking authentication:', error);
+      console.error('[AuthGuard] Error checking authentication:', error);
       return of(router.parseUrl(redirectPath));
     }),
   );
@@ -56,23 +56,23 @@ export const authMatch: CanMatchFn = (route, segments) => {
   const config = inject(SUPABASE_AUTH_CONFIG);
 
   const path = segments.map((segment) => segment.path).join('/');
-  console.log(`🔒 [AuthMatch] Checking authentication for path: ${path}`);
+  console.log('[AuthMatch] Checking authentication for path: ' + path);
 
   const redirectPath = config.authRequiredRedirect || '/login';
 
   return fromPromise(authService.isAuthenticated()).pipe(
     map((isAuthenticated) => {
       if (isAuthenticated) {
-        console.log('✅ [AuthMatch] User is authenticated, access granted');
+        console.log('[AuthMatch] User is authenticated, access granted');
         return true;
       }
 
       // Redirect to login
-      console.log(`🔄 [AuthMatch] User is not authenticated, redirecting to ${redirectPath}`);
+      console.log('[AuthMatch] User is not authenticated, redirecting to ' + redirectPath);
       return router.parseUrl(redirectPath);
     }),
     catchError((error) => {
-      console.error('❌ [AuthMatch] Error checking authentication:', error);
+      console.error('[AuthMatch] Error checking authentication:', error);
       return of(router.parseUrl(redirectPath));
     }),
   );

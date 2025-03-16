@@ -5,14 +5,10 @@ import { ProfileCompletionComponent } from '@dotted-labs/ngx-supabase-auth';
   selector: 'app-complete-profile-page',
   standalone: true,
   imports: [ProfileCompletionComponent],
-  template: `
-    <div class="container mx-auto py-8">
-      <ngx-profile-completion></ngx-profile-completion>
-    </div>
-  `,
+  template: ` <ngx-profile-completion></ngx-profile-completion> `,
 })
 export class CompleteProfilePageComponent {
   constructor() {
-    console.log('🚀 [CompleteProfilePage] Component initialized');
+    console.log('[CompleteProfilePage] Component initialized');
   }
 }

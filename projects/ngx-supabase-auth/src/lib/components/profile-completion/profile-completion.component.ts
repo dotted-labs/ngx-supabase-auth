@@ -75,7 +75,7 @@ export class ProfileCompletionComponent {
   });
 
   constructor() {
-    console.log('🚀 [ProfileCompletion] Component initialized');
+    console.log('[ProfileCompletion] Component initialized');
   }
 
   /**
@@ -83,7 +83,7 @@ export class ProfileCompletionComponent {
    */
   protected async onSubmit(): Promise<void> {
     if (this.profileForm.invalid) {
-      console.warn('⚠️ [ProfileCompletion] Form is invalid, submission prevented');
+      console.warn('[ProfileCompletion] Form is invalid, submission prevented');
       return;
     }
 
@@ -103,20 +103,20 @@ export class ProfileCompletionComponent {
       const { error } = await this.authService.updateProfile(profileData);
 
       if (error) {
-        console.error('❌ [ProfileCompletion] Error updating profile:', error);
+        console.error('[ProfileCompletion] Error updating profile:', error);
         this.error.set(error.message || 'Failed to update profile');
         this.loading.set(false);
         return;
       }
 
-      console.log('✅ [ProfileCompletion] Profile updated successfully');
+      console.log('[ProfileCompletion] Profile updated successfully');
 
       // Redirect to the main dashboard
       const redirectPath = this.config.redirectAfterLogin || '/';
       console.log(`🔄 [ProfileCompletion] Redirecting to ${redirectPath}`);
       this.router.navigate([redirectPath]);
     } catch (err) {
-      console.error('❌ [ProfileCompletion] Exception during profile update:', err);
+      console.error('[ProfileCompletion] Exception during profile update:', err);
       this.error.set('An unexpected error occurred');
       this.loading.set(false);
     }

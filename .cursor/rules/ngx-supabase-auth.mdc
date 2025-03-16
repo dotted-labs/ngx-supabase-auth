@@ -4,7 +4,7 @@ globs:
 alwaysApply: true
 ---
 **ngx-supabase-auth project summary**
-ngx-supabase-auth es una solución de autenticación que permite a los desarrolladores de aplicaciones web implementar rápidamente un sistema completo de gestión de usuarios en sus proyectos.
+ngx-supabase-auth is an angular library to implement registration, login, password reset, a basic profile and access to protected paths. 
 
 **Project features**
 1. **Registration**

@@ -26,7 +26,7 @@ export const DEFAULT_ENABLED_AUTH_PROVIDERS: AuthProvider[] = [
  */
 export function provideSupabaseAuth(config: SupabaseAuthConfig): (Provider | EnvironmentProviders)[] {
   // Check if firstTimeCheckEndpoint is configured, which requires HttpClient
-  const needsHttpClient = !!config.firstTimeCheckEndpoint;
+  const needsHttpClient = !!config.firstTimeCheckEndpoint && !config.skipFirstTimeCheck;
 
   const providers: (Provider | EnvironmentProviders)[] = [
     {
@@ -40,6 +40,7 @@ export function provideSupabaseAuth(config: SupabaseAuthConfig): (Provider | Env
         enabledAuthProviders: [],
         firstTimeProfileRedirect: '/complete-profile',
         firstTimeCheckEndpoint: null,
+        skipFirstTimeCheck: false,
         // Override with provided config
         ...config,
       },

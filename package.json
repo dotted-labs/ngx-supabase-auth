@@ -3,11 +3,15 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "concurrently \"npm run start:demo-app\" \"npm run start:demo-app-electron\"",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "build:lib": "ng build ngx-supabase-auth --project ngx-supabase-auth"
+    "build:lib": "ng build ngx-supabase-auth --project ngx-supabase-auth",
+    "start:demo-app": "ng serve demo-app",
+    "start:demo-app-electron": "concurrently \"ng serve electron-demo-app\" \"wait-on http://localhost:4300 && node projects/electron-demo-app/electron/electron.js\"",
+    "build:electron": "ng build electron-demo-app --configuration production && electron-builder",
+    "package:electron": "electron-builder --dir"
   },
   "private": true,
   "dependencies": {
@@ -32,8 +36,11 @@
     "@angular-devkit/build-angular": "^19.2.0",
     "@angular/cli": "^19.2.0",
     "@angular/compiler-cli": "^19.2.0",
+    "@electron/remote": "^2.1.2",
     "@types/jasmine": "~5.1.0",
     "autoprefixer": "^10.4.17",
+    "electron": "^35.0.2",
+    "electron-builder": "^25.1.8",
     "jasmine-core": "~5.6.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",

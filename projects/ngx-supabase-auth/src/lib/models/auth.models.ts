@@ -47,6 +47,36 @@ export interface SupabaseAuthConfig {
    * Should return a boolean (true if it's the first time)
    */
   firstTimeCheckEndpoint?: string | null;
+
+  /**
+   * Skip the first-time user check and always treat users as returning users
+   * When true, the firstTimeCheckEndpoint will not be called
+   */
+  skipFirstTimeCheck?: boolean;
+
+  /**
+   * Enable electron-specific authentication flow
+   * When true, it assumes the app is running in an Electron context
+   */
+  isElectronMode?: boolean;
+
+  /**
+   * URL of the web application for handling Electron auth
+   * Used when isElectronMode is true to redirect to the web app
+   */
+  webAppAuthUrl?: string;
+
+  /**
+   * Deep link protocol for Electron app
+   * Example: 'myapp://auth'
+   */
+  electronDeepLinkProtocol?: string;
+
+  /**
+   * URL to generate magic link tokens for Electron auth flow
+   * This should be a secure API endpoint that uses the admin Supabase client
+   */
+  magicLinkGeneratorUrl?: string;
 }
 
 /**
@@ -117,4 +147,20 @@ export interface UserProfileUpdate {
   name?: string;
   avatar_url?: string;
   [key: string]: any;
+}
+
+/**
+ * Authentication mode enum
+ */
+export enum AuthMode {
+  WEB = 'web',
+  ELECTRON = 'electron',
+}
+
+/**
+ * Electron auth result interface
+ */
+export interface ElectronAuthResult {
+  hashedToken?: string;
+  error?: string;
 }

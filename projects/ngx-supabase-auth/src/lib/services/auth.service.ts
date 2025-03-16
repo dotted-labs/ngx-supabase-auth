@@ -11,6 +11,8 @@ import {
   PasswordResetRequest,
   UpdatePasswordRequest,
   UserProfileUpdate,
+  AuthMode,
+  ElectronAuthResult,
 } from '../models/auth.models';
 
 /**
@@ -96,6 +98,18 @@ export class SupabaseAuthService {
    */
   private async handleAuthRedirect(userId: string): Promise<void> {
     try {
+      // Check if we should skip the first-time check
+      if (this.config.skipFirstTimeCheck) {
+        console.log(`🔄 [SupabaseAuthService] Skipping first-time check as configured`);
+
+        // Go directly to regular auth flow
+        if (this.config.redirectAfterLogin) {
+          console.log(`🔄 [SupabaseAuthService] Regular auth redirect to ${this.config.redirectAfterLogin}`);
+          await this.router.navigate([this.config.redirectAfterLogin]);
+        }
+        return;
+      }
+
       // Check if this is configured and if it's the user's first time
       if (this.config.firstTimeCheckEndpoint && this.config.firstTimeProfileRedirect) {
         console.log(`🔄 [SupabaseAuthService] Checking first-time status for redirection for user ${userId}`);
@@ -125,105 +139,255 @@ export class SupabaseAuthService {
   }
 
   /**
+   * Get the authentication mode based on configuration
+   * @returns The current authentication mode (WEB or ELECTRON)
+   */
+  getAuthMode(): AuthMode {
+    return this.config.isElectronMode ? AuthMode.ELECTRON : AuthMode.WEB;
+  }
+
+  /**
+   * Handles authentication for Electron by opening the web app in browser
+   * @param path The authentication path to open (login, signup, etc.)
+   * @param options Additional query parameters
+   * @returns Promise that resolves when auth is initiated
+   */
+  async openExternalAuthWindow(path: string, options: Record<string, string> = {}): Promise<void> {
+    console.log('🌍 [SupabaseAuthService] Opening external auth window', path);
+
+    if (!this.config.webAppAuthUrl) {
+      console.error('⚠️ [SupabaseAuthService] webAppAuthUrl is not configured for Electron mode');
+      throw new Error('webAppAuthUrl is not configured for Electron mode');
+    }
+
+    // Construct URL with desktop=true parameter to indicate Electron auth flow
+    const queryParams = new URLSearchParams({
+      desktop: 'true',
+      ...options,
+    });
+
+    const authUrl = `${this.config.webAppAuthUrl}/${path}?${queryParams.toString()}`;
+
+    try {
+      // In a real Electron app, this would use Electron's shell.openExternal
+      // Here we're just providing the API that would be called from Electron
+      window.open(authUrl, '_blank');
+      console.log('🔗 [SupabaseAuthService] Opened external auth URL:', authUrl);
+    } catch (error) {
+      console.error('❌ [SupabaseAuthService] Failed to open external auth window', error);
+      throw new Error(`Failed to open auth window: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Verifies a hashed token received from the web application
+   * This is used in the Electron flow after the user completes authentication in browser
+   * @param hashedToken The hashed token received via deep link
+   * @returns Promise with user data or error
+   */
+  async verifyHashedToken(hashedToken: string): Promise<{ user: SupabaseUser | null; error: Error | null }> {
+    console.log('🔑 [SupabaseAuthService] Verifying hashed token');
+
+    try {
+      const { data, error } = await this.supabase.auth.verifyOtp({
+        token_hash: hashedToken,
+        type: 'email',
+      });
+
+      if (error) {
+        console.error('❌ [SupabaseAuthService] Failed to verify hashed token', error);
+        return { user: null, error };
+      }
+
+      const user = data.user as SupabaseUser;
+      console.log(`✅ [SupabaseAuthService] Successfully verified token for user: ${user.id}`);
+
+      // Handle auth redirect if needed
+      if (user && user.id) {
+        await this.handleAuthRedirect(user.id);
+      }
+
+      return { user, error: null };
+    } catch (error) {
+      console.error('❌ [SupabaseAuthService] Error verifying hashed token', error);
+      return { user: null, error: error as Error };
+    }
+  }
+
+  /**
+   * Process the auth result from deep link (for Electron mode)
+   * @param url The deep link URL containing authentication parameters
+   * @returns Promise with the authentication result
+   */
+  async processDeepLinkUrl(url: string): Promise<ElectronAuthResult> {
+    console.log('🔄 [SupabaseAuthService] Processing deep link URL', url);
+
+    try {
+      // Basic validation
+      if (!url || typeof url !== 'string') {
+        return { error: 'Invalid URL' };
+      }
+
+      // Extract query parameters from the URL
+      const urlObj = new URL(url);
+      const hashedToken = urlObj.searchParams.get('hashed_token');
+
+      if (!hashedToken) {
+        return { error: 'No hashed_token found in URL' };
+      }
+
+      return { hashedToken };
+    } catch (error) {
+      console.error('❌ [SupabaseAuthService] Error processing deep link URL', error);
+      return { error: (error as Error).message };
+    }
+  }
+
+  /**
    * Sign in with email and password
+   * Handles both web and Electron modes
    * @param email User email
    * @param password User password
-   * @returns Promise with sign in result
+   * @returns Promise with user data or error
    */
   async signInWithEmail(email: string, password: string): Promise<{ user: SupabaseUser | null; error: Error | null }> {
+    console.log('🔐 [SupabaseAuthService] Signing in with email');
+
+    // Check if we're in Electron mode
+    if (this.getAuthMode() === AuthMode.ELECTRON) {
+      try {
+        // In Electron mode, we open the external auth window instead
+        await this.openExternalAuthWindow('login', { email });
+
+        // In a real implementation, the Electron app would wait for the deep link callback
+        // Here we just return a placeholder result as the actual auth will happen asynchronously
+        return { user: null, error: null };
+      } catch (error) {
+        console.error('❌ [SupabaseAuthService] Failed to initiate Electron auth', error);
+        return { user: null, error: error as Error };
+      }
+    }
+
+    // Original web authentication flow
     try {
-      console.log(`🔐 [SupabaseAuthService] Signing in user with email: ${email}`);
       const { data, error } = await this.supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        console.error('[SupabaseAuthService] Sign in error:', error);
+        console.error('❌ [SupabaseAuthService] Sign in failed', error);
         return { user: null, error };
       }
 
-      if (!data.user) {
-        console.warn('[SupabaseAuthService] User signed in but no user data returned');
-        return { user: null, error: new Error('No user data returned') };
+      const user = data.user as SupabaseUser;
+      console.log(`✅ [SupabaseAuthService] User signed in: ${user.id}`);
+
+      // Handle redirection after successful login
+      if (user && user.id) {
+        await this.handleAuthRedirect(user.id);
       }
 
-      console.log(`✅ [SupabaseAuthService] User signed in successfully: ${data.user.id}`);
-      const user = data.user as SupabaseUser;
-      await this.handleAuthRedirect(user.id);
-
       return { user, error: null };
-    } catch (err) {
-      console.error('[SupabaseAuthService] Exception during sign in:', err);
-      return { user: null, error: err as Error };
+    } catch (error) {
+      console.error('❌ [SupabaseAuthService] Sign in error', error);
+      return { user: null, error: error as Error };
     }
   }
 
   /**
    * Sign up with email and password
+   * Handles both web and Electron modes
    * @param email User email
    * @param password User password
-   * @returns Promise with sign up result
+   * @returns Promise with user data or error
    */
   async signUpWithEmail(email: string, password: string): Promise<{ user: SupabaseUser | null; error: Error | null }> {
+    console.log('📝 [SupabaseAuthService] Signing up with email');
+
+    // Check if we're in Electron mode
+    if (this.getAuthMode() === AuthMode.ELECTRON) {
+      try {
+        // In Electron mode, we open the external auth window instead
+        await this.openExternalAuthWindow('signup', { email });
+
+        // In a real implementation, the Electron app would wait for the deep link callback
+        return { user: null, error: null };
+      } catch (error) {
+        console.error('❌ [SupabaseAuthService] Failed to initiate Electron signup', error);
+        return { user: null, error: error as Error };
+      }
+    }
+
+    // Original web signup flow
     try {
-      console.log(`🔐 [SupabaseAuthService] Signing up user with email: ${email}`);
       const { data, error } = await this.supabase.auth.signUp({
         email,
         password,
       });
 
       if (error) {
-        console.error('[SupabaseAuthService] Sign up error:', error);
+        console.error('❌ [SupabaseAuthService] Sign up failed', error);
         return { user: null, error };
       }
 
-      if (!data.user) {
-        console.warn('[SupabaseAuthService] User signed up but no user data returned');
-        return { user: null, error: null };
-      }
-
-      console.log(`✅ [SupabaseAuthService] User signed up successfully: ${data.user.id}`);
       const user = data.user as SupabaseUser;
+      console.log(`✅ [SupabaseAuthService] User signed up: ${user.id}`);
 
-      // New users should always go through the first-time flow if configured
-      if (this.config.firstTimeProfileRedirect) {
-        console.log(`🔄 [SupabaseAuthService] New user, redirecting to ${this.config.firstTimeProfileRedirect}`);
-        await this.router.navigate([this.config.firstTimeProfileRedirect]);
-      } else if (this.config.redirectAfterLogin) {
-        console.log(`🔄 [SupabaseAuthService] No first-time profile, redirecting to ${this.config.redirectAfterLogin}`);
-        await this.router.navigate([this.config.redirectAfterLogin]);
+      // Handle redirection after successful signup
+      if (user && user.id) {
+        await this.handleAuthRedirect(user.id);
       }
 
       return { user, error: null };
-    } catch (err) {
-      console.error('[SupabaseAuthService] Exception during sign up:', err);
-      return { user: null, error: err as Error };
+    } catch (error) {
+      console.error('❌ [SupabaseAuthService] Sign up error', error);
+      return { user: null, error: error as Error };
     }
   }
 
   /**
    * Sign in with a social provider
-   * @param provider Social auth provider
-   * @returns Promise with sign in result
+   * Handles both web and Electron modes
+   * @param provider Social authentication provider
+   * @returns Promise with error status
    */
   async signInWithSocialProvider(provider: SocialAuthProvider): Promise<{ error: Error | null }> {
+    console.log(`🔐 [SupabaseAuthService] Signing in with ${provider}`);
+
+    // Check if we're in Electron mode
+    if (this.getAuthMode() === AuthMode.ELECTRON) {
+      try {
+        // In Electron mode, we open the external auth window instead
+        await this.openExternalAuthWindow('login', { provider });
+
+        // In a real implementation, the Electron app would wait for the deep link callback
+        return { error: null };
+      } catch (error) {
+        console.error(`❌ [SupabaseAuthService] Failed to initiate Electron auth with ${provider}`, error);
+        return { error: error as Error };
+      }
+    }
+
+    // Original web social auth flow
     try {
-      console.log(`🔐 [SupabaseAuthService] Signing in with provider: ${provider}`);
       const { error } = await this.supabase.auth.signInWithOAuth({
-        provider: provider,
+        provider,
+        options: {
+          redirectTo: window.location.origin,
+        },
       });
 
       if (error) {
-        console.error('[SupabaseAuthService] Social sign in error:', error);
-      } else {
-        console.log(`✅ [SupabaseAuthService] Social sign in initiated successfully`);
+        console.error('❌ [SupabaseAuthService] Social sign in failed', error);
+        return { error };
       }
 
-      return { error };
-    } catch (err) {
-      console.error('[SupabaseAuthService] Exception during social sign in:', err);
-      return { error: err as Error };
+      console.log(`✅ [SupabaseAuthService] Social auth initiated with ${provider}`);
+      return { error: null };
+    } catch (error) {
+      console.error('❌ [SupabaseAuthService] Social sign in error', error);
+      return { error: error as Error };
     }
   }
 

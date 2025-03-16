@@ -9,6 +9,8 @@ import {
   PasswordResetRequest,
   UpdatePasswordRequest,
   UserProfileUpdate,
+  AuthMode,
+  ElectronAuthResult,
 } from '../models/auth.models';
 import { SupabaseAuthService } from '../services/auth.service';
 import { SUPABASE_AUTH_CONFIG } from '../config/supabase-auth.config';
@@ -237,6 +239,106 @@ export const AuthStore = signalStore(
 
             patchState(store, {
               user: null,
+              loading: false,
+            });
+          } catch (error) {
+            patchState(store, {
+              loading: false,
+              error: (error as Error).message,
+            });
+          }
+        },
+
+        /**
+         * Get the current authentication mode (Web or Electron)
+         * @returns The current auth mode
+         */
+        getAuthMode(): AuthMode {
+          return authService.getAuthMode();
+        },
+
+        /**
+         * Open external authentication window (for Electron mode)
+         * @param path Authentication path
+         * @param options Additional query parameters
+         */
+        async openExternalAuthWindow(path: string, options: Record<string, string> = {}) {
+          patchState(store, { loading: true, error: null });
+
+          try {
+            await authService.openExternalAuthWindow(path, options);
+            patchState(store, { loading: false });
+          } catch (error) {
+            patchState(store, {
+              loading: false,
+              error: (error as Error).message,
+            });
+          }
+        },
+
+        /**
+         * Process deep link URL and authenticate with hashed token
+         * Used in Electron apps to handle the redirect from web auth
+         * @param url Deep link URL containing authentication parameters
+         */
+        async processDeepLinkAuth(url: string) {
+          patchState(store, { loading: true, error: null });
+
+          try {
+            // Extract token from URL
+            const result = await authService.processDeepLinkUrl(url);
+
+            if (result.error || !result.hashedToken) {
+              patchState(store, {
+                loading: false,
+                error: result.error || 'Invalid deep link URL',
+              });
+              return;
+            }
+
+            // Verify the token and create a session
+            const { user, error } = await authService.verifyHashedToken(result.hashedToken);
+
+            if (error) {
+              patchState(store, {
+                loading: false,
+                error: error.message,
+              });
+              return;
+            }
+
+            patchState(store, {
+              user,
+              loading: false,
+            });
+          } catch (error) {
+            patchState(store, {
+              loading: false,
+              error: (error as Error).message,
+            });
+          }
+        },
+
+        /**
+         * Handle direct verification of a hashed token
+         * @param hashedToken The hashed token to verify
+         */
+        async verifyHashedToken(hashedToken: string) {
+          patchState(store, { loading: true, error: null });
+
+          try {
+            const { user, error } = await authService.verifyHashedToken(hashedToken);
+
+            if (error) {
+              patchState(store, {
+                loading: false,
+                error: error.message,
+              });
+              return;
+            }
+
+            patchState(store, {
+              user,
               loading: false,
             });
           } catch (error) {

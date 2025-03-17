@@ -121,33 +121,33 @@
         }
       }
     },
-    "electron-demo-app": {
+    "demo-app-electron": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
           "style": "css"
         }
       },
-      "root": "projects/electron-demo-app",
-      "sourceRoot": "projects/electron-demo-app/src",
+      "root": "projects/demo-app-electron",
+      "sourceRoot": "projects/demo-app-electron/src",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/electron-demo-app",
-            "index": "projects/electron-demo-app/src/index.html",
-            "browser": "projects/electron-demo-app/src/main.ts",
+            "outputPath": "dist/demo-app-electron",
+            "index": "projects/demo-app-electron/src/index.html",
+            "browser": "projects/demo-app-electron/src/main.ts",
             "polyfills": ["zone.js"],
-            "tsConfig": "projects/electron-demo-app/tsconfig.app.json",
+            "tsConfig": "projects/demo-app-electron/tsconfig.app.json",
             "inlineStyleLanguage": "css",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "projects/electron-demo-app/public"
+                "input": "projects/demo-app-electron/public"
               }
             ],
-            "styles": ["projects/electron-demo-app/src/styles.css"],
+            "styles": ["projects/demo-app-electron/src/styles.css"],
             "scripts": []
           },
           "configurations": {
@@ -181,10 +181,10 @@
           },
           "configurations": {
             "production": {
-              "buildTarget": "electron-demo-app:build:production"
+              "buildTarget": "demo-app-electron:build:production"
             },
             "development": {
-              "buildTarget": "electron-demo-app:build:development"
+              "buildTarget": "demo-app-electron:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -196,15 +196,15 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "polyfills": ["zone.js", "zone.js/testing"],
-            "tsConfig": "projects/electron-demo-app/tsconfig.spec.json",
+            "tsConfig": "projects/demo-app-electron/tsconfig.spec.json",
             "inlineStyleLanguage": "css",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "projects/electron-demo-app/public"
+                "input": "projects/demo-app-electron/public"
               }
             ],
-            "styles": ["projects/electron-demo-app/src/styles.css"],
+            "styles": ["projects/demo-app-electron/src/styles.css"],
             "scripts": []
           }
         }

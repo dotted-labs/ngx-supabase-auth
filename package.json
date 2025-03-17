@@ -9,8 +9,8 @@
     "test": "ng test",
     "build:lib": "ng build ngx-supabase-auth --project ngx-supabase-auth",
     "start:demo-app": "ng serve demo-app",
-    "start:demo-app-electron": "concurrently \"ng serve electron-demo-app\" \"wait-on http://localhost:4300 && node projects/electron-demo-app/electron/electron.js\"",
-    "build:electron": "ng build electron-demo-app --configuration production && electron-builder",
+    "start:demo-app-electron": "concurrently \"ng serve demo-app-electron\" \"wait-on http://localhost:4300 && node projects/demo-app-electron/electron/electron.js\"",
+    "build:electron": "ng build demo-app-electron --configuration production && electron-builder",
     "package:electron": "electron-builder --dir"
   },
   "private": true,

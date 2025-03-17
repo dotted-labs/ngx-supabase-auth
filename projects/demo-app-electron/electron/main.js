@@ -30,7 +30,7 @@ function createWindow() {
   // Cargar la aplicación Angular
   const appUrl = app.isPackaged
     ? url.format({
-        pathname: path.join(__dirname, '../dist/electron-demo-app/browser/index.html'),
+        pathname: path.join(__dirname, '../dist/demo-app-electron/browser/index.html'),
         protocol: 'file:',
         slashes: true,
       })

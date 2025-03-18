@@ -8,7 +8,7 @@ An Angular library for handling authentication with Supabase. This library provi
 - 🔒 Authentication guards for route protection
 - 📊 State management using ngrx/signals
 - 🌈 Social login support (Google, Facebook, Twitter, GitHub, Discord)
-- 📱 Responsive design with Tailwind CSS and DaisyUI
+- 📱 Responsive design with Tailwind CSS and DaisyUI (not required - components will use your project's theme if available)
 - 🎨 Customizable components
 - 📝 TypeScript types for all features
 - 🖥️ Electron support for desktop applications
@@ -242,6 +242,16 @@ export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
 ];
 ```
+
+## Styling and Theming
+
+This library uses Tailwind CSS and DaisyUI for styling its components, but neither are required dependencies. If your project already has Tailwind CSS and/or DaisyUI installed, the components will automatically use your project's theme and styling configuration.
+
+- If you have Tailwind CSS in your project, the library components will use your Tailwind configuration
+- If you have DaisyUI in your project, the components will adopt your DaisyUI theme
+- If you don't have either installed, the components will still work with their default styling
+
+The styling is designed to be non-intrusive and integrates seamlessly with your existing design system.
 
 ## Electron Integration
 

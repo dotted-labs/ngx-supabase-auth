@@ -1,9 +1,9 @@
-import { Component, inject, input, output, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, computed, inject, output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { SUPABASE_AUTH_CONFIG } from '../../config/supabase-auth.config';
 import { AuthProvider, SocialAuthProvider } from '../../models/auth.models';
 import { AuthStore } from '../../store/auth.store';
-import { SUPABASE_AUTH_CONFIG } from '../../config/supabase-auth.config';
 import { SocialLoginComponent } from '../social-login/social-login.component';
 
 /**
@@ -11,11 +11,10 @@ import { SocialLoginComponent } from '../social-login/social-login.component';
  */
 @Component({
   selector: 'sup-signup',
-  standalone: true,
   imports: [CommonModule, ReactiveFormsModule, SocialLoginComponent],
   templateUrl: './signup.component.html',
 })
-export class SignupComponent implements OnInit {
+export class SignupComponent {
   /**
    * Event emitted when user clicks login
    */
@@ -47,21 +46,9 @@ export class SignupComponent implements OnInit {
   public AuthProvider = AuthProvider;
 
   /**
-   * Providers enabled from configuration
-   */
-  public enabledProviders: AuthProvider[] = [];
-
-  /**
    * Flag to show email/password form
    */
-  public showEmailPasswordForm = false;
-
-  /**
-   * Computed to check if there are social providers enabled
-   */
-  public hasSocialProviders = computed(() => {
-    return this.enabledProviders.length > 0 && this.enabledProviders.some((p) => p !== AuthProvider.EMAIL_PASSWORD);
-  });
+  public showEmailPasswordForm = computed(() => this.authStore.hasEmailPasswordProvider());
 
   /**
    * Form builder
@@ -69,6 +56,7 @@ export class SignupComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   public backToLogin = output<void>();
+
   constructor() {
     this.signupForm = this.fb.group(
       {
@@ -78,14 +66,6 @@ export class SignupComponent implements OnInit {
       },
       { validator: this.passwordMatchValidator },
     );
-  }
-
-  public ngOnInit(): void {
-    // Get enabled providers from configuration
-    this.enabledProviders = this.config.enabledAuthProviders || [];
-
-    // Check if email/password is enabled
-    this.showEmailPasswordForm = this.enabledProviders.includes(AuthProvider.EMAIL_PASSWORD);
   }
 
   /**
@@ -111,23 +91,6 @@ export class SignupComponent implements OnInit {
       const { email, password } = this.signupForm.value;
       this.authStore.signUpWithEmail(email, password);
     }
-  }
-
-  /**
-   * Signup with a social provider
-   * @param provider Social auth provider
-   */
-  public signupWithSocialProvider(provider: SocialAuthProvider): void {
-    this.authStore.signInWithSocialProvider(provider);
-  }
-
-  /**
-   * Helper to check if a provider is enabled
-   * @param provider Auth provider
-   * @returns True if the provider is enabled, false otherwise
-   */
-  public isProviderEnabled(provider: AuthProvider): boolean {
-    return this.enabledProviders.includes(provider);
   }
 
   public onBackToLogin(): void {

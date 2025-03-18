@@ -99,6 +99,7 @@ export interface AuthState {
   user: SupabaseUser | null;
   loading: boolean;
   error: string | null;
+  enabledAuthProviders: AuthProvider[];
 }
 /**
  * Social auth providers enum

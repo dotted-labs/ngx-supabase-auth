@@ -1,4 +1,4 @@
-import { Component, inject, input, output, OnInit, computed } from '@angular/core';
+import { Component, inject, input, output, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthProvider, SocialAuthProvider } from '../../models/auth.models';
@@ -11,7 +11,6 @@ import { SocialLoginComponent } from '../social-login/social-login.component';
  */
 @Component({
   selector: 'sup-login',
-  standalone: true,
   imports: [CommonModule, ReactiveFormsModule, SocialLoginComponent],
   templateUrl: './login.component.html',
 })
@@ -37,14 +36,9 @@ export class LoginComponent implements OnInit {
   public SocialAuthProvider = SocialAuthProvider;
 
   /**
-   * Providers habilitados desde la configuración
-   */
-  public enabledProviders: AuthProvider[] = [];
-
-  /**
    * Flag to show email/password form
    */
-  public showEmailPasswordForm = false;
+  public showEmailPasswordForm = signal(false);
 
   /**
    * Event emitted when user clicks forgot password
@@ -55,13 +49,6 @@ export class LoginComponent implements OnInit {
    * Event emitted when user clicks signup
    */
   public signup = output<void>();
-
-  /**
-   * Computed to check if there are social providers enabled
-   */
-  public hasSocialProviders = computed(() => {
-    return this.enabledProviders.length > 0 && this.enabledProviders.some((p) => p !== AuthProvider.EMAIL_PASSWORD);
-  });
 
   /**
    * Form builder
@@ -76,11 +63,8 @@ export class LoginComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    // Obtener los providers habilitados de la configuración
-    this.enabledProviders = this.config.enabledAuthProviders || [];
-
-    // Verificar si el email/password está habilitado
-    this.showEmailPasswordForm = this.enabledProviders.includes(AuthProvider.EMAIL_PASSWORD);
+    // Verify if the email/password is enabled
+    this.showEmailPasswordForm.set(this.authStore.enabledAuthProviders().includes(AuthProvider.EMAIL_PASSWORD));
   }
 
   /**
@@ -91,23 +75,6 @@ export class LoginComponent implements OnInit {
       const { email, password } = this.loginForm.value;
       this.authStore.signInWithEmail(email, password);
     }
-  }
-
-  /**
-   * Login with a social provider
-   * @param provider Social auth provider
-   */
-  public loginWithSocialProvider(provider: AuthProvider | SocialAuthProvider): void {
-    this.authStore.signInWithSocialProvider(provider as SocialAuthProvider);
-  }
-
-  /**
-   * Helper to check if a provider is enabled
-   * @param provider Auth provider
-   * @returns True if the provider is enabled, false otherwise
-   */
-  public isProviderEnabled(provider: AuthProvider): boolean {
-    return this.enabledProviders.includes(provider);
   }
 
   public onGoToSignup(): void {

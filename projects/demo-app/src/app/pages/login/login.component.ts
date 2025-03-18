@@ -4,7 +4,6 @@ import { LoginComponent as SupLoginComponent } from '@dotted-labs/ngx-supabase-a
 
 @Component({
   selector: 'app-login-page',
-  standalone: true,
   imports: [SupLoginComponent],
   template: `
     <div class="max-w-md mx-auto card card-border bg-base-100 border-base-300 card-sm">

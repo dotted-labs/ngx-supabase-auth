@@ -6,7 +6,6 @@ import { AuthStore, SUPABASE_AUTH_CONFIG, UserProfileUpdate } from '@dotted-labs
 
 @Component({
   selector: 'app-complete-profile-page',
-  standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
     <div class="flex flex-col items-center justify-center min-h-screen bg-base-200 p-4">

@@ -4,7 +4,6 @@ import { SignupComponent as SupSignupComponent } from '@dotted-labs/ngx-supabase
 
 @Component({
   selector: 'app-signup-page',
-  standalone: true,
   imports: [SupSignupComponent],
   template: `
     <div class="max-w-md mx-auto card card-border bg-base-100 border-base-300 card-sm">

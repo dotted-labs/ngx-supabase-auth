@@ -5,7 +5,6 @@ import { AuthStore } from '@dotted-labs/ngx-supabase-auth';
 
 @Component({
   selector: 'app-dashboard',
-  standalone: true,
   imports: [CommonModule],
   template: `
     <div class="max-w-md mx-auto card card-border bg-base-100 card-sm">

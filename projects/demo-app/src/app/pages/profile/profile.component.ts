@@ -3,7 +3,6 @@ import { ProfileComponent as SupProfileComponent } from '@dotted-labs/ngx-supaba
 
 @Component({
   selector: 'app-profile-page',
-  standalone: true,
   imports: [SupProfileComponent],
   template: `
     <div class="max-w-md mx-auto card card-border bg-base-100 border-base-300 card-sm">

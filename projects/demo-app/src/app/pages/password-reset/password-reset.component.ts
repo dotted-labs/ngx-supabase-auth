@@ -4,7 +4,6 @@ import { PasswordResetComponent as SupPasswordResetComponent } from '@dotted-lab
 
 @Component({
   selector: 'app-password-reset-page',
-  standalone: true,
   imports: [SupPasswordResetComponent],
   template: `
     <div class="max-w-md mx-auto card card-border bg-base-100 border-base-300 card-sm">

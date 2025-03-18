@@ -114,7 +114,6 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
-  standalone: true,
   imports: [LoginComponent],
   template: `
     <div class="container mx-auto p-4">
@@ -144,7 +143,6 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-signup',
-  standalone: true,
   imports: [SignupComponent],
   template: `
     <div class="container mx-auto p-4">
@@ -170,7 +168,6 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-password-reset',
-  standalone: true,
   imports: [PasswordResetComponent],
   template: `
     <div class="container mx-auto p-4">
@@ -195,7 +192,6 @@ import { ProfileComponent } from '@dotted-labs/ngx-supabase-auth';
 
 @Component({
   selector: 'app-profile',
-  standalone: true,
   imports: [ProfileComponent],
   template: `
     <div class="container mx-auto p-4">

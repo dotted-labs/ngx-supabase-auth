@@ -2,7 +2,7 @@
 <sup-social-login />
 
 <!-- Email Login Form -->
-@if (showEmailPasswordForm) {
+@if (showEmailPasswordForm()) {
   <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form-control flex flex-col gap-4 mb-6">
     <div class="form-control w-full flex flex-col gap-2">
       <label for="email" class="label">

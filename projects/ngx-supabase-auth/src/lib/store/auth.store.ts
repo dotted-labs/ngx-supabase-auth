@@ -21,6 +21,7 @@ const initialState: AuthState = {
   user: null,
   loading: false,
   error: null,
+  enabledAuthProviders: [],
 };
 
 /**
@@ -30,7 +31,18 @@ export const AuthStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
   withComputed((store) => ({
+    avatarUrl: computed(() => {
+      const user = store.user();
+      if (user?.user_metadata?.['avatar_url']) {
+        return user.user_metadata['avatar_url'];
+      }
+      return 'https://ui-avatars.com/api/?name=User&color=7F9CF5&background=EBF4FF&size=100';
+    }),
     isAuthenticated: computed(() => !!store.user()),
+    hasSocialProviders: computed(
+      () => store.enabledAuthProviders().length > 0 && store.enabledAuthProviders().some((p) => p !== AuthProvider.EMAIL_PASSWORD),
+    ),
+    hasEmailPasswordProvider: computed(() => store.enabledAuthProviders().includes(AuthProvider.EMAIL_PASSWORD)),
   })),
   withMethods(
     (
@@ -45,7 +57,7 @@ export const AuthStore = signalStore(
          * Initialize store and set up auth state listeners
          */
         async initializeStore() {
-          patchState(store, { loading: true });
+          patchState(store, { loading: true, enabledAuthProviders: config.enabledAuthProviders || [] });
           try {
             const user = await authService.getCurrentUser();
             patchState(store, { user, loading: false });
@@ -404,6 +416,15 @@ export const AuthStore = signalStore(
             });
             return false;
           }
+        },
+
+        /**
+         * Helper to check if a provider is enabled
+         * @param provider Auth provider
+         * @returns True if the provider is enabled, false otherwise
+         */
+        isProviderEnabled(provider: AuthProvider | SocialAuthProvider): boolean {
+          return store.enabledAuthProviders().includes(provider as AuthProvider);
         },
       };
     },

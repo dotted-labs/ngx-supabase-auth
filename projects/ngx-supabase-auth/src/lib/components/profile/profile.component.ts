@@ -1,20 +1,18 @@
-import { Component, computed, effect, inject, input, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, effect, inject, input, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { UserProfileUpdate, SupabaseUser } from '../../models/auth.models';
+import { SupabaseUser, UserProfileUpdate } from '../../models/auth.models';
 import { AuthStore } from '../../store/auth.store';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 /**
  * User profile component for managing user information
  */
 @Component({
   selector: 'sup-profile',
-  standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './profile.component.html',
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent {
   /**
    * Whether to show the avatar section
    */
@@ -54,27 +52,6 @@ export class ProfileComponent implements OnInit {
    * Whether the password update was successful
    */
   public passwordUpdateSuccess = signal(false);
-
-  /**
-   * Loading state for user data
-   */
-  public isLoading = computed(() => this.authStore.loading());
-
-  /**
-   * User data signal
-   */
-  public userData = computed(() => this.authStore.user());
-
-  /**
-   * URL for the user avatar
-   */
-  public avatarUrl = computed(() => {
-    const user = this.userData();
-    if (user?.user_metadata?.['avatar_url']) {
-      return user.user_metadata['avatar_url'];
-    }
-    return 'https://ui-avatars.com/api/?name=User&color=7F9CF5&background=EBF4FF&size=100';
-  });
 
   /**
    * Auth store instance
@@ -118,11 +95,6 @@ export class ProfileComponent implements OnInit {
       email: user?.email || '',
     });
   }
-
-  /**
-   * Initialize the component
-   */
-  public ngOnInit(): void {}
 
   /**
    * Password match validator
@@ -192,7 +164,7 @@ export class ProfileComponent implements OnInit {
       if (file) {
         try {
           // Get the user ID
-          const userId = this.userData()?.id;
+          const userId = this.authStore.user()?.id;
           if (!userId) {
             throw new Error('User not authenticated');
           }

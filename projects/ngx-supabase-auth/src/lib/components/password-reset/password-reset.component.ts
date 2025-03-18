@@ -1,11 +1,6 @@
-import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
+import { Component, inject, Input, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PasswordResetRequest } from '../../models/auth.models';
 import { AuthStore } from '../../store/auth.store';
 
@@ -14,7 +9,6 @@ import { AuthStore } from '../../store/auth.store';
  */
 @Component({
   selector: 'sup-password-reset',
-  standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './password-reset.component.html',
 })
@@ -42,7 +36,7 @@ export class PasswordResetComponent {
   /**
    * Whether the reset email has been sent
    */
-  resetEmailSent = false;
+  resetEmailSent = signal(false);
 
   /**
    * Auth store instance
@@ -75,7 +69,7 @@ export class PasswordResetComponent {
       // In a real app, you'd check for errors before showing success
       setTimeout(() => {
         if (!this.authStore.error()) {
-          this.resetEmailSent = true;
+          this.resetEmailSent.set(true);
         }
       }, 1000);
     }

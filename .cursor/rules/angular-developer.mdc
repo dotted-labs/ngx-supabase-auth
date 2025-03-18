@@ -1,31 +1,8 @@
 ---
-description: 
+description: Coding rules 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
-**ngx-supabase-auth project summary**
-ngx-supabase-auth is an angular library to implement registration, login, password reset, a basic profile and access to protected paths. 
-
-**Project structure**
-1. **Demo app**
-   Demo app built with angular to test the ngx-supabase-auth library. you can test this project using the following command `npm run start:demo-app`
-2. **Demo app electron**
-   Demo app built with angular and electron to test the ngx-supabase-auth native mode library. you can test this project using the following command `npm run start:demo-app-electron`
-
-2. **ngx-supabase-auth**
-   Core project, with the following features:
-     - Registration: Dedicated view for creating new user accounts that offers two main options: traditional registration with email and password, or quick registration through social providers such as Google, Facebook, and others. 
-     - Login:Sign-in interface that allows access to the application using both traditional credentials (email and password) and social login providers (Google, Facebook, etc.), offering user flexibility.
-     - Password Reset: Password recovery system that allows users to securely restore their access when they have forgotten their credentials, through an email verification process.
-     - Guards: Dual protection system that manages access to different areas of the application:
-        - Protects private routes by allowing access only to authenticated users
-        - Controls access to public routes (such as login) preventing already authenticated users from visiting them unnecessarily
-     - Profile:Personal management center where users can manage their basic information, including username updates, profile picture customization, and password changes.
-    You can buld this angular library with `build:lib`
-    
-
-**After executing the task**
-  After the required changes in the library you have to modify the demo to implement the changes made in the library and also update the README to document the changes and the new implementations.
 
 **Coding rules**
 
@@ -151,4 +128,9 @@ ngx-supabase-auth is an angular library to implement registration, login, passwo
 
 **Reference**  
 Refer to Angular's official documentation for components, services, and modules to ensure best practices and maintain code quality and maintainability.
+
+**Conversation flow**  
+- I will always ask you in Spanish, but I want you to think in English, write code and comments always in English but answer me in Spanish.
+
+
 

@@ -1,0 +1,72 @@
+name: Release and Publish
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-version-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      changed: ${{ steps.check.outputs.changed }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check for version change
+        id: check
+        run: |
+          git diff HEAD~1 HEAD -- projects/ngx-supabase-auth/package.json | grep '"version":'
+          if [ $? -eq 0 ]; then
+            VERSION=$(grep '"version":' projects/ngx-supabase-auth/package.json | sed 's/.*"version": "\(.*\)",/\1/')
+            echo "Version changed to: $VERSION"
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "No version change detected"
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        if: steps.check.outputs.changed == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.check.outputs.version }}
+          name: Release v${{ steps.check.outputs.version }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-npm:
+    needs: check-version-and-release
+    if: needs.check-version-and-release.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build library
+        run: npm run build:lib
+
+      - name: Publish to npm
+        run: |
+          cd dist/ngx-supabase-auth
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} 

@@ -102,6 +102,8 @@ The following table describes all available options for the `provideSupabaseAuth
 
 ## Quick Start
 
+The way to use the component correctly is to create components for each of the pages to be used in the project as a wrapper of the components of the package such as sup-login, sup-signup, sup-password-reset, sup-profile
+
 ### 1. Create Login Page
 
 ```typescript
@@ -376,6 +378,31 @@ export class AuthHandlerComponent implements OnInit {
   }
 }
 ```
+
+## Contributing
+
+## Automatic Release Process
+
+The library uses GitHub Actions to automate the release and publishing process. When you push changes to the `main` branch that include a version update in the `projects/ngx-supabase-auth/package.json` file, the following will happen automatically:
+
+1. A new GitHub release will be created with the new version number
+2. The library will be built and published to npm
+
+### How to create a new release
+
+1. Update the version in `projects/ngx-supabase-auth/package.json`
+2. Commit and push to main:
+   ```bash
+   git add projects/ngx-supabase-auth/package.json
+   git commit -m "chore: bump version to x.x.x"
+   git push origin main
+   ```
+3. The GitHub Actions workflow will automatically:
+   - Detect the version change
+   - Create a GitHub release
+   - Publish the package to npm
+
+> **Note:** You need to have an NPM_TOKEN secret configured in your GitHub repository settings for the automatic npm publishing to work.
 
 ## License
 

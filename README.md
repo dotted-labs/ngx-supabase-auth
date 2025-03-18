@@ -407,3 +407,27 @@ The library uses GitHub Actions to automate the release and publishing process. 
 ## License
 
 MIT
+
+## Environment Configuration and Credentials
+
+The project uses a special approach to handle environment variables that keeps sensitive credentials like Supabase URL and keys private while allowing the environment files to remain in version control:
+
+### How it works
+
+1. Default environments (`environment.ts` and `environment.prod.ts`) contain placeholder values
+2. Local environment files (`environment.local.ts`) contain your real credentials and are excluded from git
+3. The application merges these configurations, with local values taking precedence
+
+### Setting up local environments
+
+1. Copy the example file to create your local environment:
+
+   ```bash
+   cp projects/demo-app/src/environments/environment.local.example.ts projects/demo-app/src/environments/environment.local.ts
+   cp projects/demo-app-electron/src/environments/environment.local.example.ts projects/demo-app-electron/src/environments/environment.local.ts
+   ```
+
+2. Edit the local files and add your real Supabase credentials
+3. Run the application which will use your local credentials
+
+Note: `environment.local.ts` files are excluded from git via .gitignore to prevent accidental sharing of sensitive information.

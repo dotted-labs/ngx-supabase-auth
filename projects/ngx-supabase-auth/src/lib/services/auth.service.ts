@@ -7,12 +7,13 @@ import { SUPABASE_AUTH_CONFIG } from '../config/supabase-auth.config';
 import {
   SupabaseAuthConfig,
   SupabaseUser,
-  SocialAuthProvider,
+  AuthProvider,
   PasswordResetRequest,
   UpdatePasswordRequest,
   UserProfileUpdate,
   AuthMode,
   ElectronAuthResult,
+  SocialAuthProvider,
 } from '../models/auth.models';
 
 /**

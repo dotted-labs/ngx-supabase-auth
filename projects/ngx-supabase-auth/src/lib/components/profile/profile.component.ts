@@ -4,7 +4,6 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { UserProfileUpdate, SupabaseUser } from '../../models/auth.models';
 import { AuthStore } from '../../store/auth.store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { SupabaseAuthService } from '../../services/auth.service';
 
 /**
  * User profile component for managing user information
@@ -80,17 +79,12 @@ export class ProfileComponent implements OnInit {
   /**
    * Auth store instance
    */
-  public authStore = inject(AuthStore);
-
-  /**
-   * Auth service for direct user data access
-   */
-  private authService = inject(SupabaseAuthService);
+  public readonly authStore = inject(AuthStore);
 
   /**
    * Form builder
    */
-  private fb = inject(FormBuilder);
+  private readonly fb = inject(FormBuilder);
 
   constructor() {
     this.profileForm = this.fb.group({
@@ -208,8 +202,8 @@ export class ProfileComponent implements OnInit {
           const fileName = `${Date.now()}.${fileExt}`;
           const filePath = `avatars/${userId}/${fileName}`;
 
-          // Upload the file and get its URL (loading is handled by updateProfile)
-          const { url, error } = await this.authService.uploadFile('avatars', filePath, file);
+          // Upload the file and get its URL (loading is handled by store)
+          const { url, error } = await this.authStore.uploadFile('avatars', filePath, file);
 
           if (error) {
             throw error;

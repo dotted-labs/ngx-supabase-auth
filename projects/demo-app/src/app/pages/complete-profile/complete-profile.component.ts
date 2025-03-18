@@ -2,9 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { SupabaseAuthService } from '@dotted-labs/ngx-supabase-auth';
-import { SUPABASE_AUTH_CONFIG } from '@dotted-labs/ngx-supabase-auth';
-import { UserProfileUpdate } from '@dotted-labs/ngx-supabase-auth';
+import { AuthStore, SUPABASE_AUTH_CONFIG, UserProfileUpdate } from '@dotted-labs/ngx-supabase-auth';
 
 @Component({
   selector: 'app-complete-profile-page',
@@ -62,7 +60,7 @@ import { UserProfileUpdate } from '@dotted-labs/ngx-supabase-auth';
   `,
 })
 export class CompleteProfilePageComponent {
-  private readonly authService = inject(SupabaseAuthService);
+  private readonly authStore = inject(AuthStore);
   private readonly router = inject(Router);
   private readonly config = inject(SUPABASE_AUTH_CONFIG);
 
@@ -99,12 +97,14 @@ export class CompleteProfilePageComponent {
         avatar_url: formValues.avatar_url || undefined,
       };
 
-      console.log('👤 [CompleteProfilePage] Calling update profile service with data:', profileData);
-      const { error } = await this.authService.updateProfile(profileData);
+      console.log('👤 [CompleteProfilePage] Calling update profile through store with data:', profileData);
+      await this.authStore.updateProfile(profileData);
 
-      if (error) {
-        console.error('[CompleteProfilePage] Error updating profile:', error);
-        this.error.set(error.message || 'Failed to update profile');
+      // Check for errors in the store
+      const storeError = this.authStore.error();
+      if (storeError) {
+        console.error('[CompleteProfilePage] Error updating profile:', storeError);
+        this.error.set(typeof storeError === 'string' ? storeError : 'Failed to update profile');
         this.loading.set(false);
         return;
       }
@@ -114,7 +114,7 @@ export class CompleteProfilePageComponent {
       // Redirect to the main dashboard
       const redirectPath = this.config.redirectAfterLogin || '/';
       console.log(`🔄 [CompleteProfilePage] Redirecting to ${redirectPath}`);
-      this.router.navigate([redirectPath]);
+      await this.router.navigate([redirectPath]);
     } catch (err) {
       console.error('[CompleteProfilePage] Exception during profile update:', err);
       this.error.set('An unexpected error occurred');

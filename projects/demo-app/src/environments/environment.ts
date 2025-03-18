@@ -1,36 +1,16 @@
-import { AuthProvider } from 'ngx-supabase-auth';
-
 // Default environment configuration with placeholder values for sensitive data
-const defaultEnvironment = {
+export const environment = {
   production: false,
   supabase: {
-    url: 'https://example.supabase.co',
-    key: 'your-supabase-key',
+    url: 'https://chayrsrhmqflptnwdhuu.supabase.co',
+    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoYXlyc3JobXFmbHB0bndkaHV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQwMDQyNTQsImV4cCI6MjAzOTU4MDI1NH0.wyOS8cwL9i1NN2-OAt5uqC3U-1MgZX9Aix0dfvrZQBE',
   },
   auth: {
     redirectAfterLogin: '/dashboard',
     redirectAfterLogout: '/login',
     authRequiredRedirect: '/login',
     authRedirectIfAuthenticated: '/dashboard',
-    enabledAuthProviders: [AuthProvider.EMAIL_PASSWORD, AuthProvider.GOOGLE],
     firstTimeProfileRedirect: '/complete-profile',
     firstTimeCheckEndpoint: 'https://api.example.com/check-first-time',
   },
-};
-
-// Try to import local environment if it exists
-let localEnvironment = {};
-try {
-  // This import is dynamically handled during build
-  // The file is optional and excluded from git
-  // tslint:disable-next-line: no-var-requires
-  localEnvironment = require('./environment.local').environment;
-} catch (e) {
-  console.log('No local environment found. Using default values.');
-}
-
-// Merge the default and local environments, with local taking precedence
-export const environment = {
-  ...defaultEnvironment,
-  ...localEnvironment,
 };

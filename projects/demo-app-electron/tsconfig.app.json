@@ -9,6 +9,6 @@
       "@dotted-labs/ngx-supabase-auth": ["../../dist/ngx-supabase-auth"]
     }
   },
-  "files": ["src/main.ts"],
+  "files": ["src/main.ts", "src/environments/environment.local.ts"],
   "include": ["src/**/*.d.ts"]
 }

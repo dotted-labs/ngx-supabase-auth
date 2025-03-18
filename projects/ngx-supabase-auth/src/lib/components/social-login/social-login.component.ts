@@ -1,8 +1,8 @@
-import { Component, inject, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { SUPABASE_AUTH_CONFIG } from '../../config/supabase-auth.config';
 import { AuthProvider, SocialAuthProvider } from '../../models/auth.models';
 import { AuthStore } from '../../store/auth.store';
-import { SUPABASE_AUTH_CONFIG } from '../../config/supabase-auth.config';
 
 /**
  * Social login component to handle social authentication
@@ -31,11 +31,6 @@ export class SocialLoginComponent {
   public SocialAuthProvider = SocialAuthProvider;
 
   /**
-   * Auth provider enum
-   */
-  public AuthProvider = AuthProvider;
-
-  /**
    * Providers enabled from configuration
    */
   public enabledProviders: AuthProvider[] = [];
@@ -49,8 +44,8 @@ export class SocialLoginComponent {
    * Login with a social provider
    * @param provider Social auth provider
    */
-  public loginWithSocialProvider(provider: AuthProvider | SocialAuthProvider): void {
-    this.authStore.signInWithSocialProvider(provider as SocialAuthProvider);
+  public loginWithSocialProvider(provider: SocialAuthProvider): void {
+    this.authStore.signInWithSocialProvider(provider);
   }
 
   /**
@@ -58,8 +53,8 @@ export class SocialLoginComponent {
    * @param provider Auth provider
    * @returns True if the provider is enabled, false otherwise
    */
-  public isProviderEnabled(provider: AuthProvider): boolean {
-    return this.enabledProviders.includes(provider);
+  public isProviderEnabled(provider: SocialAuthProvider | AuthProvider): boolean {
+    return this.enabledProviders.includes(provider as AuthProvider);
   }
 
   /**

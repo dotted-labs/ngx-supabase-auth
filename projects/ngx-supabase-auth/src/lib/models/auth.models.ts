@@ -100,12 +100,10 @@ export interface AuthState {
   loading: boolean;
   error: string | null;
 }
-
 /**
- * Auth providers enum
+ * Social auth providers enum
  */
-export enum AuthProvider {
-  EMAIL_PASSWORD = 'email_password',
+export enum SocialAuthProvider {
   GOOGLE = 'google',
   FACEBOOK = 'facebook',
   TWITTER = 'twitter',
@@ -113,11 +111,8 @@ export enum AuthProvider {
   DISCORD = 'discord',
 }
 
-/**
- * Social auth providers enum
- * @deprecated Use AuthProvider instead
- */
-export enum SocialAuthProvider {
+export enum AuthProvider {
+  EMAIL_PASSWORD = 'email_password',
   GOOGLE = 'google',
   FACEBOOK = 'facebook',
   TWITTER = 'twitter',

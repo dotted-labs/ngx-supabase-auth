@@ -117,8 +117,8 @@ export class SignupComponent implements OnInit {
    * Signup with a social provider
    * @param provider Social auth provider
    */
-  public signupWithSocialProvider(provider: AuthProvider | SocialAuthProvider): void {
-    this.authStore.signInWithSocialProvider(provider as SocialAuthProvider);
+  public signupWithSocialProvider(provider: SocialAuthProvider): void {
+    this.authStore.signInWithSocialProvider(provider);
   }
 
   /**

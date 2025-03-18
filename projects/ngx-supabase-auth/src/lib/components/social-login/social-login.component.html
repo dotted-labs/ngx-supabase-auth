@@ -1,11 +1,11 @@
 @if (hasSocialProviders()) {
   <div class="mt-6">
     <div class="grid grid-cols-1 gap-3">
-      @if (isProviderEnabled(AuthProvider.GOOGLE)) {
+      @if (isProviderEnabled(SocialAuthProvider.GOOGLE)) {
         <button
           type="button"
           class="btn btn-outline"
-          (click)="loginWithSocialProvider(AuthProvider.GOOGLE)"
+          (click)="loginWithSocialProvider(SocialAuthProvider.GOOGLE)"
           [disabled]="authStore.loading()"
         >
           <span class="flex items-center justify-center">
@@ -19,11 +19,11 @@
           </span>
         </button>
       }
-      @if (isProviderEnabled(AuthProvider.FACEBOOK)) {
+      @if (isProviderEnabled(SocialAuthProvider.FACEBOOK)) {
         <button
           type="button"
           class="btn btn-outline"
-          (click)="loginWithSocialProvider(AuthProvider.FACEBOOK)"
+          (click)="loginWithSocialProvider(SocialAuthProvider.FACEBOOK)"
           [disabled]="authStore.loading()"
         >
           <span class="flex items-center justify-center">
@@ -37,11 +37,11 @@
           </span>
         </button>
       }
-      @if (isProviderEnabled(AuthProvider.GITHUB)) {
+      @if (isProviderEnabled(SocialAuthProvider.GITHUB)) {
         <button
           type="button"
           class="btn btn-outline"
-          (click)="loginWithSocialProvider(AuthProvider.GITHUB)"
+          (click)="loginWithSocialProvider(SocialAuthProvider.GITHUB)"
           [disabled]="authStore.loading()"
         >
           <span class="flex items-center justify-center">
@@ -55,11 +55,11 @@
           </span>
         </button>
       }
-      @if (isProviderEnabled(AuthProvider.TWITTER)) {
+      @if (isProviderEnabled(SocialAuthProvider.TWITTER)) {
         <button
           type="button"
           class="btn btn-outline"
-          (click)="loginWithSocialProvider(AuthProvider.TWITTER)"
+          (click)="loginWithSocialProvider(SocialAuthProvider.TWITTER)"
           [disabled]="authStore.loading()"
         >
           <span class="flex items-center justify-center">
@@ -73,11 +73,11 @@
           </span>
         </button>
       }
-      @if (isProviderEnabled(AuthProvider.DISCORD)) {
+      @if (isProviderEnabled(SocialAuthProvider.DISCORD)) {
         <button
           type="button"
           class="btn btn-outline"
-          (click)="loginWithSocialProvider(AuthProvider.DISCORD)"
+          (click)="loginWithSocialProvider(SocialAuthProvider.DISCORD)"
           [disabled]="authStore.loading()"
         >
           <span class="flex items-center justify-center">

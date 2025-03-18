@@ -2,7 +2,7 @@ import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { routes } from './app.routes';
-import { provideSupabaseAuth } from 'ngx-supabase-auth';
+import { AuthProvider, provideSupabaseAuth } from '@dotted-labs/ngx-supabase-auth';
 import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
@@ -16,7 +16,7 @@ export const appConfig: ApplicationConfig = {
       redirectAfterLogout: environment.auth.redirectAfterLogout,
       authRequiredRedirect: environment.auth.authRequiredRedirect,
       authRedirectIfAuthenticated: environment.auth.authRedirectIfAuthenticated,
-      enabledAuthProviders: environment.auth.enabledAuthProviders,
+      enabledAuthProviders: [AuthProvider.EMAIL_PASSWORD, AuthProvider.GOOGLE, AuthProvider.GITHUB],
       isElectronMode: environment.electron.isElectronMode,
       webAppAuthUrl: environment.electron.webAppAuthUrl,
       electronDeepLinkProtocol: environment.electron.deepLinkProtocol,

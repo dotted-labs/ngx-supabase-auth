@@ -5,6 +5,7 @@ import { fromPromise } from 'rxjs/internal/observable/innerFrom';
 import { HttpClient } from '@angular/common/http';
 import { SupabaseAuthService } from '../services/auth.service';
 import { SUPABASE_AUTH_CONFIG } from '../config/supabase-auth.config';
+import { AuthStore } from '../store/auth.store';
 
 /**
  * Type for FirstTimeProfileGuard Route Data
@@ -21,7 +22,7 @@ export interface FirstTimeProfileGuardData {
  * and redirects to the profile completion page if needed
  */
 export const firstTimeProfileGuard: CanActivateFn = (route, state) => {
-  const authService = inject(SupabaseAuthService);
+  const authStore = inject(AuthStore);
   const router = inject(Router);
   const config = inject(SUPABASE_AUTH_CONFIG);
   const http = inject(HttpClient);
@@ -39,7 +40,7 @@ export const firstTimeProfileGuard: CanActivateFn = (route, state) => {
     return of(true);
   }
 
-  return fromPromise(authService.isAuthenticated()).pipe(
+  return fromPromise(authStore.checkAuth()).pipe(
     switchMap((isAuthenticated) => {
       // If not authenticated, proceed normally (auth guard will handle this case)
       if (!isAuthenticated) {
@@ -47,34 +48,30 @@ export const firstTimeProfileGuard: CanActivateFn = (route, state) => {
         return of(true);
       }
 
-      return fromPromise(authService.getCurrentUser()).pipe(
-        switchMap((user) => {
-          if (!user) {
-            console.log('[FirstTimeProfileGuard] No user found, skipping check');
-            return of(true);
+      if (!authStore.user()) {
+        console.log('[FirstTimeProfileGuard] No user found, skipping check');
+        return of(true);
+      }
+
+      console.log(`[FirstTimeProfileGuard] Checking first-time status for user ${authStore.user()?.id}`);
+
+      // Call the endpoint to check if it's the first time
+      return http.get<boolean>(`${config.firstTimeCheckEndpoint}?userId=${authStore.user()?.id}`).pipe(
+        map((isFirstTime) => {
+          // If it's the first time, redirect to complete profile
+          if (isFirstTime) {
+            console.log(`[FirstTimeProfileGuard] First time detected, redirecting to ${redirectPath}`);
+            return router.parseUrl(redirectPath);
           }
 
-          console.log(`[FirstTimeProfileGuard] Checking first-time status for user ${user.id}`);
-
-          // Call the endpoint to check if it's the first time
-          return http.get<boolean>(`${config.firstTimeCheckEndpoint}?userId=${user.id}`).pipe(
-            map((isFirstTime) => {
-              // If it's the first time, redirect to complete profile
-              if (isFirstTime) {
-                console.log(`[FirstTimeProfileGuard] First time detected, redirecting to ${redirectPath}`);
-                return router.parseUrl(redirectPath);
-              }
-
-              console.log('[FirstTimeProfileGuard] Not first time, proceeding normally');
-              return true;
-            }),
-            catchError((error) => {
-              console.error('[FirstTimeProfileGuard] Error checking first time status:', error);
-              // On error, treat as first time user and redirect
-              console.log(`[FirstTimeProfileGuard] Error detected, treating as first time user, redirecting to ${redirectPath}`);
-              return of(router.parseUrl(redirectPath));
-            }),
-          );
+          console.log('[FirstTimeProfileGuard] Not first time, proceeding normally');
+          return true;
+        }),
+        catchError((error) => {
+          console.error('[FirstTimeProfileGuard] Error checking first time status:', error);
+          // On error, treat as first time user and redirect
+          console.log(`[FirstTimeProfileGuard] Error detected, treating as first time user, redirecting to ${redirectPath}`);
+          return of(router.parseUrl(redirectPath));
         }),
       );
     }),
@@ -91,7 +88,7 @@ export const firstTimeProfileGuard: CanActivateFn = (route, state) => {
  * Route matcher guard that checks if the user is accessing the system for the first time
  */
 export const firstTimeProfileMatch: CanMatchFn = (route, segments) => {
-  const authService = inject(SupabaseAuthService);
+  const authStore = inject(AuthStore);
   const router = inject(Router);
   const config = inject(SUPABASE_AUTH_CONFIG);
   const http = inject(HttpClient);
@@ -107,7 +104,7 @@ export const firstTimeProfileMatch: CanMatchFn = (route, segments) => {
     return of(true);
   }
 
-  return fromPromise(authService.isAuthenticated()).pipe(
+  return fromPromise(authStore.checkAuth()).pipe(
     switchMap((isAuthenticated) => {
       // If not authenticated, proceed normally (auth guard will handle this case)
       if (!isAuthenticated) {
@@ -115,34 +112,30 @@ export const firstTimeProfileMatch: CanMatchFn = (route, segments) => {
         return of(true);
       }
 
-      return fromPromise(authService.getCurrentUser()).pipe(
-        switchMap((user) => {
-          if (!user) {
-            console.log('[FirstTimeProfileMatch] No user found, skipping check');
-            return of(true);
+      if (!authStore.user()) {
+        console.log('[FirstTimeProfileMatch] No user found, skipping check');
+        return of(true);
+      }
+
+      console.log(`[FirstTimeProfileMatch] Checking first-time status for user ${authStore.user()?.id}`);
+
+      // Call the endpoint to check if it's the first time
+      return http.get<boolean>(`${config.firstTimeCheckEndpoint}?userId=${authStore.user()?.id}`).pipe(
+        map((isFirstTime) => {
+          // If it's the first time, redirect to complete profile
+          if (isFirstTime) {
+            console.log(`[FirstTimeProfileMatch] First time detected, redirecting to ${redirectPath}`);
+            return router.parseUrl(redirectPath);
           }
 
-          console.log(`[FirstTimeProfileMatch] Checking first-time status for user ${user.id}`);
-
-          // Call the endpoint to check if it's the first time
-          return http.get<boolean>(`${config.firstTimeCheckEndpoint}?userId=${user.id}`).pipe(
-            map((isFirstTime) => {
-              // If it's the first time, redirect to complete profile
-              if (isFirstTime) {
-                console.log(`[FirstTimeProfileMatch] First time detected, redirecting to ${redirectPath}`);
-                return router.parseUrl(redirectPath);
-              }
-
-              console.log('[FirstTimeProfileMatch] Not first time, proceeding normally');
-              return true;
-            }),
-            catchError((error) => {
-              console.error('[FirstTimeProfileMatch] Error checking first time status:', error);
-              // On error, treat as first time user and redirect
-              console.log(`[FirstTimeProfileMatch] Error detected, treating as first time user, redirecting to ${redirectPath}`);
-              return of(router.parseUrl(redirectPath));
-            }),
-          );
+          console.log('[FirstTimeProfileMatch] Not first time, proceeding normally');
+          return true;
+        }),
+        catchError((error) => {
+          console.error('[FirstTimeProfileMatch] Error checking first time status:', error);
+          // On error, treat as first time user and redirect
+          console.log(`[FirstTimeProfileMatch] Error detected, treating as first time user, redirecting to ${redirectPath}`);
+          return of(router.parseUrl(redirectPath));
         }),
       );
     }),

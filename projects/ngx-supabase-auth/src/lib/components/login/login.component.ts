@@ -37,11 +37,6 @@ export class LoginComponent implements OnInit {
   public SocialAuthProvider = SocialAuthProvider;
 
   /**
-   * Auth provider enum
-   */
-  public AuthProvider = AuthProvider;
-
-  /**
    * Providers habilitados desde la configuración
    */
   public enabledProviders: AuthProvider[] = [];

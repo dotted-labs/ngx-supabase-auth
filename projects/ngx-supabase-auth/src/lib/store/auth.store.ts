@@ -1,19 +1,18 @@
-import { Injectable, inject, effect, DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DestroyRef, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { patchState, signalStore, withHooks, withMethods, withState } from '@ngrx/signals';
+import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
+import { SUPABASE_AUTH_CONFIG } from '../config/supabase-auth.config';
 import {
+  AuthMode,
+  AuthProvider,
   AuthState,
-  SocialAuthProvider,
-  SupabaseUser,
   PasswordResetRequest,
+  SocialAuthProvider,
   UpdatePasswordRequest,
   UserProfileUpdate,
-  AuthMode,
-  ElectronAuthResult,
 } from '../models/auth.models';
 import { SupabaseAuthService } from '../services/auth.service';
-import { SUPABASE_AUTH_CONFIG } from '../config/supabase-auth.config';
+import { computed } from '@angular/core';
 
 /**
  * Initial auth state
@@ -30,6 +29,9 @@ const initialState: AuthState = {
 export const AuthStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
+  withComputed((store) => ({
+    isAuthenticated: computed(() => !!store.user()),
+  })),
   withMethods(
     (
       store,
@@ -258,6 +260,42 @@ export const AuthStore = signalStore(
         },
 
         /**
+         * Upload a file to Supabase storage
+         * @param bucketName The storage bucket name
+         * @param filePath The file path within the bucket
+         * @param file The file to upload
+         * @returns Promise with the file URL or error
+         */
+        async uploadFile(bucketName: string, filePath: string, file: File) {
+          patchState(store, { loading: true, error: null });
+
+          try {
+            const { url, error } = await authService.uploadFile(bucketName, filePath, file);
+
+            if (error) {
+              patchState(store, {
+                loading: false,
+                error: error.message,
+              });
+              return { url: null, error };
+            }
+
+            patchState(store, {
+              loading: false,
+            });
+
+            return { url, error: null };
+          } catch (error) {
+            patchState(store, {
+              loading: false,
+              error: (error as Error).message,
+            });
+
+            return { url: null, error };
+          }
+        },
+
+        /**
          * Open external authentication window (for Electron mode)
          * @param path Authentication path
          * @param options Additional query parameters
@@ -346,6 +384,25 @@ export const AuthStore = signalStore(
               loading: false,
               error: (error as Error).message,
             });
+          }
+        },
+
+        /**
+         * Check if the user is authenticated
+         * @returns True if the user is authenticated, false otherwise
+         */
+        async checkAuth() {
+          patchState(store, { loading: true, error: null });
+
+          try {
+            const isAuthenticated = await authService.isAuthenticated();
+            return isAuthenticated;
+          } catch (error) {
+            patchState(store, {
+              loading: false,
+              error: (error as Error).message,
+            });
+            return false;
           }
         },
       };

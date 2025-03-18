@@ -1,6 +1,6 @@
 import { InjectionToken, Provider, EnvironmentProviders } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { SupabaseAuthConfig, AuthProvider } from '../models/auth.models';
+import { SupabaseAuthConfig, AuthProvider, SocialAuthProvider } from '../models/auth.models';
 
 /**
  * Injection token for Supabase Auth configuration

@@ -23,8 +23,9 @@ jobs:
       - name: Check for version change
         id: check
         run: |
-          git diff HEAD~1 HEAD -- projects/ngx-supabase-auth/package.json | grep '"version":'
-          if [ $? -eq 0 ]; then
+          # Store the diff result without failing if nothing is found
+          DIFF_RESULT=$(git diff HEAD~1 HEAD -- projects/ngx-supabase-auth/package.json | grep '"version":' || true)
+          if [ -n "$DIFF_RESULT" ]; then
             VERSION=$(grep '"version":' projects/ngx-supabase-auth/package.json | sed 's/.*"version": "\(.*\)",/\1/')
             echo "Version changed to: $VERSION"
             echo "version=$VERSION" >> $GITHUB_OUTPUT

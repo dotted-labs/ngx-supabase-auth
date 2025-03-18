@@ -9,7 +9,7 @@
       "@dotted-labs/ngx-supabase-auth": ["../ngx-supabase-auth/src/public-api"]
     }
   },
-  "files": ["src/main.ts", "src/environments/environment.local.ts"],
+  "files": ["src/main.ts"],
   "include": ["src/**/*.d.ts"],
   "exclude": ["src/**/*.spec.ts"]
 }

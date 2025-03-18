@@ -1,9 +1,8 @@
-import { inject } from '@angular/core';
-import { CanActivateFn, CanMatchFn, Router, UrlTree } from '@angular/router';
-import { Observable, map, catchError, of, switchMap } from 'rxjs';
-import { fromPromise } from 'rxjs/internal/observable/innerFrom';
 import { HttpClient } from '@angular/common/http';
-import { SupabaseAuthService } from '../services/auth.service';
+import { inject } from '@angular/core';
+import { CanActivateFn, CanMatchFn, Router } from '@angular/router';
+import { catchError, map, of, switchMap } from 'rxjs';
+import { fromPromise } from 'rxjs/internal/observable/innerFrom';
 import { SUPABASE_AUTH_CONFIG } from '../config/supabase-auth.config';
 import { AuthStore } from '../store/auth.store';
 
@@ -17,21 +16,12 @@ export interface FirstTimeProfileGuardData {
   firstTimeProfileRedirect?: string;
 }
 
-/**
- * Guard that checks if the user is accessing the system for the first time
- * and redirects to the profile completion page if needed
- */
-export const firstTimeProfileGuard: CanActivateFn = (route, state) => {
+const createFirstTimeProfileGuard = (routeData?: FirstTimeProfileGuardData) => {
   const authStore = inject(AuthStore);
   const router = inject(Router);
   const config = inject(SUPABASE_AUTH_CONFIG);
   const http = inject(HttpClient);
 
-  // Log the guard execution
-  console.log('[FirstTimeProfileGuard] Checking if user needs to complete profile');
-
-  // Get the custom redirect path from route data or use the default
-  const routeData = route.data as FirstTimeProfileGuardData;
   const redirectPath = routeData?.firstTimeProfileRedirect || config.firstTimeProfileRedirect || '/complete-profile';
 
   // If no endpoint is configured, skip the check
@@ -85,65 +75,16 @@ export const firstTimeProfileGuard: CanActivateFn = (route, state) => {
 };
 
 /**
+ * Guard that checks if the user is accessing the system for the first time
+ * and redirects to the profile completion page if needed
+ */
+export const firstTimeProfileGuard: CanActivateFn = (route, state) => {
+  return createFirstTimeProfileGuard(route.data as FirstTimeProfileGuardData);
+};
+
+/**
  * Route matcher guard that checks if the user is accessing the system for the first time
  */
 export const firstTimeProfileMatch: CanMatchFn = (route, segments) => {
-  const authStore = inject(AuthStore);
-  const router = inject(Router);
-  const config = inject(SUPABASE_AUTH_CONFIG);
-  const http = inject(HttpClient);
-
-  // Log the guard execution
-  console.log('[FirstTimeProfileMatch] Checking if user needs to complete profile');
-
-  const redirectPath = config.firstTimeProfileRedirect || '/complete-profile';
-
-  // If no endpoint is configured, skip the check
-  if (!config.firstTimeCheckEndpoint) {
-    console.log('[FirstTimeProfileMatch] No endpoint configured, skipping check');
-    return of(true);
-  }
-
-  return fromPromise(authStore.checkAuth()).pipe(
-    switchMap((isAuthenticated) => {
-      // If not authenticated, proceed normally (auth guard will handle this case)
-      if (!isAuthenticated) {
-        console.log('[FirstTimeProfileMatch] User not authenticated, skipping check');
-        return of(true);
-      }
-
-      if (!authStore.user()) {
-        console.log('[FirstTimeProfileMatch] No user found, skipping check');
-        return of(true);
-      }
-
-      console.log(`[FirstTimeProfileMatch] Checking first-time status for user ${authStore.user()?.id}`);
-
-      // Call the endpoint to check if it's the first time
-      return http.get<boolean>(`${config.firstTimeCheckEndpoint}?userId=${authStore.user()?.id}`).pipe(
-        map((isFirstTime) => {
-          // If it's the first time, redirect to complete profile
-          if (isFirstTime) {
-            console.log(`[FirstTimeProfileMatch] First time detected, redirecting to ${redirectPath}`);
-            return router.parseUrl(redirectPath);
-          }
-
-          console.log('[FirstTimeProfileMatch] Not first time, proceeding normally');
-          return true;
-        }),
-        catchError((error) => {
-          console.error('[FirstTimeProfileMatch] Error checking first time status:', error);
-          // On error, treat as first time user and redirect
-          console.log(`[FirstTimeProfileMatch] Error detected, treating as first time user, redirecting to ${redirectPath}`);
-          return of(router.parseUrl(redirectPath));
-        }),
-      );
-    }),
-    catchError((error) => {
-      console.error('[FirstTimeProfileMatch] Error in guard execution:', error);
-      // In case of error, treat as first time user
-      console.log(`[FirstTimeProfileMatch] Fatal error detected, treating as first time user, redirecting to ${redirectPath}`);
-      return of(router.parseUrl(redirectPath));
-    }),
-  );
+  return createFirstTimeProfileGuard(route.data as FirstTimeProfileGuardData);
 };

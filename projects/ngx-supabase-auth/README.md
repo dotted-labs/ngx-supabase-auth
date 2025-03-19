@@ -4,14 +4,15 @@ An Angular library for handling authentication with Supabase. This library provi
 
 ## Features
 
-- 🔑 Authentication components (Login, Signup, Password Reset, Profile)
-- 🔒 Authentication guards for route protection
+- 🔑 Authentication components (Login, Signup, Password Reset, Profile, Profile Completion)
+- 🔒 Authentication guards for route protection (AuthGuard, UnauthGuard, FirstTimeProfileGuard)
 - 📊 State management using ngrx/signals
 - 🌈 Social login support (Google, Facebook, Twitter, GitHub, Discord)
 - 📱 Responsive design with Tailwind CSS and DaisyUI (not required - components will use your project's theme if available)
-- 🎨 Customizable components
+- 🎨 Customizable components with Signal-based inputs
 - 📝 TypeScript types for all features
 - 🖥️ Electron support for desktop applications
+- 👤 User onboarding flow with first-time profile completion
 
 ## Installation
 
@@ -29,7 +30,7 @@ First, configure the library in your `app.config.ts`:
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { provideSupabaseAuth } from '@dotted-labs/ngx-supabase-auth';
+import { AuthProvider, provideSupabaseAuth } from '@dotted-labs/ngx-supabase-auth';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -40,8 +41,11 @@ export const appConfig: ApplicationConfig = {
       redirectAfterLogin: '/dashboard',
       redirectAfterLogout: '/login',
       authRequiredRedirect: '/login',
-      authRedirectIfAuthenticated: '/dashboard',
-      enabledAuthProviders: ['email_password', 'google', 'github'],
+      authRedirectIfAuthenticated: '/dashboard', 
+      enabledAuthProviders: [AuthProvider.EMAIL_PASSWORD, AuthProvider.GOOGLE],
+      // First-time user configuration
+      firstTimeProfileRedirect: '/complete-profile',
+      skipFirstTimeCheck: false,
     }),
   ],
 };
@@ -55,7 +59,7 @@ For Electron applications, additional configuration is needed to handle the auth
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { provideSupabaseAuth } from '@dotted-labs/ngx-supabase-auth';
+import { AuthProvider, provideSupabaseAuth } from '@dotted-labs/ngx-supabase-auth';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -67,7 +71,7 @@ export const appConfig: ApplicationConfig = {
       redirectAfterLogout: '/login',
       authRequiredRedirect: '/login',
       authRedirectIfAuthenticated: '/dashboard',
-      enabledAuthProviders: ['email_password', 'google', 'github'],
+      enabledAuthProviders: [AuthProvider.EMAIL_PASSWORD, AuthProvider.GOOGLE], 
 
       // Enable Electron mode
       isElectronMode: true,
@@ -202,16 +206,87 @@ import { ProfileComponent } from '@dotted-labs/ngx-supabase-auth';
 export class ProfilePageComponent {}
 ```
 
-### 5. Set Up Routes
+### 5. Create Complete Profile Page (for first-time users)
+
+```typescript
+import { Component, inject, signal } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { AuthStore, SUPABASE_AUTH_CONFIG, UserProfileUpdate } from '@dotted-labs/ngx-supabase-auth';
+
+@Component({
+  selector: 'app-complete-profile-page',
+  imports: [CommonModule, ReactiveFormsModule],
+  template: `
+    <div class="container mx-auto p-4">
+      <div class="card bg-base-100 shadow-xl max-w-md mx-auto">
+        <div class="card-body">
+          <h1 class="card-title text-2xl">Complete Your Profile</h1>
+          
+          <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+            <div class="form-control mb-4">
+              <label class="label">
+                <span class="label-text">Full Name</span>
+              </label>
+              <input type="text" formControlName="name" class="input input-bordered" />
+            </div>
+            
+            <div class="form-control mb-6">
+              <label class="label">
+                <span class="label-text">Profile Picture URL (optional)</span>
+              </label>
+              <input type="text" formControlName="avatar_url" class="input input-bordered" />
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-full" [disabled]="profileForm.invalid">
+              Save Profile
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  `
+})
+export class CompleteProfilePageComponent {
+  private readonly authStore = inject(AuthStore);
+  private readonly router = inject(Router);
+  private readonly config = inject(SUPABASE_AUTH_CONFIG);
+  
+  protected readonly profileForm = new FormGroup({
+    name: new FormControl('', [Validators.required]),
+    avatar_url: new FormControl('')
+  });
+  
+  protected async onSubmit(): Promise<void> {
+    if (this.profileForm.invalid) return;
+    
+    const formValues = this.profileForm.value;
+    const profileData: UserProfileUpdate = {
+      name: formValues.name || undefined,
+      avatar_url: formValues.avatar_url || undefined
+    };
+    
+    await this.authStore.updateProfile(profileData);
+    
+    // Navigate to the main app
+    const redirectPath = this.config.redirectAfterLogin || '/';
+    await this.router.navigate([redirectPath]);
+  }
+}
+```
+
+### 6. Set Up Routes
 
 ```typescript
 import { Routes } from '@angular/router';
-import { LoginPageComponent } from './pages/login-page.component';
-import { SignupPageComponent } from './pages/signup-page.component';
-import { PasswordResetPageComponent } from './pages/password-reset-page.component';
-import { ProfilePageComponent } from './pages/profile-page.component';
-import { DashboardComponent } from './pages/dashboard.component';
-import { authGuard, unauthGuard } from '@dotted-labs/ngx-supabase-auth';
+import { LoginPageComponent } from './pages/login/login.component';
+import { SignupPageComponent } from './pages/signup/signup.component';
+import { PasswordResetPageComponent } from './pages/password-reset/password-reset.component';
+import { ProfilePageComponent } from './pages/profile/profile.component';
+import { CompleteProfilePageComponent } from './pages/complete-profile/complete-profile.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { authGuard, unauthGuard, firstTimeProfileGuard } from '@dotted-labs/ngx-supabase-auth';
 
 export const routes: Routes = [
   {
@@ -230,6 +305,11 @@ export const routes: Routes = [
     canActivate: [unauthGuard],
   },
   {
+    path: 'complete-profile',
+    component: CompleteProfilePageComponent,
+    canActivate: [authGuard],
+  },
+  {
     path: 'profile',
     component: ProfilePageComponent,
     canActivate: [authGuard],
@@ -237,7 +317,7 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardComponent,
-    canActivate: [authGuard],
+    canActivate: [authGuard, firstTimeProfileGuard],
   },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
 ];
@@ -252,6 +332,27 @@ This library uses Tailwind CSS and DaisyUI for styling its components, but neith
 - If you don't have either installed, the components will still work with their default styling
 
 The styling is designed to be non-intrusive and integrates seamlessly with your existing design system.
+
+## Customizing Components
+
+All components provide customization options using Angular signal-based inputs:
+
+```typescript
+// Example of customizing the Profile component
+@Component({
+  selector: 'app-profile',
+  imports: [ProfileComponent],
+  template: `
+    <sup-profile 
+      [showAvatarSection]="false"
+      [showPasswordSection]="true"
+      [showSignOut]="true" 
+      [allowEmailChange]="false">
+    </sup-profile>
+  `,
+})
+export class CustomProfileComponent {}
+```
 
 ## Electron Integration
 
@@ -347,9 +448,13 @@ import { AuthStore } from '@dotted-labs/ngx-supabase-auth';
   selector: 'app-auth-handler',
   template: `
     <div class="auth-handler">
-      <div *ngIf="store.loading()">Verifying authentication...</div>
-      <div *ngIf="store.error()">{{ store.error() }}</div>
-      <div *ngIf="store.user()">Authentication successful!</div>
+      @if (store.loading()) {
+        <div>Verifying authentication...</div>
+      } @else if (store.error()) {
+        <div>{{ store.error() }}</div>
+      } @else if (store.user()) {
+        <div>Authentication successful!</div>
+      }
     </div>
   `,
 })
@@ -389,3 +494,4 @@ export class AuthHandlerComponent implements OnInit {
 ## License
 
 MIT
+

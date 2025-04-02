@@ -10,7 +10,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "ngx-supabase-auth": [
+      "@dotted-labs/ngx-supabase-auth": [
         "./dist/ngx-supabase-auth"
       ]
     },

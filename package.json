@@ -3,16 +3,19 @@
   "version": "0.0.3",
   "scripts": {
     "ng": "ng",
-    "start": "concurrently \"npm run start:demo-app\" \"npm run start:demo-app-electron\"",
+    "start": "concurrently \"npm run start:demo-app\" \"npm run start:demo-app-electron\" \"npm run start:demo-server\"",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "build:lib": "ng build ngx-supabase-auth --project ngx-supabase-auth",
+    "build:lib": "ng build ngx-supabase-auth --project ngx-supabase-auth && npm run copy:readme",
     "start:demo-app": "ng serve demo-app",
-    "start:demo-app-electron": "concurrently \"ng serve demo-app-electron\" \"wait-on http://localhost:4300 && node projects/demo-app-electron/electron/electron.js\""
+    "start:demo-app-electron": "concurrently \"ng serve demo-app-electron\" \"wait-on http://localhost:4300 && node projects/demo-app-electron/electron/electron.js\"",
+    "start:demo-server": "node projects/demo-server/main.js",
+    "copy:readme": "cp README.md dist/ngx-supabase-auth/"
   },
   "private": false,
   "dependencies": {
+    "@angular-architects/ngrx-toolkit": "^19.1.0",
     "@angular/common": "^19.2.0",
     "@angular/compiler": "^19.2.0",
     "@angular/core": "^19.2.0",
@@ -28,10 +31,12 @@
     "rxjs": "~7.8.0",
     "tailwindcss": "^4.0.12",
     "tslib": "^2.3.0",
-    "zone.js": "~0.15.0"
+    "zone.js": "~0.15.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2"
   },
   "devDependencies": {
-    "wait-on": "^8.0.3",
     "@angular-builders/custom-webpack": "^19.0.0",
     "@angular-devkit/build-angular": "^19.2.0",
     "@angular/cli": "^19.2.0",
@@ -53,6 +58,7 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "ng-packagr": "^19.2.0",
     "postcss": "^8.5.3",
-    "typescript": "~5.5.0"
+    "typescript": "~5.5.0",
+    "wait-on": "^8.0.3"
   }
 }

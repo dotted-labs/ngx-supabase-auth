@@ -54,6 +54,11 @@ export interface SupabaseAuthConfig {
   firstTimeCheckEndpoint?: string | null;
 
   /**
+   * Endpoint URL to generate magic link
+   */
+  generateMagicLinkEndpoint?: string | null;
+
+  /**
    * Skip the first-time user check and always treat users as returning users
    * When true, the firstTimeCheckEndpoint will not be called
    */

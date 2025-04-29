@@ -1,72 +1,25 @@
-<!-- Social Logins -->
-<sup-social-login />
+<main class="container mx-auto p-4">
+  <section class="card w-96 bg-base-100 shadow-xl mx-auto my-8">
+    <div class="card-body">
+      <h2 class="card-title">Autenticación de Electron</h2>
 
-<!-- Email Login Form -->
-@if (showEmailPasswordForm()) {
-  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form-control flex flex-col gap-4 mb-6">
-    <div class="form-control w-full flex flex-col gap-2">
-      <label for="email" class="label">
-        <span class="label-text">Email</span>
-      </label>
-      <input type="email" id="email" formControlName="email" placeholder="Email" autocomplete="email" class="input input-bordered w-full" />
-      @if (loginForm.get('email')?.invalid && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)) {
-        <div class="text-error text-sm mt-1">
-          @if (loginForm.get('email')?.errors?.['required']) {
-            <span>Email is required</span>
-          }
-          @if (loginForm.get('email')?.errors?.['email']) {
-            <span>Please enter a valid email</span>
-          }
-        </div>
+      @if (store.loading()) {
+        <div class="alert">Verificando autenticación...</div>
       }
-    </div>
 
-    <div class="form-control w-full flex flex-col gap-2">
-      <label for="password" class="label flex justify-between">
-        <span class="label-text">Password</span>
-        <div class="flex justify-end">
-          <a (click)="forgotPassword.emit()" class="link link-primary text-sm">Forgot Password?</a>
-        </div>
-      </label>
-      <input
-        type="password"
-        id="password"
-        formControlName="password"
-        placeholder="Password"
-        autocomplete="current-password"
-        class="input input-bordered w-full"
-      />
-      @if (loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)) {
-        <div class="text-error text-sm mt-1">
-          @if (loginForm.get('password')?.errors?.['required']) {
-            <span>Password is required</span>
-          }
-          @if (loginForm.get('password')?.errors?.['minlength']) {
-            <span>Password must be at least 6 characters</span>
-          }
-        </div>
+      @if (store.error()) {
+        <div class="alert alert-error">{{ store.error() }}</div>
       }
-    </div>
 
-    @if (authStore.error()) {
-      <div class="text-error text-sm">
-        {{ authStore.error() }}
+      @if (store.user() && !store.loading() && !store.error()) {
+        <div class="alert alert-success">¡Autenticación exitosa!</div>
+        <p>Bienvenido, {{ store.user()?.email }}</p>
+      }
+
+      <div class="card-actions justify-end">
+        <button class="btn btn-primary" (click)="login()">Iniciar sesión</button>
+        <button class="btn btn-secondary" (click)="signup()">Registrarse</button>
       </div>
-    }
-
-    <button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid || authStore.loading()">
-      @if (!authStore.loading()) {
-        <span>Login</span>
-      } @else {
-        <span class="loading loading-spinner loading-sm"></span>
-        <span>Loading</span>
-      }
-    </button>
-  </form>
-}
-
-<!-- Signup Link -->
-<div class="flex justify-center mt-2 gap-2 text-sm">
-  <span class="text-base-content/70">Don't have an account?</span>
-  <a (click)="onGoToSignup()" class="text-base-content cursor-pointer underline"> Sign Up</a>
-</div>
+    </div>
+  </section>
+</main>

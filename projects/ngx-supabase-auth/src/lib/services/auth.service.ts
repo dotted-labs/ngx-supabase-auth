@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -27,6 +27,7 @@ export class SupabaseAuthService {
   private readonly config = inject(SUPABASE_AUTH_CONFIG);
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
+  private readonly redirectToDesktopAfterLogin = signal(false);
 
   constructor() {
     console.log('[SupabaseAuthService] Initializing service');
@@ -36,10 +37,20 @@ export class SupabaseAuthService {
     this.supabase.auth.onAuthStateChange((_, session) => {
       if (session) {
         console.log('🔐 [SupabaseAuthService] Auth state changed, session exists');
+        // this.handleAuthRedirect(session.user.id);
       } else {
         console.log('🔐 [SupabaseAuthService] Auth state changed, no session');
       }
     });
+  }
+
+  setRedirectToDesktopAfterLogin(redirect: boolean) {
+    if (redirect) {
+      localStorage.setItem('redirectToDesktopAfterLogin', 'true');
+    } else {
+      localStorage.removeItem('redirectToDesktopAfterLogin');
+    }
+    this.redirectToDesktopAfterLogin.set(redirect);
   }
 
   /**
@@ -125,6 +136,10 @@ export class SupabaseAuthService {
 
       // Regular authentication flow
       if (this.config.redirectAfterLogin) {
+        if (this.redirectToDesktopAfterLogin()) {
+          console.log(`🔄 [SupabaseAuthService] Redirecting to desktop after login`);
+          await this.handleElectronAuth();
+        }
         console.log(`🔄 [SupabaseAuthService] Regular auth redirect to ${this.config.redirectAfterLogin}`);
         await this.router.navigate([this.config.redirectAfterLogin]);
       }
@@ -183,17 +198,20 @@ export class SupabaseAuthService {
   /**
    * Verifies a hashed token received from the web application
    * This is used in the Electron flow after the user completes authentication in browser
-   * @param hashedToken The hashed token received via deep link
+   * @param accessToken The hashed token received via deep link
    * @returns Promise with user data or error
    */
   async verifyHashedToken(hashedToken: string): Promise<{ user: SupabaseUser | null; error: Error | null }> {
     console.log('🔑 [SupabaseAuthService] Verifying hashed token');
 
     try {
+      console.log('🔑 [SupabaseAuthService] Verifying hashed token', hashedToken);
       const { data, error } = await this.supabase.auth.verifyOtp({
         token_hash: hashedToken,
         type: 'email',
       });
+
+      console.log('🔑 [SupabaseAuthService] Verifying hashed token', data, error);
 
       if (error) {
         console.error('❌ [SupabaseAuthService] Failed to verify hashed token', error);
@@ -214,7 +232,6 @@ export class SupabaseAuthService {
       return { user: null, error: error as Error };
     }
   }
-
   /**
    * Process the auth result from deep link (for Electron mode)
    * @param url The deep link URL containing authentication parameters
@@ -254,21 +271,6 @@ export class SupabaseAuthService {
   async signInWithEmail(email: string, password: string): Promise<{ user: SupabaseUser | null; error: Error | null }> {
     console.log('🔐 [SupabaseAuthService] Signing in with email');
 
-    // Check if we're in Electron mode
-    if (this.getAuthMode() === AuthMode.ELECTRON) {
-      try {
-        // In Electron mode, we open the external auth window instead
-        await this.openExternalAuthWindow('login', { email });
-
-        // In a real implementation, the Electron app would wait for the deep link callback
-        // Here we just return a placeholder result as the actual auth will happen asynchronously
-        return { user: null, error: null };
-      } catch (error) {
-        console.error('❌ [SupabaseAuthService] Failed to initiate Electron auth', error);
-        return { user: null, error: error as Error };
-      }
-    }
-
     // Original web authentication flow
     try {
       const { data, error } = await this.supabase.auth.signInWithPassword({
@@ -306,20 +308,6 @@ export class SupabaseAuthService {
   async signUpWithEmail(email: string, password: string): Promise<{ user: SupabaseUser | null; error: Error | null }> {
     console.log('📝 [SupabaseAuthService] Signing up with email');
 
-    // Check if we're in Electron mode
-    if (this.getAuthMode() === AuthMode.ELECTRON) {
-      try {
-        // In Electron mode, we open the external auth window instead
-        await this.openExternalAuthWindow('signup', { email });
-
-        // In a real implementation, the Electron app would wait for the deep link callback
-        return { user: null, error: null };
-      } catch (error) {
-        console.error('❌ [SupabaseAuthService] Failed to initiate Electron signup', error);
-        return { user: null, error: error as Error };
-      }
-    }
-
     // Original web signup flow
     try {
       const { data, error } = await this.supabase.auth.signUp({
@@ -355,20 +343,6 @@ export class SupabaseAuthService {
    */
   async signInWithSocialProvider(provider: SocialAuthProvider): Promise<{ error: Error | null }> {
     console.log(`🔐 [SupabaseAuthService] Signing in with ${provider}`);
-
-    // Check if we're in Electron mode
-    if (this.getAuthMode() === AuthMode.ELECTRON) {
-      try {
-        // In Electron mode, we open the external auth window instead
-        await this.openExternalAuthWindow('login', { provider });
-
-        // In a real implementation, the Electron app would wait for the deep link callback
-        return { error: null };
-      } catch (error) {
-        console.error(`❌ [SupabaseAuthService] Failed to initiate Electron auth with ${provider}`, error);
-        return { error: error as Error };
-      }
-    }
 
     // Original web social auth flow
     try {
@@ -519,6 +493,67 @@ export class SupabaseAuthService {
     } catch (err) {
       console.error('[SupabaseAuthService] Exception during file upload:', err);
       return { url: null, error: err as Error };
+    }
+  }
+
+  // Handle auth success and redirect back to Electron app
+  async handleElectronAuth() {
+    this.setRedirectToDesktopAfterLogin(false);
+
+    try {
+      // Get current session to extract token
+      const { data } = await this.supabase.auth.getSession();
+
+      if (!data.session) {
+        console.error('❌ [SupabaseAuthService] No active session found for Electron auth');
+        return null;
+      }
+
+      if (!this.config.generateMagicLinkEndpoint) {
+        console.error('❌ [SupabaseAuthService] generateMagicLinkEndpoint is not configured for Electron mode');
+        throw new Error('generateMagicLinkEndpoint is not configured for Electron mode');
+      }
+
+      const { hashed_token: hashedToken } = await firstValueFrom(
+        this.http.post<{ hashed_token: string }>(this.config.generateMagicLinkEndpoint, {}),
+      );
+      console.log('🔄 [SupabaseAuthService] Magic link data:', hashedToken);
+
+      // Redirect to Electron app with the hashed token
+      // The protocol (your-app://) should match electronDeepLinkProtocol in your config
+
+      const redirectUrl = `${this.config.electronDeepLinkProtocol}?hashed_token=${hashedToken}`;
+      console.log('🔄 [SupabaseAuthService] Redirecting to Electron app with URL:', redirectUrl, hashedToken);
+
+      try {
+        // Try to close the window/tab if possible
+        window.location.href = redirectUrl;
+        window.close();
+      } catch (error) {
+        // Fallback to just redirecting if closing fails
+        console.log('⚠️ [SupabaseAuthService] Could not close window, redirecting only');
+        window.location.href = redirectUrl;
+        window.close();
+      }
+    } catch (error) {
+      console.error('❌ [SupabaseAuthService] Failed to get token for Electron auth', error);
+      throw error;
+    }
+
+    return null;
+  }
+
+  /**
+   * Get the current authentication token
+   * @returns The current access token or null if not authenticated
+   */
+  async getToken(): Promise<string | null> {
+    try {
+      const { data } = await this.supabase.auth.getSession();
+      return data.session?.access_token ?? null;
+    } catch (error) {
+      console.error('[SupabaseAuthService] Error getting token:', error);
+      return null;
     }
   }
 }

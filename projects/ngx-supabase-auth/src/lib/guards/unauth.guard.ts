@@ -4,6 +4,7 @@ import { catchError, map, of } from 'rxjs';
 import { fromPromise } from 'rxjs/internal/observable/innerFrom';
 import { SUPABASE_AUTH_CONFIG } from '../config/supabase-auth.config';
 import { AuthStore } from '../store/auth.store';
+import { AuthGuardsUtilsService } from '../services/auth-guards-utils.service';
 
 /**
  * Type for UnauthGuard Route Data
@@ -19,6 +20,7 @@ const createUnauthGuard = (routeData?: UnauthGuardData) => {
   const authStore = inject(AuthStore);
   const router = inject(Router);
   const config = inject(SUPABASE_AUTH_CONFIG);
+  const authGuardsUtilsService = inject(AuthGuardsUtilsService);
 
   const redirectPath = routeData?.authRedirectIfAuthenticated || config.authRedirectIfAuthenticated || '/';
 
@@ -28,6 +30,8 @@ const createUnauthGuard = (routeData?: UnauthGuardData) => {
         console.log('[UnauthGuard] User is not authenticated, access granted');
         return true;
       }
+
+      authGuardsUtilsService.redirectToDesktopIfDesktopQueryParam();
 
       // Redirect to home or dashboard
       console.log('[UnauthGuard] User is already authenticated, redirecting to ' + redirectPath);

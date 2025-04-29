@@ -6,7 +6,7 @@
     "outDir": "../../out-tsc/app",
     "types": [],
     "paths": {
-      "@dotted-labs/ngx-supabase-auth": ["../../dist/ngx-supabase-auth"]
+      "@dotted-labs/ngx-supabase-auth": ["../ngx-supabase-auth/src/public-api"]
     }
   },
   "files": ["src/main.ts"],

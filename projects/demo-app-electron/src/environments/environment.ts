@@ -13,7 +13,7 @@ export const environment = {
   },
   electron: {
     isElectronMode: true,
-    webAppAuthUrl: 'http://localhost:4200/auth',
+    webAppAuthUrl: 'http://localhost:4200',
     deepLinkProtocol: 'ngx-supabase-auth://auth',
   },
 };

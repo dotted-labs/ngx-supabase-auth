@@ -1,78 +1,70 @@
-import { Component, inject, input, output, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthProvider, SocialAuthProvider } from '../../models/auth.models';
+import { Component, inject, OnInit } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthStore } from '../../store/auth.store';
-import { SUPABASE_AUTH_CONFIG } from '../../config/supabase-auth.config';
-import { SocialLoginComponent } from '../social-login/social-login.component';
+
+// Declaraciones de tipo para la API de Electron exportada desde preload.js
+declare global {
+  interface Window {
+    electron?: {
+      receive: (channel: string, callback: (...args: any[]) => void) => void;
+      send: (channel: string, data: any) => void;
+      platform: string;
+    };
+  }
+}
 
 /**
  * Login component to handle email/password and social login
  */
 @Component({
   selector: 'sup-login-desktop',
-  imports: [CommonModule, ReactiveFormsModule, SocialLoginComponent],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login-desktop.component.html',
 })
 export class LoginDesktopComponent implements OnInit {
-  /**
-   * Login form group
-   */
-  public loginForm: FormGroup;
+  public readonly store = inject(AuthStore);
+  public readonly router = inject(Router);
 
-  /**
-   * Auth store instance
-   */
-  public authStore = inject(AuthStore);
-
-  /**
-   * Config instance
-   */
-  public config = inject(SUPABASE_AUTH_CONFIG);
-
-  /**
-   * Social auth provider enum
-   */
-  public SocialAuthProvider = SocialAuthProvider;
-
-  /**
-   * Flag to show email/password form
-   */
-  public showEmailPasswordForm = signal(false);
-
-  /**
-   * Event emitted when user clicks forgot password
-   */
-  public forgotPassword = output<void>();
-
-  /**
-   * Event emitted when user clicks signup
-   */
-  public signup = output<void>();
-
-  /**
-   * Form builder
-   */
-  private fb = inject(FormBuilder);
-
-  constructor() {}
-
-  public ngOnInit(): void {
-    // Verify if the email/password is enabled
-    this.showEmailPasswordForm.set(this.authStore.enabledAuthProviders().includes(AuthProvider.EMAIL_PASSWORD));
-  }
-
-  /**
-   * Submit the login form
-   */
-  public onSubmit(): void {
-    if (this.loginForm.valid) {
-      const { email, password } = this.loginForm.value;
-      this.authStore.signInWithEmail(email, password);
+  ngOnInit() {
+    // Verificar si estamos en un entorno de Electron
+    if (window.electron) {
+      // Escuchar eventos de deep link desde el proceso principal de Electron
+      window.electron.receive('deep-link-received', (url: string) => {
+        this.handleDeepLink(url);
+      });
     }
   }
 
-  public onGoToSignup(): void {
-    this.signup.emit();
+  /**
+   * Manejar la URL de deep link recibida
+   */
+  async handleDeepLink(url: string) {
+    console.log('Deep link recibido:', url);
+
+    // Procesar la URL de deep link para autenticación
+    await this.store.processDeepLinkAuth(url);
+
+    // Si la autenticación fue exitosa, navegar al dashboard
+    if (this.store.user()) {
+      this.router.navigate(['/dashboard']);
+    }
+  }
+
+  /**
+   * Iniciar autenticación abriendo una ventana de navegador externa
+   */
+  login() {
+    // Esto abre el navegador web para autenticación
+    this.store.openExternalAuthWindow('login');
+  }
+
+  /**
+   * Iniciar registro abriendo una ventana de navegador externa
+   */
+  signup() {
+    // Esto abre el navegador web para registro
+    this.store.openExternalAuthWindow('signup');
   }
 }

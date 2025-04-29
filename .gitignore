@@ -43,3 +43,4 @@ Thumbs.db
 
 # Environment local files with sensitive data
 **/environment.local.ts
+.env

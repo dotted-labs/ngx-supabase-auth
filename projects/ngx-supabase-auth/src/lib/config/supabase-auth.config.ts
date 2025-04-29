@@ -1,6 +1,7 @@
 import { InjectionToken, Provider, EnvironmentProviders } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { SupabaseAuthConfig, AuthProvider, SocialAuthProvider } from '../models/auth.models';
+import { authInterceptor } from '../interceptors/auth.interceptor';
 
 /**
  * Injection token for Supabase Auth configuration
@@ -26,9 +27,10 @@ export const DEFAULT_ENABLED_AUTH_PROVIDERS: AuthProvider[] = [
  */
 export function provideSupabaseAuth(config: SupabaseAuthConfig): (Provider | EnvironmentProviders)[] {
   // Check if firstTimeCheckEndpoint is configured, which requires HttpClient
-  const needsHttpClient = !!config.firstTimeCheckEndpoint && !config.skipFirstTimeCheck;
 
   const providers: (Provider | EnvironmentProviders)[] = [
+    // Add HttpClient provider with auth interceptor
+    provideHttpClient(withInterceptors([authInterceptor])),
     {
       provide: SUPABASE_AUTH_CONFIG,
       useValue: {
@@ -47,12 +49,6 @@ export function provideSupabaseAuth(config: SupabaseAuthConfig): (Provider | Env
       },
     },
   ];
-
-  // Add HttpClient provider if needed and not already provided
-  if (needsHttpClient) {
-    console.log('🔌 [provideSupabaseAuth] First-time user check enabled, adding HttpClient provider');
-    providers.push(provideHttpClient());
-  }
 
   return providers;
 }

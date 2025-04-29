@@ -12,6 +12,8 @@ export const environment = {
     desktopAuthRedirect: '/login-desktop',
     authRedirectIfAuthenticated: '/dashboard',
     firstTimeProfileRedirect: '/complete-profile',
+    generateMagicLinkEndpoint: 'http://localhost:3000/api/generate-magic-link',
     // firstTimeCheckEndpoint: 'https://api.example.com/check-first-time',
+    electronDeepLinkProtocol: 'ngx-supabase-auth://auth',
   },
 };

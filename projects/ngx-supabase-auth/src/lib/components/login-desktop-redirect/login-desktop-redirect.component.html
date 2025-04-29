@@ -1,0 +1,14 @@
+@if (authStore.loading()) {
+  <div class="alert">Verificando autenticación...</div>
+}
+
+@if (authStore.error()) {
+  <div class="alert alert-error">{{ authStore.error() }}</div>
+}
+
+@if (authStore.user() && !authStore.loading() && !authStore.error()) {
+  <div class="alert alert-success">¡Autenticación exitosa!</div>
+  <p>Bienvenido, {{ authStore.user()?.email }}</p>
+
+  <button class="btn btn-primary" (click)="redirectToDesktop()">Iniciar sesión en la app</button>
+}

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoginComponent as SupLoginComponent } from '@dotted-labs/ngx-supabase-auth';
 
@@ -14,7 +14,7 @@ import { LoginComponent as SupLoginComponent } from '@dotted-labs/ngx-supabase-a
   `,
 })
 export class LoginPageComponent {
-  constructor(private router: Router) {}
+  private readonly router = inject(Router);
 
   public onForgotPassword() {
     this.router.navigate(['/forgot-password']);

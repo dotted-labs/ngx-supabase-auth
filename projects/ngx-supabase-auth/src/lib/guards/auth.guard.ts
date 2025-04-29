@@ -4,6 +4,7 @@ import { catchError, map, of } from 'rxjs';
 import { fromPromise } from 'rxjs/internal/observable/innerFrom';
 import { SUPABASE_AUTH_CONFIG } from '../config/supabase-auth.config';
 import { AuthStore } from '../store/auth.store';
+import { AuthGuardsUtilsService } from '../services/auth-guards-utils.service';
 
 /**
  * Type for AuthGuard Route Data
@@ -19,11 +20,13 @@ const createAuthGuard = (routeData?: AuthGuardData) => {
   const authStore = inject(AuthStore);
   const router = inject(Router);
   const config = inject(SUPABASE_AUTH_CONFIG);
+  const authGuardsUtilsService = inject(AuthGuardsUtilsService);
 
   const redirectPath = routeData?.authRequiredRedirect || config.authRequiredRedirect || '/login';
 
   return fromPromise(authStore.checkAuth()).pipe(
     map((isAuthenticated) => {
+      authGuardsUtilsService.checkDesktopRedirect();
       if (isAuthenticated) {
         console.log('[AuthMatch] User is authenticated, access granted');
         return true;

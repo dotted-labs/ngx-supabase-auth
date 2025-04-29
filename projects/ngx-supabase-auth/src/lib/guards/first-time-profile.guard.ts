@@ -26,6 +26,11 @@ const createFirstTimeProfileGuard = (routeData?: FirstTimeProfileGuardData) => {
 
   // If no endpoint is configured, skip the check
   if (!config.firstTimeCheckEndpoint) {
+    const redirect = localStorage.getItem('redirectToDesktopAfterLogin');
+    if (redirect) {
+      console.log('[FirstTimeProfileGuard] Redirecting to desktop after login');
+      router.navigate([config.desktopAuthRedirect]);
+    }
     console.log('[FirstTimeProfileGuard] No endpoint configured, skipping check');
     return of(true);
   }

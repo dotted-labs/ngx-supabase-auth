@@ -18,7 +18,7 @@ export const appConfig: ApplicationConfig = {
       authRedirectIfAuthenticated: environment.auth.authRedirectIfAuthenticated,
       enabledAuthProviders: [AuthProvider.EMAIL_PASSWORD, AuthProvider.GOOGLE],
       firstTimeProfileRedirect: environment.auth.firstTimeProfileRedirect,
-      firstTimeCheckEndpoint: environment.auth.firstTimeCheckEndpoint,
+      // firstTimeCheckEndpoint: environment.auth.firstTimeCheckEndpoint,
     }),
   ],
 };

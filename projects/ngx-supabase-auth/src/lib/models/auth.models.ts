@@ -23,6 +23,11 @@ export interface SupabaseAuthConfig {
   redirectAfterLogout?: string;
 
   /**
+   * Redirect path for desktop login
+   */
+  desktopAuthRedirect?: string;
+
+  /**
    * Redirect path when authentication is required
    */
   authRequiredRedirect?: string;
@@ -100,6 +105,7 @@ export interface AuthState {
   loading: boolean;
   error: string | null;
   enabledAuthProviders: AuthProvider[];
+  redirectToDesktopAfterLogin: boolean;
 }
 /**
  * Social auth providers enum

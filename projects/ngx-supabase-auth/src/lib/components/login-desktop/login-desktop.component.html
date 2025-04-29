@@ -1,0 +1,72 @@
+<!-- Social Logins -->
+<sup-social-login />
+
+<!-- Email Login Form -->
+@if (showEmailPasswordForm()) {
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form-control flex flex-col gap-4 mb-6">
+    <div class="form-control w-full flex flex-col gap-2">
+      <label for="email" class="label">
+        <span class="label-text">Email</span>
+      </label>
+      <input type="email" id="email" formControlName="email" placeholder="Email" autocomplete="email" class="input input-bordered w-full" />
+      @if (loginForm.get('email')?.invalid && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)) {
+        <div class="text-error text-sm mt-1">
+          @if (loginForm.get('email')?.errors?.['required']) {
+            <span>Email is required</span>
+          }
+          @if (loginForm.get('email')?.errors?.['email']) {
+            <span>Please enter a valid email</span>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="form-control w-full flex flex-col gap-2">
+      <label for="password" class="label flex justify-between">
+        <span class="label-text">Password</span>
+        <div class="flex justify-end">
+          <a (click)="forgotPassword.emit()" class="link link-primary text-sm">Forgot Password?</a>
+        </div>
+      </label>
+      <input
+        type="password"
+        id="password"
+        formControlName="password"
+        placeholder="Password"
+        autocomplete="current-password"
+        class="input input-bordered w-full"
+      />
+      @if (loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)) {
+        <div class="text-error text-sm mt-1">
+          @if (loginForm.get('password')?.errors?.['required']) {
+            <span>Password is required</span>
+          }
+          @if (loginForm.get('password')?.errors?.['minlength']) {
+            <span>Password must be at least 6 characters</span>
+          }
+        </div>
+      }
+    </div>
+
+    @if (authStore.error()) {
+      <div class="text-error text-sm">
+        {{ authStore.error() }}
+      </div>
+    }
+
+    <button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid || authStore.loading()">
+      @if (!authStore.loading()) {
+        <span>Login</span>
+      } @else {
+        <span class="loading loading-spinner loading-sm"></span>
+        <span>Loading</span>
+      }
+    </button>
+  </form>
+}
+
+<!-- Signup Link -->
+<div class="flex justify-center mt-2 gap-2 text-sm">
+  <span class="text-base-content/70">Don't have an account?</span>
+  <a (click)="onGoToSignup()" class="text-base-content cursor-pointer underline"> Sign Up</a>
+</div>

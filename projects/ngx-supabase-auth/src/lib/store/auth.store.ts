@@ -22,6 +22,7 @@ const initialState: AuthState = {
   loading: false,
   error: null,
   enabledAuthProviders: [],
+  redirectToDesktopAfterLogin: false,
 };
 
 /**

@@ -9,8 +9,9 @@ export const environment = {
     redirectAfterLogin: '/dashboard',
     redirectAfterLogout: '/login',
     authRequiredRedirect: '/login',
+    desktopAuthRedirect: '/login-desktop',
     authRedirectIfAuthenticated: '/dashboard',
     firstTimeProfileRedirect: '/complete-profile',
-    firstTimeCheckEndpoint: 'https://api.example.com/check-first-time',
+    // firstTimeCheckEndpoint: 'https://api.example.com/check-first-time',
   },
 };

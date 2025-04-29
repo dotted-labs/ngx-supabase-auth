@@ -1,4 +1,4 @@
-import { DestroyRef, inject } from '@angular/core';
+import { computed, DestroyRef, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
 import { SUPABASE_AUTH_CONFIG } from '../config/supabase-auth.config';
@@ -12,8 +12,6 @@ import {
   UserProfileUpdate,
 } from '../models/auth.models';
 import { SupabaseAuthService } from '../services/auth.service';
-import { computed } from '@angular/core';
-import { updateState, withDevtools } from '@angular-architects/ngrx-toolkit';
 
 /**
  * Initial auth state
@@ -31,7 +29,6 @@ const initialState: AuthState = {
  */
 export const AuthStore = signalStore(
   { providedIn: 'root' },
-  withDevtools('authStore'), // <-- add this
   withState(initialState),
   withComputed((store) => ({
     avatarUrl: computed(() => {
@@ -59,13 +56,13 @@ export const AuthStore = signalStore(
        * Initialize store and set up auth state listeners
        */
       const initializeStore = async () => {
-        updateState(store, 'initialize store', { loading: true, enabledAuthProviders: config.enabledAuthProviders || [] });
+        patchState(store, { loading: true, enabledAuthProviders: config.enabledAuthProviders || [] });
         try {
           const user = await authService.getCurrentUser();
 
-          updateState(store, 'initialize store completed', { user, loading: false });
+          patchState(store, { user, loading: false });
         } catch (error) {
-          updateState(store, 'initialize store error', {
+          patchState(store, {
             user: null,
             loading: false,
             error: (error as Error).message,
@@ -78,25 +75,25 @@ export const AuthStore = signalStore(
        * @param password User password
        */
       const signInWithEmail = async (email: string, password: string) => {
-        updateState(store, 'sign in with email', { loading: true, error: null });
+        patchState(store, { loading: true, error: null });
 
         try {
           const { user, error } = await authService.signInWithEmail(email, password);
 
           if (error) {
-            updateState(store, 'sign in with email error', {
+            patchState(store, {
               loading: false,
               error: error.message,
             });
             return;
           }
 
-          updateState(store, 'sign in with email success', {
+          patchState(store, {
             user,
             loading: false,
           });
         } catch (error) {
-          updateState(store, 'sign in with email exception', {
+          patchState(store, {
             loading: false,
             error: (error as Error).message,
           });
@@ -114,25 +111,25 @@ export const AuthStore = signalStore(
        * @param password User password
        */
       const signUpWithEmail = async (email: string, password: string) => {
-        updateState(store, 'sign up with email', { loading: true, error: null });
+        patchState(store, { loading: true, error: null });
 
         try {
           const { user, error } = await authService.signUpWithEmail(email, password);
 
           if (error) {
-            updateState(store, 'sign up with email error', {
+            patchState(store, {
               loading: false,
               error: error.message,
             });
             return;
           }
 
-          updateState(store, 'sign up with email success', {
+          patchState(store, {
             user,
             loading: false,
           });
         } catch (error) {
-          updateState(store, 'sign up with email exception', {
+          patchState(store, {
             loading: false,
             error: (error as Error).message,
           });
@@ -144,21 +141,21 @@ export const AuthStore = signalStore(
        * @param provider Social auth provider
        */
       const signInWithSocialProvider = async (provider: SocialAuthProvider) => {
-        updateState(store, 'sign in with social provider', { loading: true, error: null });
+        patchState(store, { loading: true, error: null });
 
         try {
           const { error } = await authService.signInWithSocialProvider(provider);
 
           if (error) {
-            updateState(store, 'sign in with social provider error', {
+            patchState(store, {
               loading: false,
               error: error.message,
             });
           } else {
-            updateState(store, 'sign in with social provider success', { loading: false });
+            patchState(store, { loading: false });
           }
         } catch (error) {
-          updateState(store, 'sign in with social provider exception', {
+          patchState(store, {
             loading: false,
             error: (error as Error).message,
           });
@@ -170,17 +167,17 @@ export const AuthStore = signalStore(
        * @param request Password reset request
        */
       const sendPasswordResetEmail = async (request: PasswordResetRequest) => {
-        updateState(store, 'send password reset email', { loading: true, error: null });
+        patchState(store, { loading: true, error: null });
 
         try {
           const { error } = await authService.sendPasswordResetEmail(request);
 
-          updateState(store, 'send password reset email completed', {
+          patchState(store, {
             loading: false,
             error: error ? error.message : null,
           });
         } catch (error) {
-          updateState(store, 'send password reset email exception', {
+          patchState(store, {
             loading: false,
             error: (error as Error).message,
           });
@@ -192,17 +189,17 @@ export const AuthStore = signalStore(
        * @param request Update password request
        */
       const updatePassword = async (request: UpdatePasswordRequest) => {
-        updateState(store, 'update password', { loading: true, error: null });
+        patchState(store, { loading: true, error: null });
 
         try {
           const { error } = await authService.updatePassword(request);
 
-          updateState(store, 'update password completed', {
+          patchState(store, {
             loading: false,
             error: error ? error.message : null,
           });
         } catch (error) {
-          updateState(store, 'update password exception', {
+          patchState(store, {
             loading: false,
             error: (error as Error).message,
           });
@@ -214,13 +211,13 @@ export const AuthStore = signalStore(
        * @param update User profile update data
        */
       const updateProfile = async (update: UserProfileUpdate) => {
-        updateState(store, 'update profile', { loading: true, error: null });
+        patchState(store, { loading: true, error: null });
 
         try {
           const { error } = await authService.updateProfile(update);
 
           if (error) {
-            updateState(store, 'update profile error', {
+            patchState(store, {
               loading: false,
               error: error.message,
             });
@@ -229,12 +226,12 @@ export const AuthStore = signalStore(
 
           // Get updated user data
           const user = await authService.getCurrentUser();
-          updateState(store, 'update profile success', {
+          patchState(store, {
             user,
             loading: false,
           });
         } catch (error) {
-          updateState(store, 'update profile exception', {
+          patchState(store, {
             loading: false,
             error: (error as Error).message,
           });
@@ -245,25 +242,25 @@ export const AuthStore = signalStore(
        * Sign out the current user
        */
       const signOut = async () => {
-        updateState(store, 'sign out', { loading: true, error: null });
+        patchState(store, { loading: true, error: null });
 
         try {
           const { error } = await authService.signOut();
 
           if (error) {
-            updateState(store, 'sign out error', {
+            patchState(store, {
               loading: false,
               error: error.message,
             });
             return;
           }
 
-          updateState(store, 'sign out success', {
+          patchState(store, {
             user: null,
             loading: false,
           });
         } catch (error) {
-          updateState(store, 'sign out exception', {
+          patchState(store, {
             loading: false,
             error: (error as Error).message,
           });
@@ -286,26 +283,26 @@ export const AuthStore = signalStore(
        * @returns Promise with the file URL or error
        */
       const uploadFile = async (bucketName: string, filePath: string, file: File) => {
-        updateState(store, 'upload file', { loading: true, error: null });
+        patchState(store, { loading: true, error: null });
 
         try {
           const { url, error } = await authService.uploadFile(bucketName, filePath, file);
 
           if (error) {
-            updateState(store, 'upload file error', {
+            patchState(store, {
               loading: false,
               error: error.message,
             });
             return { url: null, error };
           }
 
-          updateState(store, 'upload file success', {
+          patchState(store, {
             loading: false,
           });
 
           return { url, error: null };
         } catch (error) {
-          updateState(store, 'upload file exception', {
+          patchState(store, {
             loading: false,
             error: (error as Error).message,
           });
@@ -320,13 +317,13 @@ export const AuthStore = signalStore(
        * @param options Additional query parameters
        */
       const openExternalAuthWindow = async (path: string, options: Record<string, string> = {}) => {
-        updateState(store, 'open external auth window', { loading: true, error: null });
+        patchState(store, { loading: true, error: null });
 
         try {
           await authService.openExternalAuthWindow(path, options);
-          updateState(store, 'open external auth window success', { loading: false });
+          patchState(store, { loading: false });
         } catch (error) {
-          updateState(store, 'open external auth window exception', {
+          patchState(store, {
             loading: false,
             error: (error as Error).message,
           });
@@ -339,14 +336,14 @@ export const AuthStore = signalStore(
        * @param url Deep link URL containing authentication parameters
        */
       const processDeepLinkAuth = async (url: string) => {
-        updateState(store, 'process deep link auth', { loading: true, error: null });
+        patchState(store, { loading: true, error: null });
 
         try {
           // Extract token from URL
           const result = await authService.processDeepLinkUrl(url);
 
           if (result.error || !result.hashedToken) {
-            updateState(store, 'process deep link auth error', {
+            patchState(store, {
               loading: false,
               error: result.error || 'Invalid deep link URL',
             });
@@ -357,19 +354,19 @@ export const AuthStore = signalStore(
           const { user, error } = await authService.verifyHashedToken(result.hashedToken);
 
           if (error) {
-            updateState(store, 'process deep link auth token error', {
+            patchState(store, {
               loading: false,
               error: error.message,
             });
             return;
           }
 
-          updateState(store, 'process deep link auth success', {
+          patchState(store, {
             user,
             loading: false,
           });
         } catch (error) {
-          updateState(store, 'process deep link auth exception', {
+          patchState(store, {
             loading: false,
             error: (error as Error).message,
           });
@@ -381,25 +378,25 @@ export const AuthStore = signalStore(
        * @param hashedToken The hashed token to verify
        */
       const verifyHashedToken = async (hashedToken: string) => {
-        updateState(store, 'verify hashed token', { loading: true, error: null });
+        patchState(store, { loading: true, error: null });
 
         try {
           const { user, error } = await authService.verifyHashedToken(hashedToken);
 
           if (error) {
-            updateState(store, 'verify hashed token error', {
+            patchState(store, {
               loading: false,
               error: error.message,
             });
             return;
           }
 
-          updateState(store, 'verify hashed token success', {
+          patchState(store, {
             user,
             loading: false,
           });
         } catch (error) {
-          updateState(store, 'verify hashed token exception', {
+          patchState(store, {
             loading: false,
             error: (error as Error).message,
           });
@@ -411,7 +408,7 @@ export const AuthStore = signalStore(
        * @returns True if the user is authenticated, false otherwise
        */
       const checkAuth = async () => {
-        updateState(store, 'check auth', { loading: true, error: null });
+        patchState(store, { loading: true, error: null });
 
         try {
           const isAuthenticated = await authService.isAuthenticated();
@@ -419,12 +416,12 @@ export const AuthStore = signalStore(
           console.log('[AuthStore] Check auth', isAuthenticated);
 
           if (isAuthenticated) {
-            updateState(store, 'check auth success', { loading: false });
+            patchState(store, { loading: false });
           }
 
           return isAuthenticated;
         } catch (error) {
-          updateState(store, 'check auth exception', {
+          patchState(store, {
             loading: false,
             error: (error as Error).message,
           });
@@ -446,7 +443,7 @@ export const AuthStore = signalStore(
           await authService.handleElectronAuth();
         } catch (error) {
           console.error('❌ [AuthStore] Failed to open app desktop after login', error);
-          updateState(store, 'open app desktop after login error', {
+          patchState(store, {
             loading: false,
             error: (error as Error).message,
           });

@@ -10,11 +10,9 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "ngx-supabase-auth": [
-        "./dist/ngx-supabase-auth"
-      ]
+      "ngx-supabase-auth": ["./dist/ngx-supabase-auth"]
     },
-    "skipLibCheck": true,
+    "skipLibCheck": false,
     "isolatedModules": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,

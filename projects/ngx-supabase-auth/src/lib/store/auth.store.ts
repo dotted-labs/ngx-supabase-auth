@@ -31,6 +31,13 @@ export const AuthStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
   withComputed((store) => ({
+    name: computed(() => {
+      const user = store.user();
+      if (user?.user_metadata?.['name']) {
+        return user.user_metadata['name'];
+      }
+      return '';
+    }),
     avatarUrl: computed(() => {
       const user = store.user();
       if (user?.user_metadata?.['avatar_url']) {

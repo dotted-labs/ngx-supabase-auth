@@ -7,10 +7,8 @@ import { AuthStore } from '../../store/auth.store';
 // Declaraciones de tipo para la API de Electron exportada desde preload.js
 declare global {
   interface Window {
-    electron?: {
-      receive: (channel: string, callback: (...args: any[]) => void) => void;
-      send: (channel: string, data: any) => void;
-      platform: string;
+    ngxSupabaseAuth?: {
+      onDeepLinkReceived: (callback: (...args: any[]) => void) => void;
     };
   }
 }
@@ -29,9 +27,9 @@ export class LoginDesktopComponent implements OnInit {
 
   ngOnInit() {
     // Verificar si estamos en un entorno de Electron
-    if (window.electron) {
+    if (window.ngxSupabaseAuth) {
       // Escuchar eventos de deep link desde el proceso principal de Electron
-      window.electron.receive('deep-link-received', (url: string) => {
+      window.ngxSupabaseAuth.onDeepLinkReceived((url: string) => {
         this.handleDeepLink(url);
       });
     }

@@ -520,12 +520,12 @@ export class SupabaseAuthService {
       try {
         // Try to close the window/tab if possible
         window.location.href = redirectUrl;
-        window.close();
+        // window.close();
       } catch (error) {
         // Fallback to just redirecting if closing fails
         console.log('⚠️ [SupabaseAuthService] Could not close window, redirecting only');
         window.location.href = redirectUrl;
-        window.close();
+        // window.close();
       }
     } catch (error) {
       console.error('❌ [SupabaseAuthService] Failed to get token for Electron auth', error);

@@ -17,7 +17,6 @@ export * from './lib/store/auth.store';
 // Guards
 export * from './lib/guards/auth.guard';
 export * from './lib/guards/unauth.guard';
-export * from './lib/guards/first-time-profile.guard';
 export * from './lib/guards/not-first-time-profile.guard';
 export * from './lib/guards/is-desktop-login.guard';
 export * from './lib/guards/is-not-desktop-login.guard';

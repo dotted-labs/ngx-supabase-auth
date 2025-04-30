@@ -275,14 +275,6 @@ export const AuthStore = signalStore(
       };
 
       /**
-       * Get the current authentication mode (Web or Electron)
-       * @returns The current auth mode
-       */
-      const getAuthMode = (): AuthMode => {
-        return authService.getAuthMode();
-      };
-
-      /**
        * Upload a file to Supabase storage
        * @param bucketName The storage bucket name
        * @param filePath The file path within the bucket
@@ -464,7 +456,6 @@ export const AuthStore = signalStore(
         updatePassword,
         updateProfile,
         signOut,
-        getAuthMode,
         uploadFile,
         openExternalAuthWindow,
         processDeepLinkAuth,

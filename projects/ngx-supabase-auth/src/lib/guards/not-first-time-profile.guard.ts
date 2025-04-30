@@ -1,73 +1,91 @@
-import { HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { CanActivateFn, CanMatchFn, Router } from '@angular/router';
-import { catchError, map, of, switchMap } from 'rxjs';
+import { CanActivateFn, CanMatchFn, Router, UrlTree } from '@angular/router';
+import { catchError, map, Observable, of } from 'rxjs';
 import { fromPromise } from 'rxjs/internal/observable/innerFrom';
+import { switchMap } from 'rxjs/operators';
 import { SUPABASE_AUTH_CONFIG } from '../config/supabase-auth.config';
 import { AuthStore } from '../store/auth.store';
+import { AuthGuardsUtilsService } from '../services/auth-guards-utils.service';
 
 /**
- * Type for FirstTimeProfileGuard Route Data
+ * Type for NotFirstTimeProfileGuard Route Data
  */
 export interface NotFirstTimeProfileGuardData {
   /**
-   * Custom redirect path for completing the profile
+   * Custom redirect path when user is accessing first time profile without needing it
    */
   notFirstTimeProfileRedirect?: string;
 }
 
-const createNotFirstTimeProfileGuard = (routeData?: NotFirstTimeProfileGuardData) => {
+const createNotFirstTimeProfileGuard = (routeData?: NotFirstTimeProfileGuardData, url?: string): Observable<boolean | UrlTree> => {
   const authStore = inject(AuthStore);
   const router = inject(Router);
   const config = inject(SUPABASE_AUTH_CONFIG);
-  const http = inject(HttpClient);
+  const authGuardsUtilsService = inject(AuthGuardsUtilsService);
+
+  const redirectPath = routeData?.notFirstTimeProfileRedirect || config.redirectAfterLogin || '/dashboard';
+  const completeProfilePath = config.firstTimeProfileRedirect || '/complete-profile';
+
+  // Si estamos ya en la ruta de complete-profile, permitir acceso para evitar redirecciones infinitas
+  if (url && (url === completeProfilePath || url.startsWith(completeProfilePath))) {
+    console.log(`[NotFirstTimeProfileGuard] Already at complete profile page, allowing access`);
+    return of(true);
+  }
+
+  // If skipFirstTimeCheck is true, redirect to the main page
+  if (config.skipFirstTimeCheck) {
+    console.log('[NotFirstTimeProfileGuard] skipFirstTimeCheck is true, redirecting to dashboard');
+    return of(router.parseUrl(redirectPath));
+  }
 
   // If no endpoint is configured, skip the check
   if (!config.firstTimeCheckEndpoint) {
-    console.log('[FirstTimeProfileGuard] No endpoint configured, skipping check');
-    return of(true);
+    console.log('[NotFirstTimeProfileGuard] No endpoint configured, redirecting to dashboard');
+    return of(router.parseUrl(redirectPath));
   }
 
   return fromPromise(authStore.checkAuth()).pipe(
     switchMap((isAuthenticated) => {
       // If not authenticated, proceed normally (auth guard will handle this case)
       if (!isAuthenticated) {
-        console.log('[FirstTimeProfileGuard] User not authenticated, skipping check');
-        return of(true);
+        console.log('[NotFirstTimeProfileGuard] User not authenticated, redirecting to login');
+        return of(router.parseUrl(config.authRequiredRedirect || '/login'));
       }
 
       if (!authStore.user()) {
-        console.log('[FirstTimeProfileGuard] No user found, skipping check');
-        return of(true);
+        console.log('[NotFirstTimeProfileGuard] No user found, redirecting to dashboard');
+        return of(router.parseUrl(redirectPath));
       }
 
-      console.log(`[FirstTimeProfileGuard] Checking first-time status for user ${authStore.user()?.id}`);
+      const userId = authStore.user()?.id as string;
+      console.log(`[NotFirstTimeProfileGuard] Checking first-time status for user ${userId}`);
 
       // Call the endpoint to check if it's the first time
-      return http.get<boolean>(`${config.firstTimeCheckEndpoint}?userId=${authStore.user()?.id}`).pipe(
+      return authGuardsUtilsService.checkIfFirstTimeUser(userId).pipe(
         map((isFirstTime) => {
-          // If it's not the first time, redirect to dashboard
-          if (!isFirstTime) {
-            console.log(`[FirstTimeProfileGuard] Not first time, redirecting to dashboard`);
-            return router.parseUrl('/dashboard');
+          // If it's the first time, allow access
+          if (isFirstTime) {
+            console.log('[NotFirstTimeProfileGuard] First time detected, allowing access');
+            return true;
           }
 
-          console.log('[FirstTimeProfileGuard] First time detected, proceeding normally');
-          return true;
+          // If it's not the first time, redirect to dashboard
+          console.log(`[NotFirstTimeProfileGuard] Not first time, redirecting to ${redirectPath}`);
+          return router.parseUrl(redirectPath);
         }),
-        catchError((error) => {
-          console.error('[FirstTimeProfileGuard] Error checking first time status:', error);
-          // On error, treat as not first time user and redirect to dashboard
-          console.log(`[FirstTimeProfileGuard] Error detected, treating as not first time user, redirecting to dashboard`);
-          return of(router.parseUrl('/dashboard'));
+        catchError((_error) => {
+          console.error('[NotFirstTimeProfileGuard] Error checking first time status:', _error);
+          // On error, allow access to be safe
+          console.log('[NotFirstTimeProfileGuard] Error detected, allowing access to be safe');
+          return of(true);
         }),
       );
     }),
-    catchError((error) => {
-      console.error('[FirstTimeProfileGuard] Error in guard execution:', error);
-      // In case of error, treat as not first time user
-      console.log(`[FirstTimeProfileGuard] Fatal error detected, treating as not first time user, redirecting to dashboard`);
-      return of(router.parseUrl('/dashboard'));
+    catchError((_error) => {
+      console.error('[NotFirstTimeProfileGuard] Error in guard execution:', _error);
+      // In case of error, allow access to be safe
+      console.log('[NotFirstTimeProfileGuard] Fatal error detected, allowing access to be safe');
+      return of(true);
     }),
   );
 };
@@ -77,7 +95,7 @@ const createNotFirstTimeProfileGuard = (routeData?: NotFirstTimeProfileGuardData
  * and allows access only if it's their first time
  */
 export const notFirstTimeProfileGuard: CanActivateFn = (route, state) => {
-  return createNotFirstTimeProfileGuard(route.data as NotFirstTimeProfileGuardData);
+  return createNotFirstTimeProfileGuard(route.data as NotFirstTimeProfileGuardData, state.url);
 };
 
 /**
@@ -85,5 +103,6 @@ export const notFirstTimeProfileGuard: CanActivateFn = (route, state) => {
  * and allows access only if it's their first time
  */
 export const notFirstTimeProfileMatch: CanMatchFn = (route, segments) => {
-  return createNotFirstTimeProfileGuard(route.data as NotFirstTimeProfileGuardData);
+  const url = '/' + segments.map((segment) => segment.path).join('/');
+  return createNotFirstTimeProfileGuard(route.data as NotFirstTimeProfileGuardData, url);
 };

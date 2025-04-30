@@ -9,7 +9,6 @@ export const environment = {
     redirectAfterLogin: '/dashboard',
     redirectAfterLogout: '/login',
     authRequiredRedirect: '/login',
-    authRedirectIfAuthenticated: '/dashboard',
   },
   electron: {
     webAppAuthUrl: 'http://localhost:4200',

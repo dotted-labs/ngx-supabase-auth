@@ -39,7 +39,6 @@ export function provideSupabaseAuth(config: SupabaseAuthConfig): (Provider | Env
         redirectAfterLogout: '/login',
         authRequiredRedirect: '/login',
         desktopAuthRedirect: '/login-desktop',
-        authRedirectIfAuthenticated: '/',
         enabledAuthProviders: [],
         firstTimeProfileRedirect: '/complete-profile',
         firstTimeCheckEndpoint: null,

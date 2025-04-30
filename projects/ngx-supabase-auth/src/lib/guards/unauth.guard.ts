@@ -13,7 +13,7 @@ export interface UnauthGuardData {
   /**
    * Custom redirect path when user should not be authenticated
    */
-  authRedirectIfAuthenticated?: string;
+  redirectIfAuthenticated?: string;
 }
 
 const createUnauthGuard = (routeData?: UnauthGuardData) => {
@@ -22,7 +22,7 @@ const createUnauthGuard = (routeData?: UnauthGuardData) => {
   const config = inject(SUPABASE_AUTH_CONFIG);
   const authGuardsUtilsService = inject(AuthGuardsUtilsService);
 
-  const redirectPath = routeData?.authRedirectIfAuthenticated || config.authRedirectIfAuthenticated || '/';
+  const redirectPath = routeData?.redirectIfAuthenticated || config.redirectAfterLogin || '/';
 
   return fromPromise(authStore.checkAuth()).pipe(
     map((isAuthenticated) => {

@@ -33,11 +33,6 @@ export interface SupabaseAuthConfig {
   authRequiredRedirect?: string;
 
   /**
-   * Redirect path when user should not be authenticated
-   */
-  authRedirectIfAuthenticated?: string;
-
-  /**
    * Enabled authentication providers
    */
   enabledAuthProviders?: AuthProvider[];

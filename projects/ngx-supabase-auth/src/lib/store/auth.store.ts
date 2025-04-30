@@ -422,9 +422,7 @@ export const AuthStore = signalStore(
 
           console.log('[AuthStore] Check auth', isAuthenticated);
 
-          if (isAuthenticated) {
-            patchState(store, { loading: false });
-          }
+          patchState(store, { loading: false });
 
           return isAuthenticated;
         } catch (error) {

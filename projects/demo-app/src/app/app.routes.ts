@@ -37,11 +37,6 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
-    path: 'dashboard',
-    component: DashboardComponent,
-    canActivate: [authGuard, firstTimeProfileGuard],
-  },
-  {
     path: 'complete-profile',
     component: CompleteProfilePageComponent,
     canActivate: [authGuard, notFirstTimeProfileGuard],
@@ -50,6 +45,11 @@ export const routes: Routes = [
     path: 'signup',
     component: SignupPageComponent,
     canActivate: [unauthGuard],
+  },
+  {
+    path: 'dashboard',
+    component: DashboardComponent,
+    canActivate: [authGuard, firstTimeProfileGuard],
   },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/login' },

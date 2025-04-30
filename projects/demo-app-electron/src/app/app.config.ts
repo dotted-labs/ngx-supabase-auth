@@ -17,7 +17,6 @@ export const appConfig: ApplicationConfig = {
       authRequiredRedirect: environment.auth.authRequiredRedirect,
       authRedirectIfAuthenticated: environment.auth.authRedirectIfAuthenticated,
       enabledAuthProviders: [AuthProvider.EMAIL_PASSWORD, AuthProvider.GOOGLE, AuthProvider.GITHUB],
-      isElectronMode: environment.electron.isElectronMode,
       webAppAuthUrl: environment.electron.webAppAuthUrl,
       electronDeepLinkProtocol: environment.electron.deepLinkProtocol,
     }),

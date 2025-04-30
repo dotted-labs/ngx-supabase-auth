@@ -65,12 +65,6 @@ export interface SupabaseAuthConfig {
   skipFirstTimeCheck?: boolean;
 
   /**
-   * Enable electron-specific authentication flow
-   * When true, it assumes the app is running in an Electron context
-   */
-  isElectronMode?: boolean;
-
-  /**
    * URL of the web application for handling Electron auth
    * Used when isElectronMode is true to redirect to the web app
    */

@@ -155,14 +155,6 @@ export class SupabaseAuthService {
   }
 
   /**
-   * Get the authentication mode based on configuration
-   * @returns The current authentication mode (WEB or ELECTRON)
-   */
-  getAuthMode(): AuthMode {
-    return this.config.isElectronMode ? AuthMode.ELECTRON : AuthMode.WEB;
-  }
-
-  /**
    * Handles authentication for Electron by opening the web app in browser
    * @param path The authentication path to open (login, signup, etc.)
    * @param options Additional query parameters

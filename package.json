@@ -1,19 +1,34 @@
 {
-  "name": "ngx-supabase-auth",
-  "version": "0.0.3",
+  "name": "@dotted-labs/ngx-supabase-auth",
+  "version": "0.0.4",
   "scripts": {
     "ng": "ng",
     "start": "concurrently \"npm run start:demo-app\" \"npm run start:demo-app-electron\" \"npm run start:demo-server\"",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "build:lib": "ng build ngx-supabase-auth --project ngx-supabase-auth && npm run copy:readme",
+    "build:lib": "ng build ngx-supabase-auth --project ngx-supabase-auth  ",
     "start:demo-app": "ng serve demo-app",
     "start:demo-app-electron": "concurrently \"ng serve demo-app-electron\" \"wait-on http://localhost:4300 && node projects/demo-app-electron/electron/electron.js\"",
-    "start:demo-server": "node projects/demo-server/main.js",
-    "copy:readme": "cp README.md dist/ngx-supabase-auth/"
+    "start:demo-server": "node projects/demo-server/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dotted-labs/ngx-supabase-auth"
   },
   "private": false,
+  "author": "DottedLabs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dotted-labs/ngx-supabase-auth/issues"
+  },
+  "homepage": "https://github.com/dotted-labs/ngx-supabase-auth#readme",
+  "files": [
+    "dist/**/*",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
   "dependencies": {
     "@angular/common": "^19.2.0",
     "@angular/compiler": "^19.2.0",

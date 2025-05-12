@@ -1,6 +1,6 @@
 {
   "name": "@dotted-labs/ngx-supabase-auth",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "scripts": {
     "ng": "ng",
     "start": "concurrently \"npm run start:demo-app\" \"npm run start:demo-app-electron\" \"npm run start:demo-server\"",
@@ -24,10 +24,9 @@
   },
   "homepage": "https://github.com/dotted-labs/ngx-supabase-auth#readme",
   "files": [
-    "dist/**/*",
+    "dist/ngx-supabase-auth",
     "LICENSE",
-    "README.md",
-    "package.json"
+    "README.md"
   ],
   "dependencies": {
     "@angular/common": "^19.2.0",

@@ -3,6 +3,10 @@ description:
 globs: 
 alwaysApply: true
 ---
+# IMPORTANT
+
+Whenever changes are made, update the `app.mdc` file to keep the documentation up to date with the app's flow and functionality.
+
 **ngx-supabase-auth project summary**
 ngx-supabase-auth is an angular library to implement registration, login, password reset, a basic profile and access to protected paths. 
 

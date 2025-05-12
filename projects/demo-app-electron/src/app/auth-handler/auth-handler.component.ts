@@ -7,6 +7,5 @@ import { LoginDesktopComponent } from '@dotted-labs/ngx-supabase-auth';
   selector: 'app-auth-handler',
   imports: [CommonModule, LoginDesktopComponent],
   template: ` <sup-login-desktop /> `,
-  styleUrl: './auth-handler.component.scss',
 })
 export class AuthHandlerComponent {}

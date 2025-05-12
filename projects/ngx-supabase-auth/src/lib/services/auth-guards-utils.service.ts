@@ -16,6 +16,10 @@ export class AuthGuardsUtilsService {
   private readonly config = inject(SUPABASE_AUTH_CONFIG);
   private readonly http = inject(HttpClient);
 
+  /**
+   * Redirect to desktop if desktop query param is true
+   * @returns UrlTree for redirection or null
+   */
   public redirectToDesktopIfDesktopQueryParam() {
     const queryParams = new URLSearchParams(window.location.search);
     console.log('[UnauthGuard] Query params:', queryParams);
@@ -27,6 +31,10 @@ export class AuthGuardsUtilsService {
     return null;
   }
 
+  /**
+   * Redirect to desktop if desktop query param is true
+   * @returns UrlTree for redirection or null
+   */
   public redirectToDesktopIfDesktopLocalStorage() {
     const redirect = localStorage.getItem('redirectToDesktopAfterLogin');
     if (!!redirect) {

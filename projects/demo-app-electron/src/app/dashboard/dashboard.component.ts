@@ -48,7 +48,6 @@ import { AuthStore } from '@dotted-labs/ngx-supabase-auth';
       </section>
     </main>
   `,
-  styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent {
   public readonly store = inject(AuthStore);

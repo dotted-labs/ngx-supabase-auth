@@ -26,6 +26,11 @@ const createUnauthGuard = (routeData?: UnauthGuardData) => {
 
   return fromPromise(authStore.checkAuth()).pipe(
     map((isAuthenticated) => {
+      const queryParams = new URLSearchParams(window.location.search);
+      if (queryParams.get('desktop') === 'true') {
+        authStore.setRedirectToDesktopAfterLogin(true);
+      }
+
       if (!isAuthenticated) {
         console.log('[UnauthGuard] User is not authenticated, access granted');
         return true;

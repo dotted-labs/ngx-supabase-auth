@@ -24,7 +24,6 @@
   },
   "homepage": "https://github.com/dotted-labs/ngx-supabase-auth#readme",
   "files": [
-    "dist/ngx-supabase-auth",
     "LICENSE",
     "README.md"
   ],

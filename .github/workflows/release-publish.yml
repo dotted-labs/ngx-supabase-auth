@@ -67,8 +67,8 @@ jobs:
 
       - name: Publish to npm
         run: |
-          cp ../../README.md dist/ngx-supabase-auth/
-          cp ../../LICENSE dist/ngx-supabase-auth/
+          cp README.md dist/ngx-supabase-auth/
+          cp LICENSE dist/ngx-supabase-auth/
           cd dist/ngx-supabase-auth && npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

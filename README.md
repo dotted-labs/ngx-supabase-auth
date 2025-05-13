@@ -219,13 +219,125 @@ Handling authentication, especially social logins, in desktop applications requi
 
 1.  Use `<sup-login-desktop>` in your main application window. When a user clicks a social login button, it triggers `signInWithOAuth`, which opens the system browser for authentication.
 2.  Configure Supabase OAuth to redirect to a custom URI scheme (e.g., `myapp://auth-callback/`) that your Electron app listens for.
-3.  Your Electron main process (`electron/main.ts`) needs to capture this custom URI activation.
-4.  The main process typically passes the URL fragment (containing `#access_token=...&refresh_token=...`) to your Angular renderer process.
-5.  Create a dedicated route/component in Angular (e.g., `/auth-handler`) to receive this fragment.
-6.  Use the `<sup-login-desktop-redirect>` component within this handler component. It automatically extracts the tokens from the route fragment and completes the sign-in process via the `AuthStore`.
+3.  Your Electron main process (e.g., `electron/main.ts` or `electron/main.js`) needs to capture this custom URI activation.
 
-- See the `projects/demo-app-electron` for a working example of this flow.
-- The `projects/demo-server` provides an _optional_ helper server demonstrating how to generate a `hashed_token` for an existing session, which is another pattern for logging into a desktop app if the user is already authenticated elsewhere (e.g., a companion web app).
+    Here's a very concise example focusing on the core logic for deep link handling in Electron's main process:
+
+    ```javascript
+    // main.js (Electron Main Process) - Highly Simplified Example
+    const { app, BrowserWindow } = require('electron'); // BrowserWindow may be needed to find mainWindow
+    let mainWindow; // Assume mainWindow is your main application window, managed elsewhere
+    const PROTOCOL_PREFIX = 'myapp://'; // Your custom protocol
+    const DEEP_LINK_CHANNEL = 'ngx-supabase-auth:deep-link-received'; // IPC Channel
+
+    function sendUrlToRenderer(url) {
+      if (mainWindow && mainWindow.webContents && url && url.startsWith(PROTOCOL_PREFIX)) {
+        console.log(`Forwarding URL to renderer on channel ${DEEP_LINK_CHANNEL}: ${url}`);
+        mainWindow.webContents.send(DEEP_LINK_CHANNEL, url);
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.focus();
+      } else {
+        console.log('Main window not ready or invalid URL for deep linking.');
+        // Optionally, store the URL to be processed when the window is ready
+      }
+    }
+
+    // macOS: Handle when app is launched or re-opened via URL
+    app.on('open-url', (event, url) => {
+      event.preventDefault();
+      sendUrlToRenderer(url);
+    });
+
+    // Windows/Linux: Handle when app is launched via URL (first instance)
+    // or when a second instance is attempted with a URL.
+    const primaryInstance = app.requestSingleInstanceLock();
+
+    if (!primaryInstance) {
+      app.quit();
+    } else {
+      app.on('second-instance', (event, commandLine) => {
+        const urlFromArgs = commandLine.find((arg) => arg.startsWith(PROTOCOL_PREFIX));
+        if (urlFromArgs) sendUrlToRenderer(urlFromArgs);
+      });
+
+      // Check if the app was launched by a URL (primary instance)
+      const initialUrlFromCmd = process.argv.find((arg) => arg.startsWith(PROTOCOL_PREFIX));
+      if (initialUrlFromCmd) {
+        // If app is not ready yet, you might need to store this URL and process it
+        // once the mainWindow is created and its webContents are loaded.
+        // For this concise example, we'll attempt to send if app becomes ready soon.
+        app.whenReady().then(() => {
+          sendUrlToRenderer(initialUrlFromCmd);
+        });
+      }
+    }
+
+    // mainWindow creation and other app event listeners (like 'ready') are assumed
+    // to be handled elsewhere in your main process file.
+    ```
+
+    **Important: Bridging with a Preload Script**
+
+    For the renderer process (your Angular app) to receive the `deep-link-received` event securely, especially with `contextIsolation` enabled (default and recommended), you need a `preload.js` script associated with your `BrowserWindow`. This script runs in a privileged environment and can expose specific Node.js/Electron functionalities to your renderer via `contextBridge`.
+
+    Here's an example of what you might include in your `preload.js`:
+
+    ```javascript
+    // preload.js
+    const { contextBridge, ipcRenderer } = require('electron');
+
+    contextBridge.exposeInMainWorld('ngxSupabaseAuth', {
+      // Expose a function to the renderer to listen for deep link URLs
+      onDeepLinkReceived: (callback) => {
+        // Remove any existing listener for this channel to prevent duplicates if this is called multiple times
+        ipcRenderer.removeAllListeners('ngx-supabase-auth:deep-link-received');
+        // Listen for the specific channel from the main process
+        ipcRenderer.on('ngx-supabase-auth:deep-link-received', (event, url) => callback(url));
+      },
+    });
+    ```
+
+    Ensure your `BrowserWindow` is configured to use this preload script:
+
+    ```javascript
+    // In your main.js where mainWindow is created
+    // const mainWindow = new BrowserWindow({
+    //   webPreferences: {
+    //     preload: path.join(__dirname, 'preload.js'), // Path to your preload script
+    //     contextIsolation: true, // Recommended for security
+    //     nodeIntegration: false, // Recommended for security
+    //   }
+    // });
+    ```
+
+    Then, in your Angular component that handles the redirect (e.g., the one using `<sup-login-desktop-redirect>`), you would use this exposed API:
+
+    ```typescript
+    // Example in your Angular component (e.g., auth-handler.component.ts)
+    // declare global {
+    //   interface Window {
+    //     ngxSupabaseAuth: {
+    //       onDeepLinkReceived: (callback: (url: string) => void) => void;
+    //     };
+    //   }
+    // }
+    //
+    // ngOnInit() {
+    //   if (window.ngxSupabaseAuth) {
+    //     window.ngxSupabaseAuth.onDeepLinkReceived((url: string) => {
+    //       console.log('Deep link URL received in renderer:', url);
+    //       // Here, you would typically pass the URL to your AuthStore
+    //       // or the <sup-login-desktop-redirect> component logic if it handles it directly.
+    //       // For example, by navigating to a route that includes the URL fragment/query.
+    //       // this.router.navigate(['/auth-handler'], { queryParams: { fromElectronUrl: url } });
+    //     });
+    //   } else {
+    //       console.warn('ngxSupabaseAuth API not found on window. Ensure preload script is working.');
+    //   }
+    // }
+    ```
+
+4.  The Electron main process captures the full deep link URL (e.g., `myapp://auth-callback/#access_token=...&refresh_token=...` or `myapp://auth-callback/?hashed_token=...`) and passes it to your Angular renderer process using the mechanism described above. This handoff is crucial for completing the authentication flow within the Angular application.
 
 ## Demo Applications
 

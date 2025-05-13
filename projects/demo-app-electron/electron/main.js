@@ -113,7 +113,7 @@ function createWindow() {
   mainWindow.webContents.on('did-finish-load', () => {
     if (initialDeepLinkUrl) {
       console.log('Processing initial deep link URL:', initialDeepLinkUrl);
-      mainWindow.webContents.send('deep-link-received', initialDeepLinkUrl);
+      mainWindow.webContents.send('ngx-supabase-auth:deep-link-received', initialDeepLinkUrl);
       initialDeepLinkUrl = null; // Clear it after processing
     }
   });
@@ -161,7 +161,7 @@ function handleDeepLink(url) {
     // If window exists, bring it to front and send the URL
     if (mainWindow.isMinimized()) mainWindow.restore();
     mainWindow.focus();
-    mainWindow.webContents.send('deep-link-received', url);
+    mainWindow.webContents.send('ngx-supabase-auth:deep-link-received', url);
   } else {
     // If window doesn't exist yet (app launched via link), store it
     console.log('Storing deep link URL for processing after window creation:', url);

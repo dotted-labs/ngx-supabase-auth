@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, CanMatchFn, Router, UrlTree } from '@angular/router';
-import { catchError, map, of, Observable } from 'rxjs';
+import { CanActivateFn, CanMatchFn, Router } from '@angular/router';
+import { catchError, map, of } from 'rxjs';
 import { fromPromise } from 'rxjs/internal/observable/innerFrom';
 import { SUPABASE_AUTH_CONFIG } from '../config/supabase-auth.config';
 import { AuthStore } from '../store/auth.store';
@@ -16,33 +16,34 @@ export interface UnauthGuardData {
   redirectIfAuthenticated?: string;
 }
 
-const createUnauthGuard = (routeData?: UnauthGuardData): Observable<boolean | UrlTree> => {
+const createUnauthGuard = (routeData?: UnauthGuardData) => {
   const authStore = inject(AuthStore);
   const router = inject(Router);
   const config = inject(SUPABASE_AUTH_CONFIG);
   const authGuardsUtilsService = inject(AuthGuardsUtilsService);
 
-  // First, check for desktop redirect via queryParam
-  const desktopRedirectUrlTree = authGuardsUtilsService.redirectToDesktopIfDesktopQueryParam();
-  if (desktopRedirectUrlTree) {
-    console.log('[UnauthGuard] Desktop query param detected, redirecting to desktop flow.');
-    return of(desktopRedirectUrlTree);
-  }
-
   const redirectPath = routeData?.redirectIfAuthenticated || config.redirectAfterLogin || '/';
 
   return fromPromise(authStore.checkAuth()).pipe(
-    map((isAuthenticated) => {
+    map(({ isAuthenticated }) => {
+      const queryParams = new URLSearchParams(window.location.search);
+      if (queryParams.get('desktop') === 'true') {
+        authStore.setRedirectToDesktopAfterLogin(true);
+      }
+
       if (!isAuthenticated) {
         console.log('[UnauthGuard] User is not authenticated, access granted');
         return true;
       }
 
-      // User is authenticated, and no desktop redirect was triggered by query param
+      authGuardsUtilsService.redirectToDesktopIfDesktopQueryParam();
+
+      // Redirect to home or dashboard
       console.log('[UnauthGuard] User is already authenticated, redirecting to ' + redirectPath);
       return router.parseUrl(redirectPath);
     }),
     catchError((error) => {
+      // In case of error, allow access
       console.error('[UnauthGuard] Error checking authentication:', error);
       console.log('[UnauthGuard] Allowing access due to error');
       return of(true);

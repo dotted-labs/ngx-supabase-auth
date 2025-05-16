@@ -8,6 +8,7 @@ import {
   AuthState,
   PasswordResetRequest,
   SocialAuthProvider,
+  SupabaseUser,
   UpdatePasswordRequest,
   UserProfileUpdate,
 } from '../models/auth.models';
@@ -406,23 +407,23 @@ export const AuthStore = signalStore(
        * Check if the user is authenticated
        * @returns True if the user is authenticated, false otherwise
        */
-      const checkAuth = async () => {
+      const checkAuth = async (): Promise<{ isAuthenticated: boolean; user: SupabaseUser | null }> => {
         patchState(store, { loading: true, error: null });
 
         try {
           const isAuthenticated = await authService.isAuthenticated();
+          const user = await authService.getCurrentUser();
+          console.log('[AuthStore] Check auth', isAuthenticated, user);
 
-          console.log('[AuthStore] Check auth', isAuthenticated);
+          patchState(store, { user, loading: false });
 
-          patchState(store, { loading: false });
-
-          return isAuthenticated;
+          return { isAuthenticated, user };
         } catch (error) {
           patchState(store, {
             loading: false,
             error: (error as Error).message,
           });
-          return false;
+          return { isAuthenticated: false, user: null };
         }
       };
 

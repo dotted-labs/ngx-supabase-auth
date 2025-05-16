@@ -339,7 +339,7 @@ export class SupabaseAuthService {
       const { error } = await this.supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: this.config.redirectAfterLogin,
+          redirectTo: `${window.location.origin}${this.config.redirectAfterLogin}`,
         },
       });
 

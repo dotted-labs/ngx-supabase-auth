@@ -20,15 +20,15 @@ export class AuthGuardsUtilsService {
    * Redirect to desktop if desktop query param is true
    * @returns UrlTree for redirection or null
    */
-  public redirectToDesktopIfDesktopQueryParam(): UrlTree | null {
+  public redirectToDesktopIfDesktopQueryParam() {
     const queryParams = new URLSearchParams(window.location.search);
-    console.log('[AuthGuardsUtilsService] Query params for desktop check:', queryParams.toString());
-    if (queryParams.get('desktop') === 'true') {
-      console.log('[AuthGuardsUtilsService] Desktop redirect initiated by query param.');
+    console.log('[AuthGuardsUtilsService] Query params:', queryParams);
+    const isDesktop = queryParams.get('desktop') === 'true';
+    if (isDesktop) {
+      console.log('[AuthGuardsUtilsService] Desktop redirect enabled');
       this.authStore.setRedirectToDesktopAfterLogin(true);
       return this.router.parseUrl(this.config.desktopAuthRedirect || '/');
     }
-    console.log('[AuthGuardsUtilsService] No desktop query param found.');
     return null;
   }
 
@@ -36,15 +36,13 @@ export class AuthGuardsUtilsService {
    * Redirect to desktop if desktop query param is true
    * @returns UrlTree for redirection or null
    */
-  public redirectToDesktopIfDesktopLocalStorage(): string | null {
+  public redirectToDesktopIfDesktopLocalStorage() {
     const redirect = localStorage.getItem('redirectToDesktopAfterLogin');
-    if (redirect === 'true') {
-      console.log('[AuthGuardsUtilsService] Desktop redirect initiated by localStorage.');
-      localStorage.removeItem('redirectToDesktopAfterLogin'); // Clean up to prevent loops
+    if (!!redirect) {
+      console.log('[AuthGuardsUtilsService] Desktop redirect enabled');
       this.authStore.setRedirectToDesktopAfterLogin(false);
-      return this.config.desktopAuthRedirect || null; // Ensure null if undefined
+      return this.config.desktopAuthRedirect;
     }
-    console.log('[AuthGuardsUtilsService] No desktop redirect found in localStorage.');
     return null;
   }
 

@@ -1,19 +1,16 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { inject, Injectable, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { firstValueFrom } from 'rxjs';
 import { SUPABASE_AUTH_CONFIG } from '../config/supabase-auth.config';
 import {
-  SupabaseAuthConfig,
-  SupabaseUser,
-  AuthProvider,
+  ElectronAuthResult,
   PasswordResetRequest,
+  SocialAuthProvider,
+  SupabaseUser,
   UpdatePasswordRequest,
   UserProfileUpdate,
-  AuthMode,
-  ElectronAuthResult,
-  SocialAuthProvider,
 } from '../models/auth.models';
 
 /**
@@ -24,6 +21,7 @@ import {
 })
 export class SupabaseAuthService {
   private supabase: SupabaseClient;
+
   private readonly config = inject(SUPABASE_AUTH_CONFIG);
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
@@ -36,10 +34,10 @@ export class SupabaseAuthService {
     // Set up auth state change listener
     this.supabase.auth.onAuthStateChange((_, session) => {
       if (session) {
-        console.log('🔐 [SupabaseAuthService] Auth state changed, session exists');
+        console.log('[SupabaseAuthService] Auth state changed, session exists');
         // this.handleAuthRedirect(session.user.id);
       } else {
-        console.log('🔐 [SupabaseAuthService] Auth state changed, no session');
+        console.log('[SupabaseAuthService] Auth state changed, no session');
       }
     });
   }
@@ -58,12 +56,12 @@ export class SupabaseAuthService {
    * @returns Promise with the current user or null
    */
   async getCurrentUser(): Promise<SupabaseUser | null> {
-    console.log('👤 [SupabaseAuthService] Getting current user');
+    console.log('[SupabaseAuthService] Getting current user');
     const { data } = await this.supabase.auth.getUser();
     if (data.user) {
-      console.log(`👤 [SupabaseAuthService] User found: ${data.user.id}`);
+      console.log(`[SupabaseAuthService] User found: ${data.user.id}`);
     } else {
-      console.log('👤 [SupabaseAuthService] No user found');
+      console.log('[SupabaseAuthService] No user found');
     }
     return data.user as SupabaseUser;
   }
@@ -73,10 +71,10 @@ export class SupabaseAuthService {
    * @returns Promise with boolean indicating if user is authenticated
    */
   async isAuthenticated(): Promise<boolean> {
-    console.log('🔍 [SupabaseAuthService] Checking authentication status');
+    console.log('[SupabaseAuthService] Checking authentication status');
     const { data } = await this.supabase.auth.getSession();
     const isAuth = !!data.session;
-    console.log(`🔍 [SupabaseAuthService] User is authenticated: ${isAuth}`);
+    console.log(`[SupabaseAuthService] User is authenticated: ${isAuth}`);
     return isAuth;
   }
 
@@ -87,19 +85,19 @@ export class SupabaseAuthService {
    */
   async isFirstTimeUser(userId: string): Promise<boolean> {
     if (!this.config.firstTimeCheckEndpoint) {
-      console.log('🚧 [SupabaseAuthService] No firstTimeCheckEndpoint configured, skipping check');
+      console.log('[SupabaseAuthService] No firstTimeCheckEndpoint configured, skipping check');
       return false;
     }
 
     try {
-      console.log(`🚧 [SupabaseAuthService] Checking if it's the first time for user ${userId}`);
+      console.log(`[SupabaseAuthService] Checking if it's the first time for user ${userId}`);
       const response = await firstValueFrom(this.http.get<boolean>(`${this.config.firstTimeCheckEndpoint}?userId=${userId}`));
-      console.log(`🚧 [SupabaseAuthService] First time check result: ${!!response}`);
+      console.log(`[SupabaseAuthService] First time check result: ${!!response}`);
       return !!response;
     } catch (error) {
       console.error('[SupabaseAuthService] Error checking first time status:', error);
       // On error, treat as first time user
-      console.log('🚧 [SupabaseAuthService] Error detected, treating as first time user');
+      console.log('[SupabaseAuthService] Error detected, treating as first time user');
       return true;
     }
   }
@@ -112,11 +110,11 @@ export class SupabaseAuthService {
     try {
       // Check if we should skip the first-time check
       if (this.config.skipFirstTimeCheck) {
-        console.log(`🔄 [SupabaseAuthService] Skipping first-time check as configured`);
+        console.log(`[SupabaseAuthService] Skipping first-time check as configured`);
 
         // Go directly to regular auth flow
         if (this.config.redirectAfterLogin) {
-          console.log(`🔄 [SupabaseAuthService] Regular auth redirect to ${this.config.redirectAfterLogin}`);
+          console.log(`[SupabaseAuthService] Regular auth redirect to ${this.config.redirectAfterLogin}`);
           await this.router.navigate([this.config.redirectAfterLogin]);
         }
         return;
@@ -124,11 +122,11 @@ export class SupabaseAuthService {
 
       // Check if this is configured and if it's the user's first time
       if (this.config.firstTimeCheckEndpoint && this.config.firstTimeProfileRedirect) {
-        console.log(`🔄 [SupabaseAuthService] Checking first-time status for redirection for user ${userId}`);
+        console.log(`[SupabaseAuthService] Checking first-time status for redirection for user ${userId}`);
         const isFirstTime = await this.isFirstTimeUser(userId);
 
         if (isFirstTime) {
-          console.log(`🔄 [SupabaseAuthService] First time user, redirecting to ${this.config.firstTimeProfileRedirect}`);
+          console.log(`[SupabaseAuthService] First time user, redirecting to ${this.config.firstTimeProfileRedirect}`);
           await this.router.navigate([this.config.firstTimeProfileRedirect]);
           return;
         }
@@ -137,10 +135,10 @@ export class SupabaseAuthService {
       // Regular authentication flow
       if (this.config.redirectAfterLogin) {
         if (this.redirectToDesktopAfterLogin()) {
-          console.log(`🔄 [SupabaseAuthService] Redirecting to desktop after login`);
+          console.log(`[SupabaseAuthService] Redirecting to desktop after login`);
           await this.handleElectronAuth();
         }
-        console.log(`🔄 [SupabaseAuthService] Regular auth redirect to ${this.config.redirectAfterLogin}`);
+        console.log(`[SupabaseAuthService] Regular auth redirect to ${this.config.redirectAfterLogin}`);
         await this.router.navigate([this.config.redirectAfterLogin]);
       }
     } catch (error) {
@@ -148,7 +146,7 @@ export class SupabaseAuthService {
 
       // Fallback to regular redirect
       if (this.config.redirectAfterLogin) {
-        console.log(`🔄 [SupabaseAuthService] Fallback redirect to ${this.config.redirectAfterLogin}`);
+        console.log(`[SupabaseAuthService] Fallback redirect to ${this.config.redirectAfterLogin}`);
         await this.router.navigate([this.config.redirectAfterLogin]);
       }
     }
@@ -161,10 +159,10 @@ export class SupabaseAuthService {
    * @returns Promise that resolves when auth is initiated
    */
   async openExternalAuthWindow(path: string, options: Record<string, string> = {}): Promise<void> {
-    console.log('🌍 [SupabaseAuthService] Opening external auth window', path);
+    console.log('[SupabaseAuthService] Opening external auth window', path);
 
     if (!this.config.webAppAuthUrl) {
-      console.error('⚠️ [SupabaseAuthService] webAppAuthUrl is not configured for Electron mode');
+      console.error('[SupabaseAuthService] webAppAuthUrl is not configured for Electron mode');
       throw new Error('webAppAuthUrl is not configured for Electron mode');
     }
 
@@ -180,9 +178,9 @@ export class SupabaseAuthService {
       // In a real Electron app, this would use Electron's shell.openExternal
       // Here we're just providing the API that would be called from Electron
       window.open(authUrl, '_blank');
-      console.log('🔗 [SupabaseAuthService] Opened external auth URL:', authUrl);
+      console.log('[SupabaseAuthService] Opened external auth URL:', authUrl);
     } catch (error) {
-      console.error('❌ [SupabaseAuthService] Failed to open external auth window', error);
+      console.error('[SupabaseAuthService] Failed to open external auth window', error);
       throw new Error(`Failed to open auth window: ${(error as Error).message}`);
     }
   }
@@ -194,24 +192,24 @@ export class SupabaseAuthService {
    * @returns Promise with user data or error
    */
   async verifyHashedToken(hashedToken: string): Promise<{ user: SupabaseUser | null; error: Error | null }> {
-    console.log('🔑 [SupabaseAuthService] Verifying hashed token');
+    console.log('[SupabaseAuthService] Verifying hashed token');
 
     try {
-      console.log('🔑 [SupabaseAuthService] Verifying hashed token', hashedToken);
+      console.log('[SupabaseAuthService] Verifying hashed token', hashedToken);
       const { data, error } = await this.supabase.auth.verifyOtp({
         token_hash: hashedToken,
         type: 'email',
       });
 
-      console.log('🔑 [SupabaseAuthService] Verifying hashed token', data, error);
+      console.log('[SupabaseAuthService] Verifying hashed token', data, error);
 
       if (error) {
-        console.error('❌ [SupabaseAuthService] Failed to verify hashed token', error);
+        console.error('[SupabaseAuthService] Failed to verify hashed token', error);
         return { user: null, error };
       }
 
       const user = data.user as SupabaseUser;
-      console.log(`✅ [SupabaseAuthService] Successfully verified token for user: ${user.id}`);
+      console.log(`[SupabaseAuthService] Successfully verified token for user: ${user.id}`);
 
       // Handle auth redirect if needed
       if (user && user.id) {
@@ -220,7 +218,7 @@ export class SupabaseAuthService {
 
       return { user, error: null };
     } catch (error) {
-      console.error('❌ [SupabaseAuthService] Error verifying hashed token', error);
+      console.error('[SupabaseAuthService] Error verifying hashed token', error);
       return { user: null, error: error as Error };
     }
   }
@@ -230,7 +228,7 @@ export class SupabaseAuthService {
    * @returns Promise with the authentication result
    */
   async processDeepLinkUrl(url: string): Promise<ElectronAuthResult> {
-    console.log('🔄 [SupabaseAuthService] Processing deep link URL', url);
+    console.log('[SupabaseAuthService] Processing deep link URL', url);
 
     try {
       // Basic validation
@@ -248,7 +246,7 @@ export class SupabaseAuthService {
 
       return { hashedToken };
     } catch (error) {
-      console.error('❌ [SupabaseAuthService] Error processing deep link URL', error);
+      console.error('[SupabaseAuthService] Error processing deep link URL', error);
       return { error: (error as Error).message };
     }
   }
@@ -261,7 +259,7 @@ export class SupabaseAuthService {
    * @returns Promise with user data or error
    */
   async signInWithEmail(email: string, password: string): Promise<{ user: SupabaseUser | null; error: Error | null }> {
-    console.log('🔐 [SupabaseAuthService] Signing in with email');
+    console.log('[SupabaseAuthService] Signing in with email');
 
     // Original web authentication flow
     try {
@@ -271,12 +269,12 @@ export class SupabaseAuthService {
       });
 
       if (error) {
-        console.error('❌ [SupabaseAuthService] Sign in failed', error);
+        console.error('[SupabaseAuthService] Sign in failed', error);
         return { user: null, error };
       }
 
       const user = data.user as SupabaseUser;
-      console.log(`✅ [SupabaseAuthService] User signed in: ${user.id}`);
+      console.log(`[SupabaseAuthService] User signed in: ${user.id}`);
 
       // Handle redirection after successful login
       if (user && user.id) {
@@ -285,7 +283,7 @@ export class SupabaseAuthService {
 
       return { user, error: null };
     } catch (error) {
-      console.error('❌ [SupabaseAuthService] Sign in error', error);
+      console.error('[SupabaseAuthService] Sign in error', error);
       return { user: null, error: error as Error };
     }
   }
@@ -308,12 +306,12 @@ export class SupabaseAuthService {
       });
 
       if (error) {
-        console.error('❌ [SupabaseAuthService] Sign up failed', error);
+        console.error('[SupabaseAuthService] Sign up failed', error);
         return { user: null, error };
       }
 
       const user = data.user as SupabaseUser;
-      console.log(`✅ [SupabaseAuthService] User signed up: ${user.id}`);
+      console.log(`[SupabaseAuthService] User signed up: ${user.id}`);
 
       // Handle redirection after successful signup
       if (user && user.id) {
@@ -322,7 +320,7 @@ export class SupabaseAuthService {
 
       return { user, error: null };
     } catch (error) {
-      console.error('❌ [SupabaseAuthService] Sign up error', error);
+      console.error('[SupabaseAuthService] Sign up error', error);
       return { user: null, error: error as Error };
     }
   }
@@ -334,26 +332,26 @@ export class SupabaseAuthService {
    * @returns Promise with error status
    */
   async signInWithSocialProvider(provider: SocialAuthProvider): Promise<{ error: Error | null }> {
-    console.log(`🔐 [SupabaseAuthService] Signing in with ${provider}`);
+    console.log(`[SupabaseAuthService] Signing in with ${provider}`);
 
     // Original web social auth flow
     try {
       const { error } = await this.supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: this.config.redirectAfterLogin,
         },
       });
 
       if (error) {
-        console.error('❌ [SupabaseAuthService] Social sign in failed', error);
+        console.error('[SupabaseAuthService] Social sign in failed', error);
         return { error };
       }
 
-      console.log(`✅ [SupabaseAuthService] Social auth initiated with ${provider}`);
+      console.log(`[SupabaseAuthService] Social auth initiated with ${provider}`);
       return { error: null };
     } catch (error) {
-      console.error('❌ [SupabaseAuthService] Social sign in error', error);
+      console.error('[SupabaseAuthService] Social sign in error', error);
       return { error: error as Error };
     }
   }
@@ -365,13 +363,13 @@ export class SupabaseAuthService {
    */
   async sendPasswordResetEmail(request: PasswordResetRequest): Promise<{ error: Error | null }> {
     try {
-      console.log(`🔐 [SupabaseAuthService] Sending password reset email to: ${request.email}`);
+      console.log(`[SupabaseAuthService] Sending password reset email to: ${request.email}`);
       const { error } = await this.supabase.auth.resetPasswordForEmail(request.email);
 
       if (error) {
         console.error('[SupabaseAuthService] Password reset email error:', error);
       } else {
-        console.log(`✅ [SupabaseAuthService] Password reset email sent successfully`);
+        console.log(`[SupabaseAuthService] Password reset email sent successfully`);
       }
 
       return { error };
@@ -388,15 +386,15 @@ export class SupabaseAuthService {
    */
   async updatePassword(request: UpdatePasswordRequest): Promise<{ error: Error | null }> {
     try {
-      console.log(`🔐 [SupabaseAuthService] Updating user password`);
+      console.log(`[SupabaseAuthService] Updating user password`);
       const { error } = await this.supabase.auth.updateUser({
         password: request.password,
       });
 
       if (error) {
-        console.error('[SupabaseAuthService] Update password error:', error);
+        console.error(' [SupabaseAuthService] Update password error:', error);
       } else {
-        console.log(`✅ [SupabaseAuthService] Password updated successfully`);
+        console.log(`[SupabaseAuthService] Password updated successfully`);
       }
 
       return { error };
@@ -413,7 +411,7 @@ export class SupabaseAuthService {
    */
   async updateProfile(update: UserProfileUpdate): Promise<{ error: Error | null }> {
     try {
-      console.log(`👤 [SupabaseAuthService] Updating user profile:`, update);
+      console.log(`[SupabaseAuthService] Updating user profile:`, update);
       const { error } = await this.supabase.auth.updateUser({
         data: update,
       });
@@ -421,7 +419,7 @@ export class SupabaseAuthService {
       if (error) {
         console.error('[SupabaseAuthService] Update profile error:', error);
       } else {
-        console.log(`✅ [SupabaseAuthService] Profile updated successfully`);
+        console.log(`[SupabaseAuthService] Profile updated successfully`);
       }
 
       return { error };
@@ -437,15 +435,15 @@ export class SupabaseAuthService {
    */
   async signOut(): Promise<{ error: Error | null }> {
     try {
-      console.log(`🔐 [SupabaseAuthService] Signing out user`);
+      console.log(`[SupabaseAuthService] Signing out user`);
       const { error } = await this.supabase.auth.signOut();
 
       if (error) {
         console.error('[SupabaseAuthService] Sign out error:', error);
       } else {
-        console.log(`✅ [SupabaseAuthService] User signed out successfully`);
+        console.log(`[SupabaseAuthService] User signed out successfully`);
         if (this.config.redirectAfterLogout) {
-          console.log(`🔄 [SupabaseAuthService] Redirecting to ${this.config.redirectAfterLogout}`);
+          console.log(`[SupabaseAuthService] Redirecting to ${this.config.redirectAfterLogout}`);
           await this.router.navigate([this.config.redirectAfterLogout]);
         }
       }
@@ -479,7 +477,7 @@ export class SupabaseAuthService {
 
       // Get the public URL
       const { data } = this.supabase.storage.from(bucketName).getPublicUrl(filePath);
-      console.log(`✅ [SupabaseAuthService] File uploaded successfully, URL: ${data.publicUrl}`);
+      console.log(`[SupabaseAuthService] File uploaded successfully, URL: ${data.publicUrl}`);
 
       return { url: data.publicUrl, error: null };
     } catch (err) {
@@ -497,25 +495,25 @@ export class SupabaseAuthService {
       const { data } = await this.supabase.auth.getSession();
 
       if (!data.session) {
-        console.error('❌ [SupabaseAuthService] No active session found for Electron auth');
+        console.error('[SupabaseAuthService] No active session found for Electron auth');
         return null;
       }
 
       if (!this.config.generateMagicLinkEndpoint) {
-        console.error('❌ [SupabaseAuthService] generateMagicLinkEndpoint is not configured for Electron mode');
+        console.error('[SupabaseAuthService] generateMagicLinkEndpoint is not configured for Electron mode');
         throw new Error('generateMagicLinkEndpoint is not configured for Electron mode');
       }
 
       const { hashed_token: hashedToken } = await firstValueFrom(
         this.http.post<{ hashed_token: string }>(this.config.generateMagicLinkEndpoint, {}),
       );
-      console.log('🔄 [SupabaseAuthService] Magic link data:', hashedToken);
+      console.log('[SupabaseAuthService] Magic link data:', hashedToken);
 
       // Redirect to Electron app with the hashed token
       // The protocol (your-app://) should match electronDeepLinkProtocol in your config
 
       const redirectUrl = `${this.config.electronDeepLinkProtocol}?hashed_token=${hashedToken}`;
-      console.log('🔄 [SupabaseAuthService] Redirecting to Electron app with URL:', redirectUrl, hashedToken);
+      console.log('[SupabaseAuthService] Redirecting to Electron app with URL:', redirectUrl, hashedToken);
 
       try {
         // Try to close the window/tab if possible
@@ -523,12 +521,12 @@ export class SupabaseAuthService {
         // window.close();
       } catch (error) {
         // Fallback to just redirecting if closing fails
-        console.log('⚠️ [SupabaseAuthService] Could not close window, redirecting only');
+        console.log('[SupabaseAuthService] Could not close window, redirecting only');
         window.location.href = redirectUrl;
         // window.close();
       }
     } catch (error) {
-      console.error('❌ [SupabaseAuthService] Failed to get token for Electron auth', error);
+      console.error('[SupabaseAuthService] Failed to get token for Electron auth', error);
       throw error;
     }
 

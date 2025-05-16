@@ -20,14 +20,15 @@ export class AuthGuardsUtilsService {
    * Redirect to desktop if desktop query param is true
    * @returns UrlTree for redirection or null
    */
-  public redirectToDesktopIfDesktopQueryParam() {
+  public redirectToDesktopIfDesktopQueryParam(): UrlTree | null {
     const queryParams = new URLSearchParams(window.location.search);
-    console.log('[UnauthGuard] Query params:', queryParams);
+    console.log('[AuthGuardsUtilsService] Query params for desktop check:', queryParams.toString());
     if (queryParams.get('desktop') === 'true') {
-      console.log('[UnauthGuard] Desktop redirect enabled');
+      console.log('[AuthGuardsUtilsService] Desktop redirect initiated by query param.');
       this.authStore.setRedirectToDesktopAfterLogin(true);
       return this.router.parseUrl(this.config.desktopAuthRedirect || '/');
     }
+    console.log('[AuthGuardsUtilsService] No desktop query param found.');
     return null;
   }
 
@@ -35,13 +36,15 @@ export class AuthGuardsUtilsService {
    * Redirect to desktop if desktop query param is true
    * @returns UrlTree for redirection or null
    */
-  public redirectToDesktopIfDesktopLocalStorage() {
+  public redirectToDesktopIfDesktopLocalStorage(): string | null {
     const redirect = localStorage.getItem('redirectToDesktopAfterLogin');
-    if (!!redirect) {
-      console.log('[AuthGuardsUtilsService] Desktop redirect enabled');
+    if (redirect === 'true') {
+      console.log('[AuthGuardsUtilsService] Desktop redirect initiated by localStorage.');
+      localStorage.removeItem('redirectToDesktopAfterLogin'); // Clean up to prevent loops
       this.authStore.setRedirectToDesktopAfterLogin(false);
-      return this.config.desktopAuthRedirect;
+      return this.config.desktopAuthRedirect || null; // Ensure null if undefined
     }
+    console.log('[AuthGuardsUtilsService] No desktop redirect found in localStorage.');
     return null;
   }
 

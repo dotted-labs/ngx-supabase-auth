@@ -23,29 +23,27 @@ const createAuthGuard = (routeData?: AuthGuardData, url?: string): Observable<bo
   const config = inject(SUPABASE_AUTH_CONFIG);
   const authGuardsUtilsService = inject(AuthGuardsUtilsService);
 
+  // First, check for desktop redirect from localStorage
+  const desktopRedirectPathFromStorage = authGuardsUtilsService.redirectToDesktopIfDesktopLocalStorage();
+  if (desktopRedirectPathFromStorage) {
+    console.log('[AuthGuard] Desktop redirect from localStorage detected, redirecting.');
+    return of(router.parseUrl(desktopRedirectPathFromStorage));
+  }
+
   const redirectPath = routeData?.authRequiredRedirect || config.authRequiredRedirect || '/login';
 
   return fromPromise(authStore.checkAuth()).pipe(
     switchMap((isAuthenticated) => {
-      // Check if we should redirect to desktop-login-redirect after login
-
-      const redirectToDesktop = authGuardsUtilsService.redirectToDesktopIfDesktopLocalStorage();
-      if (redirectToDesktop) {
-        return of(router.parseUrl(redirectToDesktop));
-      }
+      // Desktop redirect logic via localStorage is already handled above
 
       const userId = authStore?.user()?.id;
 
       if (!isAuthenticated || !userId) {
-        // Redirect to login if not authenticated
         console.log('[AuthGuard] User is not authenticated, redirecting to ' + redirectPath);
         return of(router.parseUrl(redirectPath));
       }
 
-      // User is authenticated, check if it's first time
       console.log('[AuthGuard] User is authenticated, checking if first time');
-
-      // Check if it's the user's first time
       return authGuardsUtilsService.checkIfFirstTimeUser(userId).pipe(
         map((isFirstTime) => {
           return authGuardsUtilsService.handleAuthRedirection(isAuthenticated, isFirstTime, url);

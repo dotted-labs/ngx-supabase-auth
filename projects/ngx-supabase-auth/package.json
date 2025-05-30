@@ -1,6 +1,6 @@
 {
   "name": "@dotted-labs/ngx-supabase-auth",
-  "version": "0.1.11",
+  "version": "0.2.0",
   "description": "Angular library for authentication with Supabase, including ready-to-use components, services, and guards",
   "keywords": [
     "angular",

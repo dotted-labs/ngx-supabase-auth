@@ -22,11 +22,18 @@ export const DEFAULT_ENABLED_AUTH_PROVIDERS: AuthProvider[] = [
 
 /**
  * Create provider for Supabase Auth configuration
- * @param config Supabase Auth configuration
+ * @param config Supabase Auth configuration with required supabaseClient
  * @returns Array of providers for Supabase Auth configuration
  */
 export function provideSupabaseAuth(config: SupabaseAuthConfig): (Provider | EnvironmentProviders)[] {
-  // Check if firstTimeCheckEndpoint is configured, which requires HttpClient
+  // Validate that supabaseClient is provided
+  if (!config.supabaseClient) {
+    throw new Error(
+      'provideSupabaseAuth: supabaseClient is required. ' +
+        'Please create a Supabase client in your main application and pass it to provideSupabaseAuth(). ' +
+        'Example: provideSupabaseAuth({ supabaseClient: createClient(url, key), ... })',
+    );
+  }
 
   const providers: (Provider | EnvironmentProviders)[] = [
     // Add HttpClient provider with auth interceptor

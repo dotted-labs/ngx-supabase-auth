@@ -1,16 +1,26 @@
+import { SupabaseClient } from '@supabase/supabase-js';
+
 /**
  * Authentication configuration interface
  */
 export interface SupabaseAuthConfig {
   /**
    * Supabase project URL
+   * @deprecated When supabaseClient is provided, this field is not used
    */
-  supabaseUrl: string;
+  supabaseUrl?: string;
 
   /**
    * Supabase API key
+   * @deprecated When supabaseClient is provided, this field is not used
    */
-  supabaseKey: string;
+  supabaseKey?: string;
+
+  /**
+   * Supabase client instance to use for authentication
+   * This must be created in your main application to ensure a single client instance
+   */
+  supabaseClient: SupabaseClient;
 
   /**
    * Redirect path after successful login

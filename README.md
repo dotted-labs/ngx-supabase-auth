@@ -37,32 +37,86 @@ _Requires `@angular/core`, `@angular/common`, `@angular/router`, `rxjs`, `ngrx/s
 
 ### 1. Configure in `app.config.ts`
 
-Import `provideSupabaseAuth` and add it to the `providers` array in your `ApplicationConfig`.
+**⚠️ Important:** You **must** provide a Supabase client instance to avoid conflicts. Import `provideSupabaseAuth` and add it to the `providers` array in your `ApplicationConfig`.
 
 ```typescript
 // src/app/app.config.ts
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideSupabaseAuth } from '@dotted-labs/ngx-supabase-auth';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { provideSupabaseAuth, AuthProvider } from '@dotted-labs/ngx-supabase-auth';
 import { routes } from './app.routes';
-import { environment } from '../environments/environment'; // Your environment file
+import { environment } from '../environments/environment';
+
+/**
+ * Creates and configures the Supabase client instance in your main application
+ * This ensures a single client instance is used throughout the application
+ */
+function createSupabaseClient(): SupabaseClient {
+  return createClient(environment.supabaseUrl, environment.supabaseKey);
+}
+
+// Create the single Supabase client instance for the entire app
+const supabaseClient = createSupabaseClient();
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes), // Your routes
+    provideRouter(routes),
     provideSupabaseAuth({
-      supabaseUrl: environment.supabaseUrl, // Your Supabase URL
-      supabaseKey: environment.supabaseKey, // Your Supabase Anon Key
-      // Optional configuration
-      // config: {
-      //   redirectUrl: 'http://localhost:4200/callback', // Optional: Override redirect URL
-      //   requireMetadataFields: ['full_name'], // Optional: Fields required in user_metadata for profile completion
-      //   storageType: 'sessionStorage' // Optional: 'localStorage' (default) or 'sessionStorage'
-      // }
+      supabaseClient: supabaseClient, // Required: Pass the client instance
+      // Optional configuration:
+      redirectAfterLogin: '/dashboard',
+      redirectAfterLogout: '/login',
+      authRequiredRedirect: '/login',
+      enabledAuthProviders: [AuthProvider.EMAIL_PASSWORD, AuthProvider.GOOGLE],
+      // ... other options
     }),
     // ... other providers
   ],
 };
+
+// Export the client for use elsewhere in your app
+export { supabaseClient };
+```
+
+### Advanced Configuration Options
+
+**Why is `supabaseClient` required?**
+
+- Prevents authentication state conflicts
+- Ensures consistent session management
+- Avoids duplicate auth listeners
+- Allows you to use the same client for database, storage, etc.
+
+**Available configuration options:**
+
+```typescript
+provideSupabaseAuth({
+  supabaseClient: supabaseClient, // Required
+  redirectAfterLogin: '/dashboard', // Default: '/'
+  redirectAfterLogout: '/login', // Default: '/login'
+  authRequiredRedirect: '/login', // Default: '/login'
+  enabledAuthProviders: [AuthProvider.EMAIL_PASSWORD, AuthProvider.GOOGLE],
+  firstTimeProfileRedirect: '/complete-profile', // For first-time users
+  electronDeepLinkProtocol: 'myapp://auth', // For Electron apps
+  // ... other options
+});
+```
+
+**Using the same client elsewhere in your app:**
+
+```typescript
+// src/app/services/database.service.ts
+import { Injectable } from '@angular/core';
+import { supabaseClient } from '../app.config';
+
+@Injectable({ providedIn: 'root' })
+export class DatabaseService {
+  async getTodos() {
+    const { data, error } = await supabaseClient.from('todos').select('*');
+    return { data, error };
+  }
+}
 ```
 
 ### 2. Use Components
@@ -145,9 +199,9 @@ export class NavbarComponent {
 
   // Example computed signal
   public userName = computed(() => {
-    const profile = this.authStore.profile();
-    // Use a specific field from profile or fallback to email
-    return profile?.['full_name'] ?? this.authStore.user()?.email ?? 'User';
+    const user = this.authStore.user();
+    // Use user metadata or fallback to email
+    return user?.user_metadata?.['name'] ?? user?.email?.split('@')[0] ?? 'User';
   });
 
   public logout(): void {
@@ -159,15 +213,16 @@ export class NavbarComponent {
 Key `AuthStore` Signals:
 
 - `user()`: Current Supabase `User` or `null`.
-- `session()`: Current Supabase `Session` or `null`.
-- `profile()`: User profile data (from `profiles` table, if configured) or `null`.
 - `isAuthenticated()`: `boolean` indicating if the user is logged in.
-- `isLoading()`: `boolean` indicating if an auth operation is in progress.
-- `authError()`: Any Supabase auth error that occurred.
+- `loading()`: `boolean` indicating if an auth operation is in progress.
+- `error()`: Any authentication error that occurred, or `null`.
+- `name()`: User's display name from metadata.
+- `avatarUrl()`: User's avatar URL or default avatar.
+- `enabledAuthProviders()`: Array of enabled authentication providers.
 
 Key `AuthStore` Methods:
 
-- `signInWithPassword()`, `signUpWithEmail()`, `signOut()`, `resetPasswordForEmail()`, `updatePassword()`, `signInWithOtp()`, `signInWithOAuth()`, `updateUserProfile()` ...and more.
+- `signInWithEmail()`, `signUpWithEmail()`, `signOut()`, `sendPasswordResetEmail()`, `updatePassword()`, `signInWithSocialProvider()`, `updateProfile()` ...and more.
 
 ### 4. Protect Routes
 
@@ -217,7 +272,7 @@ export const routes: Routes = [
 
 Handling authentication, especially social logins, in desktop applications requires a specific flow:
 
-1.  Use `<sup-login-desktop>` in your main application window. When a user clicks a social login button, it triggers `signInWithOAuth`, which opens the system browser for authentication.
+1.  Use `<sup-login-desktop>` in your main application window. When a user clicks a social login button, it triggers `signInWithSocialProvider`, which opens the system browser for authentication.
 2.  Configure Supabase OAuth to redirect to a custom URI scheme (e.g., `myapp://auth-callback/`) that your Electron app listens for.
 3.  Your Electron main process (e.g., `electron/main.ts` or `electron/main.js`) needs to capture this custom URI activation.
 

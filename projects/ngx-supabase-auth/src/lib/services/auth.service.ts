@@ -29,7 +29,18 @@ export class SupabaseAuthService {
 
   constructor() {
     console.log('[SupabaseAuthService] Initializing service');
-    this.supabase = createClient(this.config.supabaseUrl, this.config.supabaseKey);
+
+    // Use the provided Supabase client - it's required
+    if (!this.config.supabaseClient) {
+      throw new Error(
+        'SupabaseAuthService: supabaseClient is required. ' +
+          'Please create a Supabase client in your main application and pass it to provideSupabaseAuth(). ' +
+          'See: https://github.com/dotted-labs/ngx-supabase-auth#using-a-single-supabase-client-instance-recommended',
+      );
+    }
+
+    console.log('[SupabaseAuthService] Using provided Supabase client');
+    this.supabase = this.config.supabaseClient;
 
     // Set up auth state change listener
     this.supabase.auth.onAuthStateChange((_, session) => {

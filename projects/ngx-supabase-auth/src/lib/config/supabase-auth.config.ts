@@ -18,6 +18,7 @@ export const DEFAULT_ENABLED_AUTH_PROVIDERS: AuthProvider[] = [
   AuthProvider.GITHUB,
   AuthProvider.TWITTER,
   AuthProvider.DISCORD,
+  AuthProvider.TWITCH,
 ];
 
 /**

@@ -120,6 +120,7 @@ export enum SocialAuthProvider {
   TWITTER = 'twitter',
   GITHUB = 'github',
   DISCORD = 'discord',
+  TWITCH = 'twitch',
 }
 
 export enum AuthProvider {
@@ -129,6 +130,7 @@ export enum AuthProvider {
   TWITTER = 'twitter',
   GITHUB = 'github',
   DISCORD = 'discord',
+  TWITCH = 'twitch',
 }
 
 /**

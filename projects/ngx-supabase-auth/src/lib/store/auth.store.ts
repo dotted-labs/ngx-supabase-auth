@@ -13,6 +13,7 @@ import {
   UserProfileUpdate,
 } from '../models/auth.models';
 import { SupabaseAuthService } from '../services/auth.service';
+import { Session } from '@supabase/supabase-js';
 
 /**
  * Initial auth state
@@ -449,6 +450,14 @@ export const AuthStore = signalStore(
         }
       };
 
+      const onAuth = (session: Session) => {
+        console.log('[AuthStore] Auth state changed, session exists', session);
+      };
+
+      const onUnauth = () => {
+        console.log('[AuthStore] Auth state changed, no session');
+      };
+
       return {
         signInWithEmail,
         setRedirectToDesktopAfterLogin,
@@ -466,12 +475,23 @@ export const AuthStore = signalStore(
         isProviderEnabled,
         openAppDesktopAfterLogin,
         initializeStore,
+        onAuth,
+        onUnauth,
       };
     },
   ),
   withHooks({
-    onInit(store) {
+    onInit(store, authService = inject(SupabaseAuthService), config = inject(SUPABASE_AUTH_CONFIG)) {
       store.initializeStore();
+      config.supabaseClient.auth.onAuthStateChange((_, session) => {
+        if (session) {
+          console.log('[AuthStore] Auth state changed, session exists');
+          store.onAuth(session);
+        } else {
+          console.log('[AuthStore] Auth state changed, no session');
+          store.onUnauth();
+        }
+      });
     },
   }),
 );

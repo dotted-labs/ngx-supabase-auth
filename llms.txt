@@ -1,0 +1,1099 @@
+========================
+CODE SNIPPETS
+========================
+TITLE: Running the ngx-supabase-auth Electron Demo Application
+DESCRIPTION: This snippet provides the necessary npm commands to set up and launch the Electron demo application. It first installs all project dependencies and then executes the script defined to start the Electron app, making it ready for testing authentication flows.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/demo-app-electron/README.md#_snippet_0
+
+LANGUAGE: bash
+CODE:
+```
+# Install dependencies
+npm install
+
+# Run the Electron demo application
+npm run start:demo-app-electron
+```
+
+----------------------------------------
+
+TITLE: Running the ngx-supabase-auth Demo Application
+DESCRIPTION: These bash commands are used to set up and run the ngx-supabase-auth demo application. First, `npm install` fetches all required project dependencies, and then `npm run start:demo-app` compiles and serves the Angular application, making it accessible locally.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/demo-app/README.md#_snippet_0
+
+LANGUAGE: bash
+CODE:
+```
+# Install dependencies
+npm install
+
+# Run the demo application
+npm run start:demo-app
+```
+
+----------------------------------------
+
+TITLE: Running ngx-supabase-auth Demo Applications
+DESCRIPTION: These commands provide instructions for setting up and running the various demo applications included in the `ngx-supabase-auth` repository. It covers installing dependencies, launching the standard web demo, the Electron desktop demo, and the optional demo server for magic link generation.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/README.md#_snippet_12
+
+LANGUAGE: Bash
+CODE:
+```
+# Install all dependencies from the root
+npm install
+
+# Run the web demo
+npm run start:demo-app
+
+# Run the Electron demo
+npm run start:demo-app-electron
+
+# Run the optional demo server (requires separate setup, see its README)
+# cd projects/demo-server && npm install && npm run dev
+```
+
+----------------------------------------
+
+TITLE: Installing Node.js Dependencies for Supabase Demo Server
+DESCRIPTION: This command sequence navigates into the `projects/demo-server` directory and then installs all required Node.js dependencies listed in `package.json` using npm. This is a prerequisite for running the Express server.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/demo-server/README.md#_snippet_0
+
+LANGUAGE: Bash
+CODE:
+```
+cd projects/demo-server
+npm install
+```
+
+----------------------------------------
+
+TITLE: Running the Supabase Magic Link Generator Server
+DESCRIPTION: These commands initiate the Node.js Express server. `npm start` runs the server in production mode, while `npm run dev` typically starts it with development features like automatic restarts (e.g., using `nodemon`), facilitating rapid development.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/demo-server/README.md#_snippet_2
+
+LANGUAGE: Bash
+CODE:
+```
+npm start
+
+npm run dev
+```
+
+----------------------------------------
+
+TITLE: Installing ngx-supabase-auth and Supabase JS via npm
+DESCRIPTION: This command installs the `ngx-supabase-auth` library and the official `@supabase/supabase-js` client library using npm. These are the primary dependencies required to integrate Supabase authentication into an Angular application.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/README.md#_snippet_0
+
+LANGUAGE: bash
+CODE:
+```
+npm install @dotted-labs/ngx-supabase-auth @supabase/supabase-js
+```
+
+----------------------------------------
+
+TITLE: Configuring Supabase Authentication in Angular's app.config.ts
+DESCRIPTION: This TypeScript snippet demonstrates how to configure `ngx-supabase-auth` in an Angular application's `app.config.ts`. It shows the creation of a single Supabase client instance using `createClient` and its provision to `provideSupabaseAuth` along with optional configuration like redirect paths and enabled authentication providers. This setup ensures a consistent Supabase client throughout the application.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/README.md#_snippet_1
+
+LANGUAGE: typescript
+CODE:
+```
+// src/app/app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { provideSupabaseAuth, AuthProvider } from '@dotted-labs/ngx-supabase-auth';
+import { routes } from './app.routes';
+import { environment } from '../environments/environment';
+
+/**
+ * Creates and configures the Supabase client instance in your main application
+ * This ensures a single client instance is used throughout the application
+ */
+function createSupabaseClient(): SupabaseClient {
+  return createClient(environment.supabaseUrl, environment.supabaseKey);
+}
+
+// Create the single Supabase client instance for the entire app
+const supabaseClient = createSupabaseClient();
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideRouter(routes),
+    provideSupabaseAuth({
+      supabaseClient: supabaseClient, // Required: Pass the client instance
+      // Optional configuration:
+      redirectAfterLogin: '/dashboard',
+      redirectAfterLogout: '/login',
+      authRequiredRedirect: '/login',
+      enabledAuthProviders: [AuthProvider.EMAIL_PASSWORD, AuthProvider.GOOGLE],
+      // ... other options
+    }),
+    // ... other providers
+  ]
+};
+
+// Export the client for use elsewhere in your app
+export { supabaseClient };
+```
+
+----------------------------------------
+
+TITLE: Handling Deep Links in Angular Electron Renderer Process
+DESCRIPTION: This snippet demonstrates how an Angular application, running in an Electron renderer process, listens for deep link URLs using the `ngxSupabaseAuth` API. It logs the received URL and provides a commented-out example of how to use Angular Router to navigate based on the deep link, ensuring the authentication flow can be completed.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/README.md#_snippet_11
+
+LANGUAGE: TypeScript
+CODE:
+```
+ngOnInit() {
+  if (window.ngxSupabaseAuth) {
+    window.ngxSupabaseAuth.onDeepLinkReceived((url: string) => {
+      console.log('Deep link URL received in renderer:', url);
+      // Here, you would typically pass the URL to your AuthStore
+      // or the <sup-login-desktop-redirect> component logic if it handles it directly.
+      // For example, by navigating to a route that includes the URL fragment/query.
+      // this.router.navigate(['/auth-handler'], { queryParams: { fromElectronUrl: url } });
+    });
+  } else {
+      console.warn('ngxSupabaseAuth API not found on window. Ensure preload script is working.');
+  }
+}
+```
+
+----------------------------------------
+
+TITLE: Accessing Supabase Client in an Angular Service
+DESCRIPTION: This example shows how to inject and use the shared `supabaseClient` instance within an Angular service. By importing `supabaseClient` from `app.config`, developers can perform database operations (like fetching todos) ensuring consistent client usage across the application. This prevents authentication conflicts and leverages the same client for all Supabase interactions.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/README.md#_snippet_3
+
+LANGUAGE: TypeScript
+CODE:
+```
+// src/app/services/database.service.ts
+import { Injectable } from '@angular/core';
+import { supabaseClient } from '../app.config';
+
+@Injectable({ providedIn: 'root' })
+export class DatabaseService {
+  async getTodos() {
+    const { data, error } = await supabaseClient.from('todos').select('*');
+    return { data, error };
+  }
+}
+```
+
+----------------------------------------
+
+TITLE: Configuring Environment Variables for Supabase Server
+DESCRIPTION: This `.env` file configuration sets up the necessary Supabase API keys (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_KEY`) and the server's listening port. The `SUPABASE_SERVICE_KEY` is critical for administrative operations like generating magic links and must be kept secure.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/demo-server/README.md#_snippet_1
+
+LANGUAGE: dotenv
+CODE:
+```
+# Supabase Configuration
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_KEY=your_supabase_service_role_key # IMPORTANT: Service Role Key!
+
+# Server Configuration
+PORT=3000
+```
+
+----------------------------------------
+
+TITLE: Handling Deep Links in Electron Main Process (JavaScript)
+DESCRIPTION: This JavaScript snippet demonstrates how the Electron main process captures and forwards deep link URLs (e.g., `myapp://auth-callback/`) to the renderer process. It handles URL activation on macOS (`open-url`) and Windows/Linux (`second-instance` and initial launch arguments), ensuring the main window is focused and the URL is sent via IPC.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/README.md#_snippet_7
+
+LANGUAGE: javascript
+CODE:
+```
+// main.js (Electron Main Process) - Highly Simplified Example
+const { app, BrowserWindow } = require('electron'); // BrowserWindow may be needed to find mainWindow
+let mainWindow; // Assume mainWindow is your main application window, managed elsewhere
+const PROTOCOL_PREFIX = 'myapp://'; // Your custom protocol
+const DEEP_LINK_CHANNEL = 'ngx-supabase-auth:deep-link-received'; // IPC Channel
+
+function sendUrlToRenderer(url) {
+  if (mainWindow && mainWindow.webContents && url && url.startsWith(PROTOCOL_PREFIX)) {
+    console.log(`Forwarding URL to renderer on channel ${DEEP_LINK_CHANNEL}: ${url}`);
+    mainWindow.webContents.send(DEEP_LINK_CHANNEL, url);
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  } else {
+    console.log('Main window not ready or invalid URL for deep linking.');
+    // Optionally, store the URL to be processed when the window is ready
+  }
+}
+
+// macOS: Handle when app is launched or re-opened via URL
+app.on('open-url', (event, url) => {
+  event.preventDefault();
+  sendUrlToRenderer(url);
+});
+
+// Windows/Linux: Handle when app is launched via URL (first instance)
+// or when a second instance is attempted with a URL.
+const primaryInstance = app.requestSingleInstanceLock();
+
+if (!primaryInstance) {
+  app.quit();
+} else {
+  app.on('second-instance', (event, commandLine) => {
+    const urlFromArgs = commandLine.find((arg) => arg.startsWith(PROTOCOL_PREFIX));
+    if (urlFromArgs) sendUrlToRenderer(urlFromArgs);
+  });
+
+  // Check if the app was launched by a URL (primary instance)
+  const initialUrlFromCmd = process.argv.find((arg) => arg.startsWith(PROTOCOL_PREFIX));
+  if (initialUrlFromCmd) {
+    // If app is not ready yet, you might need to store this URL and process it
+    // once the mainWindow is created and its webContents are loaded.
+    // For this concise example, we'll attempt to send if app becomes ready soon.
+    app.whenReady().then(() => {
+      sendUrlToRenderer(initialUrlFromCmd);
+    });
+  }
+}
+
+// mainWindow creation and other app event listeners (like 'ready') are assumed
+// to be handled elsewhere in your main process file.
+```
+
+----------------------------------------
+
+TITLE: Configuring Electron BrowserWindow with Preload Script (JavaScript)
+DESCRIPTION: This JavaScript snippet illustrates how to configure an Electron `BrowserWindow` to load a `preload.js` script. It emphasizes setting `contextIsolation` to `true` and `nodeIntegration` to `false` for enhanced security, ensuring the renderer process interacts with Electron APIs only through the exposed `contextBridge` methods.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/README.md#_snippet_9
+
+LANGUAGE: javascript
+CODE:
+```
+// In your main.js where mainWindow is created
+// const mainWindow = new BrowserWindow({
+//   webPreferences: {
+//     preload: path.join(__dirname, 'preload.js'), // Path to your preload script
+//     contextIsolation: true, // Recommended for security
+//     nodeIntegration: false, // Recommended for security
+//   }
+// });
+```
+
+----------------------------------------
+
+TITLE: Configuring ngx-supabase-auth in Angular Electron App
+DESCRIPTION: This TypeScript snippet from app.config.ts demonstrates how to initialize the @dotted-labs/ngx-supabase-auth library within an Angular Electron application. It uses provideSupabaseAuth to supply the Supabase URL and key, typically sourced from environment variables, enabling the library's authentication services.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/demo-app-electron/README.md#_snippet_1
+
+LANGUAGE: typescript
+CODE:
+```
+// src/app/app.config.ts (snippet)
+import { provideSupabaseAuth } from '@dotted-labs/ngx-supabase-auth';
+import { environment } from '../environments/environment';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    // ... other providers
+    provideSupabaseAuth({
+      supabaseUrl: environment.supabaseUrl,
+      supabaseKey: environment.supabaseKey,
+      // No specific desktop config needed here usually
+    }),
+  ],
+};
+```
+
+----------------------------------------
+
+TITLE: Configuring ngx-supabase-auth in Angular app.config.ts
+DESCRIPTION: This TypeScript snippet demonstrates how to initialize the `@dotted-labs/ngx-supabase-auth` library within an Angular application's `app.config.ts` file. The `provideSupabaseAuth` function is called within the `providers` array, passing the Supabase URL and Key, typically sourced from environment variables, to configure the library.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/demo-app/README.md#_snippet_1
+
+LANGUAGE: typescript
+CODE:
+```
+// src/app/app.config.ts (snippet)
+import { provideSupabaseAuth } from '@dotted-labs/ngx-supabase-auth';
+import { environment } from '../environments/environment';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    // ... other providers like provideRouter
+    provideSupabaseAuth({
+      supabaseUrl: environment.supabaseUrl,
+      supabaseKey: environment.supabaseKey,
+      // config: { /* Optional config */ }
+    })
+  ]
+};
+```
+
+----------------------------------------
+
+TITLE: Signing In with Supabase Hashed Token in Desktop App (TypeScript)
+DESCRIPTION: This TypeScript function demonstrates how a desktop application uses the Supabase JS client to sign in a user with a `hashed_token` received from the server. It calls `supabase.auth.verifyOtp` with the token hash and type 'magiclink' to establish a new authenticated session within the desktop context.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/demo-server/README.md#_snippet_4
+
+LANGUAGE: TypeScript
+CODE:
+```
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+async function signInWithHashedToken(hashedToken: string) {
+  const { data, error } = await supabase.auth.verifyOtp({
+    token_hash: hashedToken,
+    type: 'magiclink', // Or 'email' depending on Supabase version/config
+  });
+
+  if (error) {
+    console.error('Error verifying OTP:', error);
+    return null;
+  }
+  // `data.session` contains the new session for the desktop app
+  console.log('Desktop sign-in successful:', data.session);
+  return data.session;
+}
+
+// Assuming 'received_hashed_token' is the token from the server
+const session = await signInWithHashedToken(received_hashed_token);
+```
+
+----------------------------------------
+
+TITLE: Integrating Desktop Login Component in Angular
+DESCRIPTION: This snippet demonstrates how to integrate the `LoginDesktopComponent` within an Angular `AppComponent`. It conditionally renders the login component or authenticated content based on the authentication state managed by `authStore`, providing a user interface suitable for desktop login flows.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/demo-app-electron/README.md#_snippet_2
+
+LANGUAGE: typescript
+CODE:
+```
+import { LoginDesktopComponent } from '@dotted-labs/ngx-supabase-auth';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [/*...,*/ LoginDesktopComponent],
+  template: `
+    @if (authStore.isLoading()) {
+      <p>Loading...</p>
+    } @else if (!authStore.isAuthenticated()) {
+      <sup-login-desktop /> // Use the desktop login component
+    } @else {
+      <router-outlet /> // Show dashboard or other authenticated content
+    }
+  `,
+})
+export class AppComponent {
+  public readonly authStore = inject(AuthStore);
+  // ...
+}
+```
+
+----------------------------------------
+
+TITLE: Configuring ngx-supabase-auth with provideSupabaseAuth
+DESCRIPTION: This snippet demonstrates how to configure the ngx-supabase-auth library using `provideSupabaseAuth`. It highlights essential options like `supabaseClient` (required for consistent session management), redirect paths after login/logout, and enabling specific authentication providers. This configuration is typically done in the application's root module or main configuration file.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/README.md#_snippet_2
+
+LANGUAGE: TypeScript
+CODE:
+```
+provideSupabaseAuth({
+  supabaseClient: supabaseClient, // Required
+  redirectAfterLogin: '/dashboard', // Default: '/'
+  redirectAfterLogout: '/login', // Default: '/login'
+  authRequiredRedirect: '/login', // Default: '/login'
+  enabledAuthProviders: [AuthProvider.EMAIL_PASSWORD, AuthProvider.GOOGLE],
+  firstTimeProfileRedirect: '/complete-profile', // For first-time users
+  electronDeepLinkProtocol: 'myapp://auth', // For Electron apps
+  // ... other options
+});
+```
+
+----------------------------------------
+
+TITLE: Integrating Supabase Login Component in Angular
+DESCRIPTION: This snippet demonstrates how to integrate the <sup-login> UI component from @dotted-labs/ngx-supabase-auth into an Angular standalone component. It shows importing SupabaseLoginComponent and using it within the component's template, highlighting its event bindings for forgotPassword and signUp.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/demo-app/README.md#_snippet_2
+
+LANGUAGE: TypeScript
+CODE:
+```
+import { LoginComponent as SupabaseLoginComponent } from '@dotted-labs/ngx-supabase-auth';
+
+@Component({
+  // ...,
+  standalone: true,
+  imports: [SupabaseLoginComponent], // Import the library component
+  template: `
+    <div class="flex justify-center ...">
+      <sup-login (forgotPassword)="..." (signUp)="..." />
+    </div>
+  `,
+})
+export class LoginComponent {
+  /* ... */
+}
+```
+
+----------------------------------------
+
+TITLE: Implementing a Login Page with ngx-supabase-auth Components
+DESCRIPTION: This snippet illustrates how to create a login page in an Angular application using the `LoginComponent` and `SocialLoginComponent` from `ngx-supabase-auth`. It demonstrates importing standalone components, embedding them in a template, and handling events like `forgotPassword` and `signUp` to navigate to other routes. This approach simplifies UI development for authentication flows.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/README.md#_snippet_4
+
+LANGUAGE: TypeScript
+CODE:
+```
+// Example: src/app/pages/login-page/login-page.component.ts
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { LoginComponent } from '@dotted-labs/ngx-supabase-auth';
+
+@Component({
+  selector: 'app-login-page',
+  standalone: true,
+  imports: [LoginComponent], // Import the library component
+  template: `
+    <div class="container mx-auto p-4">
+      <h1 class="text-2xl font-bold mb-4">Login</h1>
+      <sup-login (forgotPassword)="goToPasswordReset()" (signUp)="goToSignup()" />
+      <!-- Optionally add social login -->
+      <sup-social-login class="mt-4" />
+    </div>
+  `,
+})
+export class LoginPageComponent {
+  constructor(private readonly router: Router) {}
+
+  public goToPasswordReset(): void {
+    this.router.navigate(['/password-reset']);
+  }
+
+  public goToSignup(): void {
+    this.router.navigate(['/signup']);
+  }
+}
+```
+
+----------------------------------------
+
+TITLE: Successful Response for Magic Link Hashed Token Generation
+DESCRIPTION: This JSON object represents the successful response from the `/api/generate-magic-link` endpoint. It contains the `hashed_token` string, which is a secure, single-use token that the desktop client can use to sign in with Supabase.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/demo-server/README.md#_snippet_3
+
+LANGUAGE: JSON
+CODE:
+```
+{
+  "hashed_token": "supabase_generated_hashed_token_string"
+}
+```
+
+----------------------------------------
+
+TITLE: Exposing Deep Link Listener via Electron Preload Script (JavaScript)
+DESCRIPTION: This JavaScript snippet for an Electron preload script securely exposes an API (`onDeepLinkReceived`) to the renderer process using `contextBridge`. It allows the renderer to register a callback function that will be invoked when a deep link URL is received from the main process via the `ngx-supabase-auth:deep-link-received` IPC channel, preventing duplicate listeners.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/README.md#_snippet_8
+
+LANGUAGE: javascript
+CODE:
+```
+// preload.js
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('ngxSupabaseAuth', {
+  // Expose a function to the renderer to listen for deep link URLs
+  onDeepLinkReceived: (callback) => {
+    // Remove any existing listener for this channel to prevent duplicates if this is called multiple times
+    ipcRenderer.removeAllListeners('ngx-supabase-auth:deep-link-received');
+    // Listen for the specific channel from the main process
+    ipcRenderer.on('ngx-supabase-auth:deep-link-received', (event, url) => callback(url));
+  }
+});
+```
+
+----------------------------------------
+
+TITLE: Displaying Auth Store Error and Loading State in Angular Template
+DESCRIPTION: This snippet demonstrates conditional rendering based on an `authStore`'s state. It displays an error message if the `authStore` has an error, and toggles between a 'Sign up' button and a 'Loading' indicator based on the `authStore`'s loading status.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/ngx-supabase-auth/src/lib/components/signup/signup.component.html#_snippet_3
+
+LANGUAGE: Angular Template
+CODE:
+```
+@if (authStore.error()) {
+
+{{ authStore.error() }}
+
+} @if (!authStore.loading()) { Sign up } @else { Loading }
+```
+
+----------------------------------------
+
+TITLE: Accessing Authentication State with AuthStore in Angular
+DESCRIPTION: This snippet illustrates how an Angular component can inject and utilize the AuthStore from @dotted-labs/ngx-supabase-auth to access reactive authentication state signals like user() and isAuthenticated(). It also demonstrates calling authentication actions such as signOut().
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/demo-app/README.md#_snippet_3
+
+LANGUAGE: TypeScript
+CODE:
+```
+import { computed, inject } from '@angular/core';
+import { AuthStore } from '@dotted-labs/ngx-supabase-auth';
+
+export class ExampleComponent {
+  public readonly authStore = inject(AuthStore); // Inject the store
+
+  // Access reactive state signals
+  public user = computed(() => this.authStore.user());
+  public isAuthenticated = computed(() => this.authStore.isAuthenticated());
+
+  public logout(): void {
+    this.authStore.signOut(); // Call store actions
+  }
+  // Other methods might call signInWithPassword(), updateUserProfile(), etc.
+}
+```
+
+----------------------------------------
+
+TITLE: Implementing Route Guards for Authentication in Angular
+DESCRIPTION: This snippet shows how to apply authGuard and unauthGuard from @dotted-labs/ngx-supabase-auth to Angular routes. authGuard protects routes, requiring user authentication, while unauthGuard ensures a route is only accessible when the user is logged out, typically used for login pages.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/demo-app/README.md#_snippet_4
+
+LANGUAGE: TypeScript
+CODE:
+```
+import { Routes } from '@angular/router';
+import { authGuard, unauthGuard } from '@dotted-labs/ngx-supabase-auth';
+
+export const routes: Routes = [
+  {
+    path: 'dashboard',
+    // ...,
+    canActivate: [authGuard], // Protected route: Requires login
+  },
+  {
+    path: 'login',
+    // ...,
+    canActivate: [unauthGuard], // Public route: Accessible only when logged out
+  },
+  // ... other routes
+]
+```
+
+----------------------------------------
+
+TITLE: Displaying Profile Loading Indicator in Angular Template
+DESCRIPTION: This snippet conditionally renders a 'Loading user profile...' message, providing visual feedback to the user while authentication data is being fetched or processed by the 'authStore'.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/ngx-supabase-auth/src/lib/components/profile/profile.component.html#_snippet_0
+
+LANGUAGE: HTML (Angular Template)
+CODE:
+```
+@if (authStore.loading()) {
+
+Loading user profile...
+
+}
+```
+
+----------------------------------------
+
+TITLE: Handling Supabase Auth Redirects in Angular
+DESCRIPTION: This code illustrates the `AuthHandlerComponent` responsible for processing authentication redirects from external browsers after social logins. It utilizes the `LoginDesktopRedirectComponent` to automatically handle the URL fragment containing the authentication token, completing the sign-in process within the Angular application. An alternative manual handling approach is also shown.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/demo-app-electron/README.md#_snippet_3
+
+LANGUAGE: typescript
+CODE:
+```
+import { Component, inject, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthStore, LoginDesktopRedirectComponent } from '@dotted-labs/ngx-supabase-auth'; // Import redirect component and store
+
+@Component({
+  selector: 'app-auth-handler',
+  standalone: true,
+  imports: [LoginDesktopRedirectComponent], // Use the redirect component
+  template: `<sup-login-desktop-redirect />`, // The component handles the logic
+})
+export class AuthHandlerComponent implements OnInit {
+  // Alternatively, handle manually without the component:
+  /*
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly authStore = inject(AuthStore);
+
+  async ngOnInit() {
+    // IMPORTANT: Logic to get the fragment might differ based on
+    // how electron/main.ts passes the data (e.g., IPC, route fragment)
+    const fragment = this.route.snapshot.fragment;
+    if (fragment) {
+      await this.authStore.handleRedirect(`#${fragment}`);
+      // Redirect to dashboard or desired route after handling
+      this.router.navigate(['/dashboard']);
+    } else {
+      // Handle error: No fragment found
+      this.router.navigate(['/']); // Go back to login
+    }
+  }
+  */
+}
+```
+
+----------------------------------------
+
+TITLE: Implementing Email/Password Login Form in Angular Template
+DESCRIPTION: This Angular template snippet defines the user interface for an email and password login form. It includes conditional rendering for input validation messages based on form control states (dirty, touched, invalid) and displays global authentication errors or loading states managed by an `authStore`. It requires `loginForm` (likely a `FormGroup`) and `authStore` (likely an Angular signal store or service) to be available in the component's context.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/ngx-supabase-auth/src/lib/components/login/login.component.html#_snippet_0
+
+LANGUAGE: Angular Template
+CODE:
+```
+@if (showEmailPasswordForm()) {
+
+Email  @if (loginForm.get('email')?.invalid && (loginForm.get('email')?.dirty || loginForm.get('email')?.touched)) {
+
+@if (loginForm.get('email')?.errors?.['required']) { Email is required } @if (loginForm.get('email')?.errors?.['email']) { Please enter a valid email }
+
+}
+
+Password
+
+Forgot Password?
+
+ @if (loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)) {
+
+@if (loginForm.get('password')?.errors?.['required']) { Password is required } @if (loginForm.get('password')?.errors?.['minlength']) { Password must be at least 6 characters }
+
+}
+
+@if (authStore.error()) {
+
+{{ authStore.error() }}
+
+} @if (!authStore.loading()) { Login } @else { Loading }
+
+}
+
+Don't have an account? Sign Up
+```
+
+----------------------------------------
+
+TITLE: Consuming Electron Deep Link API in Angular Component (TypeScript)
+DESCRIPTION: This TypeScript snippet shows how an Angular component, typically one handling redirects like `<sup-login-desktop-redirect>`, would declare and use the `ngxSupabaseAuth` object exposed by the Electron preload script. It enables the Angular application to receive and process deep link URLs forwarded from the Electron main process.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/README.md#_snippet_10
+
+LANGUAGE: typescript
+CODE:
+```
+// Example in your Angular component (e.g., auth-handler.component.ts)
+// declare global {
+//   interface Window {
+//     ngxSupabaseAuth: {
+```
+
+----------------------------------------
+
+TITLE: Displaying Password Validation Errors in Angular Template
+DESCRIPTION: This snippet shows the Angular template logic for displaying validation errors related to a password input field. It checks for 'required' and 'minlength' errors, providing user feedback when the password control is invalid and has been interacted with.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/ngx-supabase-auth/src/lib/components/signup/signup.component.html#_snippet_1
+
+LANGUAGE: Angular Template
+CODE:
+```
+@if (signupForm.get('password')?.invalid && (signupForm.get('password')?.dirty || signupForm.get('password')?.touched)) {
+
+@if (signupForm.get('password')?.errors?.['required']) { Password is required } @if (signupForm.get('password')?.errors?.['minlength']) { Password must be at least 6 characters }
+
+}
+```
+
+----------------------------------------
+
+TITLE: Protecting Angular Routes with Supabase Auth Guard
+DESCRIPTION: This snippet demonstrates how to configure Angular routes to use the `authGuard` from `@dotted-labs/ngx-supabase-auth`. It ensures that routes like `/dashboard` are only accessible to authenticated users, while also defining a specific route for the `auth-handler` component to manage authentication redirects.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/demo-app-electron/README.md#_snippet_4
+
+LANGUAGE: typescript
+CODE:
+```
+import { Routes } from '@angular/router';
+import { authGuard } from '@dotted-labs/ngx-supabase-auth';
+
+export const routes: Routes = [
+  // ... route for '/' possibly showing AppComponent with login
+  {
+    path: 'auth-handler', // Route for the redirect handler
+    loadComponent: () => import('./auth-handler/auth-handler.component').then((m) => m.AuthHandlerComponent),
+  },
+  {
+    path: 'dashboard',
+    loadComponent: () => import('./dashboard/dashboard.component').then((m) => m.DashboardComponent),
+    canActivate: [authGuard], // Protect the dashboard
+  },
+  // ... other routes
+];
+```
+
+----------------------------------------
+
+TITLE: Protecting Angular Routes with ngx-supabase-auth Guards
+DESCRIPTION: This snippet demonstrates how to protect Angular routes using `authGuard` and `unauthGuard` from `@dotted-labs/ngx-supabase-auth`. `authGuard` ensures only authenticated users can access a route, while `unauthGuard` restricts access to unauthenticated users. This is achieved by adding the guards to the `canActivate` array in the route definition.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/README.md#_snippet_6
+
+LANGUAGE: TypeScript
+CODE:
+```
+// src/app/app.routes.ts
+import { Routes } from '@angular/router';
+import { authGuard, unauthGuard } from '@dotted-labs/ngx-supabase-auth';
+
+export const routes: Routes = [
+  {
+    path: 'dashboard',
+    loadComponent: () => import('./pages/dashboard/dashboard.component').then((m) => m.DashboardComponent),
+    canActivate: [authGuard], // Requires user to be authenticated
+  },
+  {
+    path: 'profile',
+    loadComponent: () => import('./pages/profile/profile.component').then((m) => m.ProfileComponent),
+    canActivate: [authGuard], // Requires user to be authenticated
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./pages/login/login.component').then((m) => m.LoginComponent),
+    canActivate: [unauthGuard], // Requires user NOT to be authenticated
+  },
+  {
+    path: 'signup',
+    loadComponent: () => import('./pages/signup/signup.component').then((m) => m.SignupComponent),
+    canActivate: [unauthGuard], // Requires user NOT to be authenticated
+  },
+  // ... other routes
+];
+```
+
+----------------------------------------
+
+TITLE: Managing Authentication State with AuthStore in Angular
+DESCRIPTION: This snippet demonstrates how to use the `AuthStore` from `ngx-supabase-auth` to reactively manage and display user authentication status in an Angular component. It shows injecting `AuthStore`, using computed signals for derived state (like `userName`), and triggering authentication actions such as `signOut`. The template dynamically renders UI elements based on the user's authentication status (logged in, logged out, or loading).
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/README.md#_snippet_5
+
+LANGUAGE: TypeScript
+CODE:
+```
+// Example: src/app/components/navbar/navbar.component.ts
+import { Component, computed, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { AuthStore } from '@dotted-labs/ngx-supabase-auth';
+
+@Component({
+  selector: 'app-navbar',
+  standalone: true,
+  imports: [RouterLink],
+  template: `
+    <nav class="navbar bg-base-100">
+      <div class="flex-1">
+        <a class="btn btn-ghost text-xl" routerLink="/">MyApp</a>
+      </div>
+      <div class="flex-none">
+        @if (authStore.isAuthenticated()) {
+          <span class="mr-4">Welcome, {{ userName() }}</span>
+          <button class="btn btn-ghost" (click)="logout()">Logout</button>
+          <a class="btn btn-ghost" routerLink="/profile">Profile</a>
+        } @else if (!authStore.isLoading()) {
+          <a class="btn btn-ghost" routerLink="/login">Login</a>
+          <a class="btn btn-ghost" routerLink="/signup">Sign Up</a>
+        } @else {
+          <span class="loading loading-spinner"></span>
+        }
+      </div>
+    </nav>
+  `,
+})
+export class NavbarComponent {
+  public readonly authStore = inject(AuthStore);
+
+  // Example computed signal
+  public userName = computed(() => {
+    const user = this.authStore.user();
+    // Use user metadata or fallback to email
+    return user?.user_metadata?.['name'] ?? user?.email?.split('@')[0] ?? 'User';
+  });
+
+  public logout(): void {
+    this.authStore.signOut(); // Call store action
+  }
+}
+```
+
+----------------------------------------
+
+TITLE: Displaying Confirm Password Validation Errors in Angular Template
+DESCRIPTION: This snippet illustrates how to display validation messages for a 'confirm password' field in an Angular template. It specifically checks for 'required' and a custom 'passwordMismatch' error, ensuring the user is informed if the passwords do not match.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/ngx-supabase-auth/src/lib/components/signup/signup.component.html#_snippet_2
+
+LANGUAGE: Angular Template
+CODE:
+```
+@if ( signupForm.get('confirmPassword')?.invalid && (signupForm.get('confirmPassword')?.dirty || signupForm.get('confirmPassword')?.touched) ) {
+
+@if (signupForm.get('confirmPassword')?.errors?.['required']) { Confirm password is required } @if (signupForm.get('confirmPassword')?.errors?.['passwordMismatch']) { Passwords do not match }
+
+}
+```
+
+----------------------------------------
+
+TITLE: Displaying Auth Status and Reset Button in Angular
+DESCRIPTION: This snippet manages the display of authentication errors and the state of the password reset button. It shows an error message if `authStore.error()` returns a value, and conditionally renders 'Reset Password' or 'Sending...' based on `authStore.loading()` status.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/ngx-supabase-auth/src/lib/components/password-reset/password-reset.component.html#_snippet_1
+
+LANGUAGE: Angular Template
+CODE:
+```
+@if (authStore.error()) {
+
+{{ authStore.error() }}
+
+} @if (!authStore.loading()) { Reset Password } @else { Sending... }
+
+```
+
+----------------------------------------
+
+TITLE: Password Management Section with Validation and Status in Angular Template
+DESCRIPTION: This comprehensive snippet renders the password update form, including input fields for new and confirmed passwords, their respective validation messages (required, minlength), a password mismatch error, a success message upon update, and a dynamic update button reflecting loading state. It is displayed only if 'showPasswordSection()' is true.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/ngx-supabase-auth/src/lib/components/profile/profile.component.html#_snippet_7
+
+LANGUAGE: HTML (Angular Template)
+CODE:
+```
+@if (showPasswordSection()) {
+
+Password
+
+```
+
+----------------------------------------
+
+TITLE: Displaying General Authentication Error in Angular Template
+DESCRIPTION: This snippet conditionally displays an error message retrieved from 'authStore.error()', providing feedback to the user about any general authentication-related issues.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/ngx-supabase-auth/src/lib/components/profile/profile.component.html#_snippet_4
+
+LANGUAGE: HTML (Angular Template)
+CODE:
+```
+@if (authStore.error()) {
+
+{{ authStore.error() }}
+
+}
+```
+
+----------------------------------------
+
+TITLE: Conditionally Displaying Social Login Buttons - Angular Template
+DESCRIPTION: This snippet shows how to use Angular's `@if` structural directive to conditionally render social login provider buttons. It checks if any social providers are enabled using `authStore.hasSocialProviders()` and then individually checks each provider (e.g., `SocialAuthProvider.GOOGLE`) using `authStore.isProviderEnabled()` before displaying its respective button.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/ngx-supabase-auth/src/lib/components/social-login/social-login.component.html#_snippet_0
+
+LANGUAGE: Angular Template
+CODE:
+```
+@if (authStore.hasSocialProviders()) {
+
+@if (authStore.isProviderEnabled(SocialAuthProvider.GOOGLE)) { Google } @if (authStore.isProviderEnabled(SocialAuthProvider.FACEBOOK)) { Facebook } @if (authStore.isProviderEnabled(SocialAuthProvider.GITHUB)) { GitHub } @if (authStore.isProviderEnabled(SocialAuthProvider.TWITTER)) { Twitter } @if (authStore.isProviderEnabled(SocialAuthProvider.DISCORD)) { Discord }
+
+Or
+
+}
+```
+
+----------------------------------------
+
+TITLE: Password Reset Email Sent Confirmation in Angular
+DESCRIPTION: This snippet displays a confirmation message after a password reset email has been successfully sent. It conditionally renders a success icon, a heading, and instructions to check the inbox, along with a 'Back to Login' link, based on the `resetEmailSent()` flag.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/ngx-supabase-auth/src/lib/components/password-reset/password-reset.component.html#_snippet_2
+
+LANGUAGE: Angular Template
+CODE:
+```
+} @if (resetEmailSent()) {
+
+✓
+
+### Email Sent
+
+Check your inbox for the password reset link.
+
+Back to Login
+
+}
+
+```
+
+----------------------------------------
+
+TITLE: Displaying Profile Update Success Message in Angular Template
+DESCRIPTION: This snippet shows a 'Profile updated successfully!' message to the user upon a successful profile update operation, indicating completion of the action.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/ngx-supabase-auth/src/lib/components/profile/profile.component.html#_snippet_5
+
+LANGUAGE: HTML (Angular Template)
+CODE:
+```
+@if (updateSuccess()) {
+
+Profile updated successfully!
+
+}
+```
+
+----------------------------------------
+
+TITLE: Displaying Email Validation Errors in Angular Template
+DESCRIPTION: This snippet demonstrates how to conditionally display validation error messages for an email input field in an Angular template. It checks if the 'email' form control is invalid and has been interacted with (dirty or touched), then shows specific messages for 'required' or 'email' format errors.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/ngx-supabase-auth/src/lib/components/signup/signup.component.html#_snippet_0
+
+LANGUAGE: Angular Template
+CODE:
+```
+@if (signupForm.get('email')?.invalid && (signupForm.get('email')?.dirty || signupForm.get('email')?.touched)) {
+
+@if (signupForm.get('email')?.errors?.['required']) { Email is required } @if (signupForm.get('email')?.errors?.['email']) { Please enter a valid email }
+
+}
+```
+
+----------------------------------------
+
+TITLE: Toggling Profile Update Button Text in Angular Template
+DESCRIPTION: This snippet dynamically changes the text of the 'Update Profile' button. It displays 'Updating...' when 'authStore.loading()' is true (indicating an ongoing operation), and 'Update Profile' otherwise.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/ngx-supabase-auth/src/lib/components/profile/profile.component.html#_snippet_6
+
+LANGUAGE: HTML (Angular Template)
+CODE:
+```
+@if (!authStore.loading()) { Update Profile } @else { Updating... }
+```
+
+----------------------------------------
+
+TITLE: Conditional Display of Avatar Section in Angular Template
+DESCRIPTION: This snippet uses an '@if' block to conditionally render a 'Change' button or link, likely for updating the user's avatar, based on the 'showAvatarSection()' component method. It's part of the main profile display when not loading.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/ngx-supabase-auth/src/lib/components/profile/profile.component.html#_snippet_1
+
+LANGUAGE: HTML (Angular Template)
+CODE:
+```
+@if (showAvatarSection()) {
+
+ Change
+
+}
+```
+
+----------------------------------------
+
+TITLE: Email Field Validation for Required and Format Errors in Angular Template
+DESCRIPTION: This snippet displays validation messages for the 'email' field. It checks if the field is invalid, dirty, or touched, then shows 'Email is required' if the 'required' validator fails, or 'Please enter a valid email' if the 'email' validator fails.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/ngx-supabase-auth/src/lib/components/profile/profile.component.html#_snippet_3
+
+LANGUAGE: HTML (Angular Template)
+CODE:
+```
+@if (profileForm.get('email')?.invalid && (profileForm.get('email')?.dirty || profileForm.get('email')?.touched)) {
+
+@if (profileForm.get('email')?.errors?.['required']) { Email is required } @if (profileForm.get('email')?.errors?.['email']) { Please enter a valid email }
+
+}
+```
+
+----------------------------------------
+
+TITLE: Email Input Validation in Angular Template
+DESCRIPTION: This snippet demonstrates conditional rendering for email input validation in an Angular template. It checks for invalid email format, required field, and displays corresponding error messages based on `resetForm` controls' state (invalid, dirty, touched).
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/ngx-supabase-auth/src/lib/components/password-reset/password-reset.component.html#_snippet_0
+
+LANGUAGE: Angular Template
+CODE:
+```
+@if (!resetEmailSent) {
+
+Email  @if (resetForm.get('email')?.invalid && (resetForm.get('email')?.dirty || resetForm.get('email')?.touched)) {
+
+@if (resetForm.get('email')?.errors?.['required']) { Email is required } @if (resetForm.get('email')?.errors?.['email']) { Please enter a valid email }
+
+}
+
+```
+
+----------------------------------------
+
+TITLE: Name Field Validation for Required Error in Angular Template
+DESCRIPTION: This snippet displays a 'Name is required' error message if the 'name' field in 'profileForm' is invalid, has been touched, or is dirty, and specifically if the 'required' validator has failed.
+
+SOURCE: https://github.com/dotted-labs/ngx-supabase-auth/blob/master/projects/ngx-supabase-auth/src/lib/components/profile/profile.component.html#_snippet_2
+
+LANGUAGE: HTML (Angular Template)
+CODE:
+```
+@if (profileForm.get('name')?.invalid && (profileForm.get('name')?.dirty || profileForm.get('name')?.touched)) {
+
+@if (profileForm.get('name')?.errors?.['required']) { Name is required }
+
+}
+```

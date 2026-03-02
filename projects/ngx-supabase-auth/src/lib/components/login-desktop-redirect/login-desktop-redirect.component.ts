@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AuthStore } from '../../store/auth.store';
@@ -8,7 +7,7 @@ import { AuthStore } from '../../store/auth.store';
  */
 @Component({
   selector: 'sup-login-desktop-redirect',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './login-desktop-redirect.component.html',
 })
 export class LoginDesktopRedirectComponent implements OnInit {

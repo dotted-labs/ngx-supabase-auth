@@ -1,11 +1,11 @@
 import { Component, computed, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router } from '@angular/router';
 import { AuthStore } from '@dotted-labs/ngx-supabase-auth';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="max-w-md mx-auto card card-border bg-base-100 card-sm">
       <div class="card-body">

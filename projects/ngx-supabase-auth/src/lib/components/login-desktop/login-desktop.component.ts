@@ -1,24 +1,16 @@
-import { CommonModule } from '@angular/common';
+/// <reference path="../../electron.d.ts" />
+
 import { Component, inject, OnInit } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthStore } from '../../store/auth.store';
-
-// Declaraciones de tipo para la API de Electron exportada desde preload.js
-declare global {
-  interface Window {
-    ngxSupabaseAuth?: {
-      onDeepLinkReceived: (callback: (...args: any[]) => void) => void;
-    };
-  }
-}
 
 /**
  * Login component to handle email/password and social login
  */
 @Component({
   selector: 'sup-login-desktop',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './login-desktop.component.html',
 })
 export class LoginDesktopComponent implements OnInit {

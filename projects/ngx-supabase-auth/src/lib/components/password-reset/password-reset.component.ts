@@ -1,5 +1,5 @@
 import { Component, inject, Input, Output, EventEmitter, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PasswordResetRequest } from '../../models/auth.models';
 import { AuthStore } from '../../store/auth.store';
@@ -9,7 +9,7 @@ import { AuthStore } from '../../store/auth.store';
  */
 @Component({
   selector: 'sup-password-reset',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './password-reset.component.html',
 })
 export class PasswordResetComponent {

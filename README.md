@@ -31,7 +31,7 @@
 npm install @dotted-labs/ngx-supabase-auth @supabase/supabase-js
 ```
 
-_Requires `@angular/core`, `@angular/common`, `@angular/router`, `rxjs`, `ngrx/signals`. You also need to have Tailwind CSS and daisyUI configured in your Angular project if you intend to use the default component styling._
+_Requires Angular 21+ (`@angular/core` >= 21.0.0, `@angular/common` >= 21.0.0, `@angular/router` >= 21.0.0), `rxjs` ^6.5.3 || ^7.4.0, `@ngrx/signals` ^21.0.0. Node.js ^20.19.0, ^22.12.0, or ^24.0.0 is required. You also need to have Tailwind CSS and daisyUI configured in your Angular project if you intend to use the default component styling._
 
 ## Getting Started
 

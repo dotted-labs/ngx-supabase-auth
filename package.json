@@ -6,7 +6,7 @@
     "start": "concurrently \"npm run start:demo-app\" \"npm run start:demo-app-electron\" \"npm run start:demo-server\"",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
+    "test": "ng test demo-app --no-watch --browsers=ChromeHeadless",
     "build:lib": "ng build ngx-supabase-auth --project ngx-supabase-auth  ",
     "start:demo-app": "ng serve demo-app",
     "start:demo-app-electron": "concurrently \"ng serve demo-app-electron\" \"wait-on http://localhost:4300 && node projects/demo-app-electron/electron/electron.js\"",
@@ -28,14 +28,14 @@
     "README.md"
   ],
   "dependencies": {
-    "@angular/common": "^19.2.0",
-    "@angular/compiler": "^19.2.0",
-    "@angular/core": "^19.2.0",
-    "@angular/forms": "^19.2.0",
-    "@angular/platform-browser": "^19.2.0",
-    "@angular/platform-browser-dynamic": "^19.2.0",
-    "@angular/router": "^19.2.0",
-    "@ngrx/signals": "^19.0.0",
+    "@angular/common": "^21.2.0",
+    "@angular/compiler": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/platform-browser": "^21.2.0",
+    "@angular/platform-browser-dynamic": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "@ngrx/signals": "^21.0.1",
     "@supabase/supabase-js": "^2.39.7",
     "@tailwindcss/postcss": "^4.0.12",
     "cors": "^2.8.5",
@@ -48,10 +48,9 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@angular-builders/custom-webpack": "^19.0.0",
-    "@angular-devkit/build-angular": "^19.2.0",
-    "@angular/cli": "^19.2.0",
-    "@angular/compiler-cli": "^19.2.0",
+    "@angular-devkit/build-angular": "^21.2.0",
+    "@angular/cli": "^21.2.0",
+    "@angular/compiler-cli": "^21.2.0",
     "@electron/remote": "^2.1.2",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^22.13.10",
@@ -67,9 +66,9 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "ng-packagr": "^19.2.0",
+    "ng-packagr": "^21.2.0",
     "postcss": "^8.5.3",
-    "typescript": "~5.5.0",
+    "typescript": "~5.9.3",
     "wait-on": "^8.0.3"
   }
 }

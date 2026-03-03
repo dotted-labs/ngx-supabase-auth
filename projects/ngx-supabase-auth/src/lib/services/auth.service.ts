@@ -347,10 +347,11 @@ export class SupabaseAuthService {
 
     // Original web social auth flow
     try {
+      const callbackPath = this.config.socialLoginCallbackPath || '/auth/callback';
       const { error } = await this.supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}${this.config.redirectAfterLogin}`,
+          redirectTo: `${window.location.origin}${callbackPath}`,
         },
       });
 

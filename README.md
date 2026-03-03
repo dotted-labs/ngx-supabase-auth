@@ -97,6 +97,7 @@ provideSupabaseAuth({
   redirectAfterLogout: '/login', // Default: '/login'
   authRequiredRedirect: '/login', // Default: '/login'
   enabledAuthProviders: [AuthProvider.EMAIL_PASSWORD, AuthProvider.GOOGLE],
+  socialLoginCallbackPath: '/auth/callback', // Default: '/auth/callback'
   firstTimeProfileRedirect: '/complete-profile', // For first-time users
   electronDeepLinkProtocol: 'myapp://auth', // For Electron apps
   // ... other options
@@ -231,9 +232,13 @@ Import and use `authGuard` and `unauthGuard` in your route definitions.
 ```typescript
 // src/app/app.routes.ts
 import { Routes } from '@angular/router';
-import { authGuard, unauthGuard } from '@dotted-labs/ngx-supabase-auth';
+import { AuthCallbackComponent, authGuard, unauthGuard } from '@dotted-labs/ngx-supabase-auth';
 
 export const routes: Routes = [
+  {
+    path: 'auth/callback',
+    component: AuthCallbackComponent, // Required: handles OAuth redirects (NO guard)
+  },
   {
     path: 'dashboard',
     loadComponent: () => import('./pages/dashboard/dashboard.component').then((m) => m.DashboardComponent),
@@ -258,8 +263,11 @@ export const routes: Routes = [
 ];
 ```
 
+> **Important:** The `auth/callback` route **must not** have any auth guard. This route handles the redirect from social OAuth providers (Google, Facebook, etc.) after the user authenticates. The `AuthCallbackComponent` processes the session tokens, updates the store, and redirects to `redirectAfterLogin`.
+
 ## Components Reference
 
+- **`AuthCallbackComponent`:** Handles OAuth social login redirects. Place on an unguarded `/auth/callback` route. Processes session tokens, displays errors from the provider, and redirects to `redirectAfterLogin` on success.
 - **`<sup-login>`:** Standard login form (email/password). Emits `forgotPassword`, `signUp`.
 - **`<sup-signup>`:** Standard registration form (email/password, optional metadata). Emits `backToLogin`.
 - **`<sup-password-reset>`:** Form for requesting password reset email and setting a new password. Emits `backToLogin`.

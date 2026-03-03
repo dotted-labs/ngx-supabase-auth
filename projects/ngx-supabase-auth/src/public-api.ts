@@ -22,6 +22,7 @@ export * from './lib/guards/is-desktop-login.guard';
 export * from './lib/guards/is-not-desktop-login.guard';
 
 // Components
+export * from './lib/components/auth-callback/auth-callback.component';
 export * from './lib/components/login/login.component';
 export * from './lib/components/login-desktop/login-desktop.component';
 export * from './lib/components/login-desktop-redirect/login-desktop-redirect.component';

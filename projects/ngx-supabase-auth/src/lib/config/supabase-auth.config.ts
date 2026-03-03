@@ -51,6 +51,7 @@ export function provideSupabaseAuth(config: SupabaseAuthConfig): (Provider | Env
         firstTimeProfileRedirect: '/complete-profile',
         firstTimeCheckEndpoint: null,
         skipFirstTimeCheck: false,
+        socialLoginCallbackPath: '/auth/callback',
         // Override with provided config
         ...config,
       },

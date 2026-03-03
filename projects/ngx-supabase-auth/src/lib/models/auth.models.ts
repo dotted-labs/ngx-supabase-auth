@@ -86,6 +86,13 @@ export interface SupabaseAuthConfig {
    * This should be a secure API endpoint that uses the admin Supabase client
    */
   magicLinkGeneratorUrl?: string;
+
+  /**
+   * Route path for handling OAuth social login callbacks
+   * This route should NOT be protected by any auth guard
+   * @default '/auth/callback'
+   */
+  socialLoginCallbackPath?: string;
 }
 
 /**

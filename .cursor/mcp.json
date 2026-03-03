@@ -2,6 +2,10 @@
   "mcpServers": {
     "nx-mcp": {
       "url": "http://localhost:9769/sse"
+    },
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp?project_ref=tiwagdlcxnzfjnncqsrf",
+      "headers": {}
     }
   }
 }

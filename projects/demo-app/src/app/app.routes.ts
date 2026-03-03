@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, notFirstTimeProfileGuard, unauthGuard } from '@dotted-labs/ngx-supabase-auth';
+import { AuthCallbackComponent, authGuard, notFirstTimeProfileGuard, unauthGuard } from '@dotted-labs/ngx-supabase-auth';
 import { CompleteProfilePageComponent } from './pages/complete-profile/complete-profile.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { LoginDesktopPageComponent } from './pages/login-desktop/login-desktop.component';
@@ -9,6 +9,10 @@ import { ProfilePageComponent } from './pages/profile/profile.component';
 import { SignupPageComponent } from './pages/signup/signup.component';
 
 export const routes: Routes = [
+  {
+    path: 'auth/callback',
+    component: AuthCallbackComponent,
+  },
   {
     path: 'login',
     component: LoginPageComponent,

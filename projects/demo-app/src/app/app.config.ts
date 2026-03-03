@@ -25,6 +25,7 @@ export const appConfig: ApplicationConfig = {
       redirectAfterLogout: environment.auth.redirectAfterLogout,
       authRequiredRedirect: environment.auth.authRequiredRedirect,
       enabledAuthProviders: [AuthProvider.EMAIL_PASSWORD, AuthProvider.GOOGLE],
+      socialLoginCallbackPath: '/auth/callback',
       firstTimeProfileRedirect: environment.auth.firstTimeProfileRedirect,
       electronDeepLinkProtocol: environment.auth.electronDeepLinkProtocol,
       generateMagicLinkEndpoint: environment.auth.generateMagicLinkEndpoint,

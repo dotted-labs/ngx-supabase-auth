@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, computed, inject, output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SUPABASE_AUTH_CONFIG } from '../../config/supabase-auth.config';
@@ -11,7 +10,7 @@ import { SocialLoginComponent } from '../social-login/social-login.component';
  */
 @Component({
   selector: 'sup-signup',
-  imports: [CommonModule, ReactiveFormsModule, SocialLoginComponent],
+  imports: [ReactiveFormsModule, SocialLoginComponent],
   templateUrl: './signup.component.html',
 })
 export class SignupComponent {

@@ -1,12 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { AuthStore, SUPABASE_AUTH_CONFIG, UserProfileUpdate } from '@dotted-labs/ngx-supabase-auth';
 
 @Component({
   selector: 'app-complete-profile-page',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   template: `
     <div class="flex flex-col items-center justify-center min-h-screen bg-base-200 p-4">
       <div class="card w-full max-w-md bg-base-100 shadow-xl">

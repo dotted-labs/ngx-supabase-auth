@@ -2,8 +2,8 @@
 export const environment = {
   production: true,
   supabase: {
-    url: 'https://chayrsrhmqflptnwdhuu.supabase.co',
-    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNoYXlyc3JobXFmbHB0bndkaHV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQwMDQyNTQsImV4cCI6MjAzOTU4MDI1NH0.wyOS8cwL9i1NN2-OAt5uqC3U-1MgZX9Aix0dfvrZQBE',
+    url: 'https://tiwagdlcxnzfjnncqsrf.supabase.co',
+    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpd2FnZGxjeG56ZmpubmNxc3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0MTU1NDAsImV4cCI6MjA4Njk5MTU0MH0.y9E_zh7Yarpx-RqPKGX21IQc5qXde0lXCZJQkdqi6ls',
   },
   auth: {
     redirectAfterLogin: '/dashboard',
@@ -12,7 +12,7 @@ export const environment = {
     desktopAuthRedirect: '/login-desktop',
     firstTimeProfileRedirect: '/complete-profile',
     generateMagicLinkEndpoint: 'http://localhost:3000/api/generate-magic-link',
-    // firstTimeCheckEndpoint: 'https://api.example.com/check-first-time',
+    firstTimeCheckEndpoint: 'http://localhost:3000/api/check-first-time',
     electronDeepLinkProtocol: 'ngx-supabase-auth://auth',
   },
 };

@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { SUPABASE_AUTH_CONFIG } from '../../config/supabase-auth.config';
 import { AuthProvider, SocialAuthProvider } from '../../models/auth.models';
@@ -10,7 +9,7 @@ import { AuthStore } from '../../store/auth.store';
  */
 @Component({
   selector: 'sup-social-login',
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './social-login.component.html',
 })
 export class SocialLoginComponent {

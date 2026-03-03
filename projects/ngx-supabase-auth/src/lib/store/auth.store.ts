@@ -451,11 +451,12 @@ export const AuthStore = signalStore(
       };
 
       const onAuth = (session: Session) => {
-        console.log('[AuthStore] Auth state changed, session exists', session);
+        const user = session.user as SupabaseUser;
+        patchState(store, { user, loading: false, error: null });
       };
 
       const onUnauth = () => {
-        console.log('[AuthStore] Auth state changed, no session');
+        patchState(store, { user: null, loading: false });
       };
 
       return {
@@ -481,7 +482,7 @@ export const AuthStore = signalStore(
     },
   ),
   withHooks({
-    onInit(store, authService = inject(SupabaseAuthService), config = inject(SUPABASE_AUTH_CONFIG)) {
+    onInit(store, config = inject(SUPABASE_AUTH_CONFIG)) {
       store.initializeStore();
       config.supabaseClient.auth.onAuthStateChange((_, session) => {
         if (session) {

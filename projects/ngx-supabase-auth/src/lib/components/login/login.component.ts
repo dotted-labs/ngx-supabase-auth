@@ -1,5 +1,5 @@
 import { Component, inject, input, output, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthProvider, SocialAuthProvider } from '../../models/auth.models';
 import { AuthStore } from '../../store/auth.store';
@@ -11,7 +11,7 @@ import { SocialLoginComponent } from '../social-login/social-login.component';
  */
 @Component({
   selector: 'sup-login',
-  imports: [CommonModule, ReactiveFormsModule, SocialLoginComponent],
+  imports: [ReactiveFormsModule, SocialLoginComponent],
   templateUrl: './login.component.html',
 })
 export class LoginComponent implements OnInit {

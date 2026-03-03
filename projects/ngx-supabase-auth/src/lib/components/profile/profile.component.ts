@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, effect, inject, input, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SupabaseUser, UserProfileUpdate } from '../../models/auth.models';
@@ -9,7 +8,7 @@ import { AuthStore } from '../../store/auth.store';
  */
 @Component({
   selector: 'sup-profile',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent {

@@ -41,6 +41,9 @@ testem.log
 .DS_Store
 Thumbs.db
 
+# Cursor MCP config (may contain project tokens)
+.cursor/mcp.json
+
 # Environment local files with sensitive data
 **/environment.local.ts
 .env

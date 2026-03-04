@@ -212,7 +212,7 @@ export class SupabaseAuthService {
         type: 'email',
       });
 
-      console.log('[SupabaseAuthService] Verifying hashed token', data, error);
+      console.log('[SupabaseAuthService] Verifying hashed token after call verifyOtp', data, error);
 
       if (error) {
         console.error('[SupabaseAuthService] Failed to verify hashed token', error);
@@ -516,8 +516,8 @@ export class SupabaseAuthService {
         throw new Error('generateMagicLinkEndpoint is not configured for Electron mode');
       }
 
-      const { hashed_token: hashedToken } = await firstValueFrom(
-        this.http.post<{ hashed_token: string }>(this.config.generateMagicLinkEndpoint, {}),
+      const { hashedToken } = await firstValueFrom(
+        this.http.post<{ hashedToken: string }>(this.config.generateMagicLinkEndpoint, {}),
       );
       console.log('[SupabaseAuthService] Magic link data:', hashedToken);
 

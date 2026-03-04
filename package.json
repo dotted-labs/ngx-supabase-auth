@@ -1,6 +1,6 @@
 {
   "name": "@dotted-labs/ngx-supabase-auth",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "scripts": {
     "ng": "ng",
     "start": "concurrently \"npm run start:demo-app\" \"npm run start:demo-app-electron\" \"npm run start:demo-server\"",

@@ -86,40 +86,33 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-### 2. Desktop Login Component (`auth-handler/auth-handler.component.ts`)
+### 2. Desktop Login Component (`app.component.ts`)
 
-The root route hosts `<sup-login-desktop>` with a projected branding slot. The component renders a full-screen layout with a default dark radial-gradient background, vertically stacked **Iniciar sesión** / **Registrarse** buttons, and centered content.
+The root `AppComponent` often hosts the `<sup-login-desktop>` component. This component handles presenting login options (email/password, social providers) suitable for a desktop flow. Clicking a social provider button typically opens the system's default browser for authentication.
 
 ```typescript
-// Example: src/app/auth-handler/auth-handler.component.ts
+// Example: src/app/app.component.ts (template snippet)
 import { LoginDesktopComponent } from '@dotted-labs/ngx-supabase-auth';
 
 @Component({
-  selector: 'app-auth-handler',
-  imports: [LoginDesktopComponent],
+  selector: 'app-root',
+  standalone: true,
+  imports: [/*...,*/ LoginDesktopComponent],
   template: `
-    <sup-login-desktop>
-      <div login-desktop-branding class="flex flex-col items-center gap-2">
-        <div class="avatar placeholder">
-          <div class="bg-primary text-primary-content rounded-full w-24">
-            <span class="text-3xl">SA</span>
-          </div>
-        </div>
-        <h2 class="text-2xl font-bold text-white">Electron Demo</h2>
-        <p class="text-white/70">Inicia sesión para continuar</p>
-      </div>
-    </sup-login-desktop>
+    @if (authStore.isLoading()) {
+      <p>Loading...</p>
+    } @else if (!authStore.isAuthenticated()) {
+      <sup-login-desktop /> // Use the desktop login component
+    } @else {
+      <router-outlet /> // Show dashboard or other authenticated content
+    }
   `,
 })
-export class AuthHandlerComponent {}
+export class AppComponent {
+  public readonly authStore = inject(AuthStore);
+  // ...
+}
 ```
-
-**Projection slots:**
-
-| Attribute | Purpose | Default |
-|---|---|---|
-| `login-desktop-background` | Full-screen background layer | Dark radial gradient |
-| `login-desktop-branding` | Logo, title, or brand visuals | `ngx-supabase-auth` heading |
 
 ### 3. Authentication Handler (`auth-handler/auth-handler.component.ts`)
 

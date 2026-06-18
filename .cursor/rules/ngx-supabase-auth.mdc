@@ -27,7 +27,6 @@ ngx-supabase-auth is an Angular 21 library to implement registration, login, pas
         - Controls access to public routes (such as login) preventing already authenticated users from visiting them unnecessarily
      - Profile: Personal management center where users can manage their basic information, including username updates, profile picture customization, and password changes.
      - AuthStore `onAuthStateChange` sync: The store's `onAuth`/`onUnauth` handlers reactively sync user state from the Supabase session via `patchState`, keeping the store in sync with auth state changes at all times.
-     - Login Desktop (`<sup-login-desktop>`): Full-screen Electron login with two projection slots — `login-desktop-background` (default dark radial gradient) and `login-desktop-branding` (default library title). Vertically stacked Iniciar sesión / Registrarse buttons, centered on screen.
     You can build this angular library with `build:lib`
     
 

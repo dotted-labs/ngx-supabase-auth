@@ -1,32 +1,6 @@
-<main class="min-h-screen w-full relative flex items-center justify-center overflow-hidden">
-  <ng-content select="[login-desktop-background]">
-    <div
-      class="absolute inset-0 z-0"
-      style="background: radial-gradient(125% 125% at 50% 90%, #000000 40%, #0d1a36 100%);"
-    ></div>
-  </ng-content>
-
-  <section class="relative z-10 flex flex-col items-center gap-6 text-center px-4">
-    <ng-content select="[login-desktop-branding]">
-      <h1 class="text-3xl font-bold text-white">ngx-supabase-auth</h1>
-    </ng-content>
-
-    @if (store.loading()) {
-      <div class="alert">Verificando autenticación...</div>
-    }
-
-    @if (store.error()) {
-      <div class="alert alert-error">{{ store.error() }}</div>
-    }
-
-    @if (store.user() && !store.loading() && !store.error()) {
-      <div class="alert alert-success">¡Autenticación exitosa!</div>
-      <p class="text-white/80">Bienvenido, {{ store.user()?.email }}</p>
-    }
-
-    <div class="flex flex-col gap-3 w-full max-w-xs">
-      <button class="btn btn-primary w-full" (click)="login()">Iniciar sesión</button>
-      <button class="btn btn-secondary w-full" (click)="signup()">Registrarse</button>
+  <section class="relative flex flex-col items-center gap-6 text-center px-4">
+    <div class="flex flex-col items-center justify-center gap-3 w-full">
+      <button class="btn btn-primary w-[320px]" (click)="login()">Iniciar sesión</button>
+      <button class="btn btn-secondary w-[320px]" (click)="signup()">Registrarse</button>
     </div>
   </section>
-</main>

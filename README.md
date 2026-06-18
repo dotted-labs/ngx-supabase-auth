@@ -273,8 +273,27 @@ export const routes: Routes = [
 - **`<sup-password-reset>`:** Form for requesting password reset email and setting a new password. Emits `backToLogin`.
 - **`<sup-profile>`:** Displays user information (email, metadata) and allows updating profile data and password.
 - **`<sup-social-login>`:** Displays buttons for configured social OAuth providers.
-- **`<sup-login-desktop>`:** Login component optimized for Electron/desktop flows. Initiates OAuth via system browser.
+- **`<sup-login-desktop>`:** Full-screen login component optimized for Electron/desktop flows. Opens authentication in the system browser via `openExternalAuthWindow`. Supports two projection slots with built-in defaults:
+  - **`login-desktop-background`:** Custom background layer (default: dark radial gradient).
+  - **`login-desktop-branding`:** Branding area for logo, text, or other visual elements (default: library title).
 - **`<sup-login-desktop-redirect>`:** Helper component used in the desktop redirect handler page to process the login callback.
+
+### `<sup-login-desktop>` projection slots
+
+Both slots include built-in defaults. Override them by projecting content with the matching attribute:
+
+```html
+<sup-login-desktop>
+  <!-- Optional: custom background -->
+  <div login-desktop-background class="absolute inset-0 z-0 bg-gradient-to-b from-base-300 to-base-100"></div>
+
+  <!-- Optional: custom branding (logo, title, tagline) -->
+  <div login-desktop-branding class="flex flex-col items-center gap-2">
+    <img src="assets/logo.svg" alt="App logo" width="96" height="96" />
+    <p class="text-white/70">Inicia sesión para continuar</p>
+  </div>
+</sup-login-desktop>
+```
 
 ## Electron / Desktop Integration
 

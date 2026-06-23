@@ -16,7 +16,7 @@ export class PasswordResetComponent {
   /**
    * Title for the password reset component
    */
-  @Input() title = 'Reset Password';
+  @Input() title = $localize`:@@auth.resetPassword.title:Reset Password`;
 
   /**
    * Subtitle for the password reset component

@@ -347,7 +347,7 @@ export const AuthStore = signalStore(
           if (result.error || !result.hashedToken) {
             patchState(store, {
               loading: false,
-              error: result.error || 'Invalid deep link URL',
+              error: result.error || $localize`:@@auth.desktop.invalidDeepLink:Invalid deep link URL`,
             });
             return;
           }

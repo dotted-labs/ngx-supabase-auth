@@ -14,10 +14,10 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'Supabase Auth Demo App' title`, () => {
+  it('should expose supported locales', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('Supabase Auth Demo App');
+    expect(app.locales).toEqual(['es', 'en']);
   });
 
   it('should render main container with router-outlet', () => {

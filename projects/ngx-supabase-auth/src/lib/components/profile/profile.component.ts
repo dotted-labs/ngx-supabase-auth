@@ -194,7 +194,7 @@ export class ProfileComponent {
           }
         } catch (error) {
           console.error('Error uploading avatar:', error);
-          alert('Failed to upload avatar. Please try again.');
+          alert($localize`:@@auth.profile.avatarUploadFailed:Failed to upload avatar. Please try again.`);
         }
       }
     };

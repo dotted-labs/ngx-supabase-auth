@@ -27,6 +27,7 @@
   "peerDependencies": {
     "@angular/common": ">=21.0.0",
     "@angular/core": ">=21.0.0",
+    "@angular/localize": "^21.0.0",
     "@supabase/supabase-js": ">=2.38.0"
   },
   "dependencies": {

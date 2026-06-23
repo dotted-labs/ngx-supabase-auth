@@ -6,7 +6,11 @@
     "outDir": "../../out-tsc/spec",
     "types": [
       "jasmine"
-    ]
+    ],
+    "paths": {
+      "@dotted-labs/ngx-supabase-auth": ["../ngx-supabase-auth/src/public-api"],
+      "@dotted-labs/ngx-supabase-auth/i18n": ["../ngx-supabase-auth/i18n/src/public-api"]
+    }
   },
   "include": [
     "src/**/*.spec.ts",

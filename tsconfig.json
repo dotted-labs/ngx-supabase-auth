@@ -10,7 +10,9 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "ngx-supabase-auth": ["./dist/ngx-supabase-auth"]
+      "ngx-supabase-auth": ["./dist/ngx-supabase-auth"],
+      "@dotted-labs/ngx-supabase-auth": ["./projects/ngx-supabase-auth/src/public-api"],
+      "@dotted-labs/ngx-supabase-auth/i18n": ["./projects/ngx-supabase-auth/i18n/src/public-api"]
     },
     "skipLibCheck": false,
     "isolatedModules": true,

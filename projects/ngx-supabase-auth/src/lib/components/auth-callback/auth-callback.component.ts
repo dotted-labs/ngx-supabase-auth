@@ -94,7 +94,7 @@ export class AuthCallbackComponent implements OnInit {
 
       resolved = true;
       subscription.unsubscribe();
-      this.error.set('Authentication timed out. Please try again.');
+      this.error.set($localize`:@@auth.callback.timeout:Authentication timed out. Please try again.`);
     }, AUTH_TIMEOUT_MS);
   }
 
@@ -102,7 +102,7 @@ export class AuthCallbackComponent implements OnInit {
     const { isAuthenticated } = await this.authStore.checkAuth();
 
     if (!isAuthenticated) {
-      this.error.set('Failed to establish session. Please try again.');
+      this.error.set($localize`:@@auth.callback.sessionFailed:Failed to establish session. Please try again.`);
       return;
     }
 

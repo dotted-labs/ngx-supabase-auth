@@ -2,15 +2,15 @@
   <!-- Loading state -->
   <div class="flex flex-col items-center justify-center py-8">
     <span class="loading loading-spinner loading-lg"></span>
-    <p class="mt-4 text-base-content/70">Loading user profile...</p>
+    <p class="mt-4 text-base-content/70" i18n="@@auth.profile.loading">Loading user profile...</p>
   </div>
 } @else {
   <!-- Profile content when data is loaded -->
   @if (showAvatarSection()) {
     <div class="flex justify-center mb-8">
       <div class="relative w-24 h-24">
-        <img [src]="authStore.userAvatarUrl()" alt="User Avatar" class="w-full h-full rounded-full object-cover border-3 border-base-300" />
-        <button (click)="onChangeAvatar()" class="btn btn-primary btn-xs absolute bottom-0 right-0">Change</button>
+        <img [src]="authStore.userAvatarUrl()" i18n-alt="@@auth.profile.avatarAlt" alt="User Avatar" class="w-full h-full rounded-full object-cover border-3 border-base-300" />
+        <button (click)="onChangeAvatar()" class="btn btn-primary btn-xs absolute bottom-0 right-0" i18n="@@auth.profile.changeAvatar">Change</button>
       </div>
     </div>
   }
@@ -19,13 +19,13 @@
   <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="form-control flex flex-col gap-5 mb-6">
     <div class="form-control w-full flex flex-col gap-2">
       <label for="name" class="label">
-        <span class="label-text">Name</span>
+        <span class="label-text" i18n="@@auth.profile.nameLabel">Name</span>
       </label>
-      <input type="text" id="name" formControlName="name" placeholder="Your name" class="input input-bordered w-full" />
+      <input type="text" id="name" formControlName="name" i18n-placeholder="@@auth.profile.namePlaceholder" placeholder="Your name" class="input input-bordered w-full" />
       @if (profileForm.get('name')?.invalid && (profileForm.get('name')?.dirty || profileForm.get('name')?.touched)) {
         <div class="text-error text-sm mt-1">
           @if (profileForm.get('name')?.errors?.['required']) {
-            <span>Name is required</span>
+            <span i18n="@@auth.validation.nameRequired">Name is required</span>
           }
         </div>
       }
@@ -33,12 +33,13 @@
 
     <div class="form-control w-full flex flex-col gap-2">
       <label for="email" class="label">
-        <span class="label-text">Email</span>
+        <span class="label-text" i18n="@@auth.common.emailLabel">Email</span>
       </label>
       <input
         type="email"
         id="email"
         formControlName="email"
+        i18n-placeholder="@@auth.common.emailPlaceholder"
         placeholder="Email"
         [readonly]="!allowEmailChange()"
         class="input input-bordered w-full disabled:bg-base-200 disabled:cursor-not-allowed"
@@ -46,10 +47,10 @@
       @if (profileForm.get('email')?.invalid && (profileForm.get('email')?.dirty || profileForm.get('email')?.touched)) {
         <div class="text-error text-sm mt-1">
           @if (profileForm.get('email')?.errors?.['required']) {
-            <span>Email is required</span>
+            <span i18n="@@auth.validation.emailRequired">Email is required</span>
           }
           @if (profileForm.get('email')?.errors?.['email']) {
-            <span>Please enter a valid email</span>
+            <span i18n="@@auth.validation.emailInvalid">Please enter a valid email</span>
           }
         </div>
       }
@@ -61,15 +62,15 @@
       </div>
     }
     @if (updateSuccess()) {
-      <div class="text-success text-sm mt-1">Profile updated successfully!</div>
+      <div class="text-success text-sm mt-1" i18n="@@auth.profile.updateSuccess">Profile updated successfully!</div>
     }
 
     <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid || authStore.loading() || !profileForm.dirty">
       @if (!authStore.loading()) {
-        <span>Update Profile</span>
+        <span i18n="@@auth.profile.updateProfile">Update Profile</span>
       } @else {
         <span class="loading loading-spinner loading-sm"></span>
-        <span>Updating...</span>
+        <span i18n="@@auth.common.updating">Updating...</span>
       }
     </button>
   </form>
@@ -77,21 +78,21 @@
   <!-- Password Change Section -->
   @if (showPasswordSection()) {
     <div class="mt-8">
-      <div class="divider">Password</div>
+      <div class="divider" i18n="@@auth.profile.passwordSection">Password</div>
 
       <form [formGroup]="passwordForm" (ngSubmit)="onPasswordSubmit()" class="form-control flex flex-col gap-5 mb-6">
         <div class="form-control w-full flex flex-col gap-2">
           <label for="password" class="label">
-            <span class="label-text">New Password</span>
+            <span class="label-text" i18n="@@auth.profile.newPasswordLabel">New Password</span>
           </label>
-          <input type="password" id="password" formControlName="password" placeholder="New password" class="input input-bordered w-full" />
+          <input type="password" id="password" formControlName="password" i18n-placeholder="@@auth.profile.newPasswordPlaceholder" placeholder="New password" class="input input-bordered w-full" />
           @if (passwordForm.get('password')?.invalid && (passwordForm.get('password')?.dirty || passwordForm.get('password')?.touched)) {
             <div class="text-error text-sm mt-1">
               @if (passwordForm.get('password')?.errors?.['required']) {
-                <span>Password is required</span>
+                <span i18n="@@auth.validation.passwordRequired">Password is required</span>
               }
               @if (passwordForm.get('password')?.errors?.['minlength']) {
-                <span>Password must be at least 6 characters</span>
+                <span i18n="@@auth.validation.passwordMinLength">Password must be at least 6 characters</span>
               }
             </div>
           }
@@ -99,12 +100,13 @@
 
         <div class="form-control w-full flex flex-col gap-2">
           <label for="confirmPassword" class="label">
-            <span class="label-text">Confirm Password</span>
+            <span class="label-text" i18n="@@auth.common.confirmPasswordLabel">Confirm Password</span>
           </label>
           <input
             type="password"
             id="confirmPassword"
             formControlName="confirmPassword"
+            i18n-placeholder="@@auth.profile.confirmPasswordPlaceholder"
             placeholder="Confirm password"
             class="input input-bordered w-full"
           />
@@ -114,25 +116,25 @@
           ) {
             <div class="text-error text-sm mt-1">
               @if (passwordForm.get('confirmPassword')?.errors?.['required']) {
-                <span>Confirm Password is required</span>
+                <span i18n="@@auth.validation.confirmPasswordRequiredAlt">Confirm Password is required</span>
               }
             </div>
           }
           @if (passwordForm.errors?.['passwordMismatch']) {
-            <div class="text-error text-sm mt-1">Passwords do not match</div>
+            <div class="text-error text-sm mt-1" i18n="@@auth.validation.passwordMismatch">Passwords do not match</div>
           }
         </div>
 
         @if (passwordUpdateSuccess()) {
-          <div class="text-success text-sm mt-1">Password updated successfully!</div>
+          <div class="text-success text-sm mt-1" i18n="@@auth.profile.passwordUpdateSuccess">Password updated successfully!</div>
         }
 
         <button type="submit" class="btn btn-primary" [disabled]="passwordForm.invalid || authStore.loading()">
           @if (!authStore.loading()) {
-            <span>Update Password</span>
+            <span i18n="@@auth.profile.updatePassword">Update Password</span>
           } @else {
             <span class="loading loading-spinner loading-sm"></span>
-            <span>Updating...</span>
+            <span i18n="@@auth.common.updating">Updating...</span>
           }
         </button>
       </form>
@@ -142,7 +144,7 @@
   <!-- Logout Button -->
   @if (showSignOut()) {
     <div class="mt-8 flex justify-center">
-      <button type="button" class="btn btn-error" (click)="onSignOut()" [disabled]="authStore.loading()">Sign Out</button>
+      <button type="button" class="btn btn-error" (click)="onSignOut()" [disabled]="authStore.loading()" i18n="@@auth.profile.signOut">Sign Out</button>
     </div>
   }
 }

@@ -244,7 +244,7 @@ export class SupabaseAuthService {
     try {
       // Basic validation
       if (!url || typeof url !== 'string') {
-        return { error: 'Invalid URL' };
+        return { error: $localize`:@@auth.desktop.invalidUrl:Invalid URL` };
       }
 
       // Extract query parameters from the URL
@@ -252,7 +252,7 @@ export class SupabaseAuthService {
       const hashedToken = urlObj.searchParams.get('hashed_token');
 
       if (!hashedToken) {
-        return { error: 'No hashed_token found in URL' };
+        return { error: $localize`:@@auth.desktop.noHashedToken:No hashed_token found in URL` };
       }
 
       return { hashedToken };

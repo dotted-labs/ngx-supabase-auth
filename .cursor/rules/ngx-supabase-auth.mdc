@@ -27,6 +27,7 @@ ngx-supabase-auth is an Angular 21 library to implement registration, login, pas
         - Controls access to public routes (such as login) preventing already authenticated users from visiting them unnecessarily
      - Profile: Personal management center where users can manage their basic information, including username updates, profile picture customization, and password changes.
      - AuthStore `onAuthStateChange` sync: The store's `onAuth`/`onUnauth` handlers reactively sync user state from the Supabase session via `patchState`, keeping the store in sync with auth state changes at all times.
+     - **Internationalization (i18n):** All component strings use `$localize` / `i18n="@@auth.*"`. Translation files (`en`, `es`) are published via the secondary entry point `@dotted-labs/ngx-supabase-auth/i18n` (`loadAuthMessages`, `AUTH_LOCALES`). The library does not call `loadTranslations` or manage locale — the consumer app loads messages before bootstrap.
     You can build this angular library with `build:lib`
     
 

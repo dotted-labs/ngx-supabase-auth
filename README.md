@@ -24,14 +24,15 @@
 - **Social Logins:** Configure and use various Supabase-supported social OAuth providers.
 - **TypeScript & Signals:** Built with strict TypeScript and leverages Angular Signals for optimal performance and developer experience.
 - **Tailwind CSS & daisyUI:** Components are styled with Tailwind CSS and daisyUI for easy customization (requires Tailwind setup in your project).
+- **Internationalization (i18n):** All UI strings use `$localize` with custom IDs (`@@auth.*`). Translation files (`en`, `es`) ship via the `@dotted-labs/ngx-supabase-auth/i18n` entry point for runtime loading in consumer apps.
 
 ## Installation
 
 ```bash
-npm install @dotted-labs/ngx-supabase-auth @supabase/supabase-js
+npm install @dotted-labs/ngx-supabase-auth @supabase/supabase-js @angular/localize
 ```
 
-_Requires Angular 21+ (`@angular/core` >= 21.0.0, `@angular/common` >= 21.0.0, `@angular/router` >= 21.0.0), `rxjs` ^6.5.3 || ^7.4.0, `@ngrx/signals` ^21.0.0. Node.js ^20.19.0, ^22.12.0, or ^24.0.0 is required. You also need to have Tailwind CSS and daisyUI configured in your Angular project if you intend to use the default component styling._
+_Requires Angular 21+ (`@angular/core` >= 21.0.0, `@angular/common` >= 21.0.0, `@angular/router` >= 21.0.0, `@angular/localize` ^21.0.0), `rxjs` ^6.5.3 || ^7.4.0, `@ngrx/signals` ^21.0.0. Node.js ^20.19.0, ^22.12.0, or ^24.0.0 is required. You also need to have Tailwind CSS and daisyUI configured in your Angular project if you intend to use the default component styling._
 
 ## Getting Started
 
@@ -119,6 +120,60 @@ export class DatabaseService {
   }
 }
 ```
+
+## Internationalization
+
+The library uses Angular's [`$localize`](https://angular.dev/guide/i18n) with custom message IDs under the `@@auth.*` namespace. The package **provides** translation files; your app **controls** locale selection and runtime loading.
+
+### 1. Add the localize polyfill
+
+In `angular.json`, add `@angular/localize/init` to your app `polyfills`:
+
+```json
+"polyfills": ["@angular/localize/init"]
+```
+
+### 2. Load translations before bootstrap
+
+Merge auth messages into `loadTranslations()` in `main.ts` **before** `bootstrapApplication()`:
+
+```typescript
+// src/main.ts
+import { bootstrapApplication } from '@angular/platform-browser';
+import { loadTranslations } from '@angular/localize';
+import { loadAuthMessages } from '@dotted-labs/ngx-supabase-auth/i18n';
+import { AppComponent } from './app/app.component';
+import { appConfig } from './app/app.config';
+
+async function bootstrap() {
+  const locale = localStorage.getItem('locale') ?? 'en';
+  const authMessages = await loadAuthMessages(locale);
+  loadTranslations(authMessages.translations);
+
+  await bootstrapApplication(AppComponent, appConfig);
+}
+
+bootstrap();
+```
+
+To combine with your own app messages, merge both `translations` objects before calling `loadTranslations()`.
+
+### 3. Available locales and assets
+
+| Export | Description |
+|--------|-------------|
+| `AUTH_LOCALES` | `['es', 'en']` — supported locale codes |
+| `loadAuthMessages(locale)` | Returns `{ locale, translations }`; falls back to English |
+| `@dotted-labs/ngx-supabase-auth/i18n/messages.en.json` | English translation file (also copied to `dist`) |
+| `@dotted-labs/ngx-supabase-auth/i18n/messages.es.json` | Spanish translation file |
+
+### Runtime locale changes
+
+`$localize` evaluates each message once when first rendered. To switch language at runtime, reload translations **and** re-render the app (typically via a full page reload). See the demo app (`projects/demo-app`) for an EN/ES toggle example.
+
+### Out of scope
+
+The library does **not** translate dynamic errors from Supabase, OAuth `error_description` URL parameters, or other API `error.message` values. Map those in your consumer app if needed.
 
 ### 2. Use Components
 

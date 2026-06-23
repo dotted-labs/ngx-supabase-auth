@@ -6,16 +6,16 @@
   <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="form-control flex flex-col gap-4 mb-6">
     <div class="form-control w-full flex flex-col gap-2">
       <label for="email" class="label">
-        <span class="label-text">Email</span>
+        <span class="label-text" i18n="@@auth.common.emailLabel">Email</span>
       </label>
-      <input type="email" id="email" formControlName="email" placeholder="Email" autocomplete="email" class="input input-bordered w-full" />
+      <input type="email" id="email" formControlName="email" i18n-placeholder="@@auth.common.emailPlaceholder" placeholder="Email" autocomplete="email" class="input input-bordered w-full" />
       @if (signupForm.get('email')?.invalid && (signupForm.get('email')?.dirty || signupForm.get('email')?.touched)) {
         <div class="text-error text-sm mt-1">
           @if (signupForm.get('email')?.errors?.['required']) {
-            <span>Email is required</span>
+            <span i18n="@@auth.validation.emailRequired">Email is required</span>
           }
           @if (signupForm.get('email')?.errors?.['email']) {
-            <span>Please enter a valid email</span>
+            <span i18n="@@auth.validation.emailInvalid">Please enter a valid email</span>
           }
         </div>
       }
@@ -23,12 +23,13 @@
 
     <div class="form-control w-full flex flex-col gap-2">
       <label for="password" class="label">
-        <span class="label-text">Password</span>
+        <span class="label-text" i18n="@@auth.common.passwordLabel">Password</span>
       </label>
       <input
         type="password"
         id="password"
         formControlName="password"
+        i18n-placeholder="@@auth.common.passwordPlaceholder"
         placeholder="Password"
         autocomplete="new-password"
         class="input input-bordered w-full"
@@ -36,10 +37,10 @@
       @if (signupForm.get('password')?.invalid && (signupForm.get('password')?.dirty || signupForm.get('password')?.touched)) {
         <div class="text-error text-sm mt-1">
           @if (signupForm.get('password')?.errors?.['required']) {
-            <span>Password is required</span>
+            <span i18n="@@auth.validation.passwordRequired">Password is required</span>
           }
           @if (signupForm.get('password')?.errors?.['minlength']) {
-            <span>Password must be at least 6 characters</span>
+            <span i18n="@@auth.validation.passwordMinLength">Password must be at least 6 characters</span>
           }
         </div>
       }
@@ -47,12 +48,13 @@
 
     <div class="form-control w-full flex flex-col gap-2">
       <label for="confirmPassword" class="label">
-        <span class="label-text">Confirm Password</span>
+        <span class="label-text" i18n="@@auth.common.confirmPasswordLabel">Confirm Password</span>
       </label>
       <input
         type="password"
         id="confirmPassword"
         formControlName="confirmPassword"
+        i18n-placeholder="@@auth.common.confirmPasswordPlaceholder"
         placeholder="Confirm Password"
         autocomplete="new-password"
         class="input input-bordered w-full"
@@ -63,10 +65,10 @@
       ) {
         <div class="text-error text-sm mt-1">
           @if (signupForm.get('confirmPassword')?.errors?.['required']) {
-            <span>Confirm password is required</span>
+            <span i18n="@@auth.validation.confirmPasswordRequired">Confirm password is required</span>
           }
           @if (signupForm.get('confirmPassword')?.errors?.['passwordMismatch']) {
-            <span>Passwords do not match</span>
+            <span i18n="@@auth.validation.passwordMismatch">Passwords do not match</span>
           }
         </div>
       }
@@ -80,10 +82,10 @@
 
     <button type="submit" class="btn btn-primary" [disabled]="signupForm.invalid || authStore.loading()">
       @if (!authStore.loading()) {
-        <span>Sign up</span>
+        <span i18n="@@auth.signup.submit">Sign up</span>
       } @else {
         <span class="loading loading-spinner loading-sm"></span>
-        <span>Loading</span>
+        <span i18n="@@auth.common.loading">Loading</span>
       }
     </button>
   </form>
@@ -91,6 +93,6 @@
 
 <!-- Signup Link -->
 <div class="flex justify-center mt-2 gap-2 text-sm">
-  <span class="text-base-content/70">Have an account?</span>
-  <a (click)="onBackToLogin()" class="text-base-content cursor-pointer underline">Sign In Now </a>
+  <span class="text-base-content/70" i18n="@@auth.signup.hasAccount">Have an account?</span>
+  <a (click)="onBackToLogin()" class="text-base-content cursor-pointer underline" i18n="@@auth.signup.signInNow">Sign In Now</a>
 </div>

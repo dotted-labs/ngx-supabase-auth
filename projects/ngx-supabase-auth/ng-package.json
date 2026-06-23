@@ -4,5 +4,11 @@
   "lib": {
     "entryFile": "src/public-api.ts"
   },
-  "assets": []
+  "assets": [
+    {
+      "glob": "messages.*.json",
+      "input": "i18n/src",
+      "output": "i18n"
+    }
+  ]
 }

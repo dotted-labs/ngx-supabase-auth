@@ -1,5 +1,5 @@
 @if (authStore.loading()) {
-  <div class="alert">Verificando autenticación...</div>
+  <div class="alert" i18n="@@auth.desktop.verifying">Verifying authentication...</div>
 }
 
 @if (authStore.error()) {
@@ -7,8 +7,8 @@
 }
 
 @if (authStore.user() && !authStore.loading() && !authStore.error()) {
-  <div class="alert alert-success">¡Autenticación exitosa!</div>
-  <p>Bienvenido, {{ authStore.user()?.email }}</p>
+  <div class="alert alert-success" i18n="@@auth.desktop.authSuccess">Authentication successful!</div>
+  <p i18n="@@auth.desktop.welcome">Welcome, {{ authStore.user()?.email }}</p>
 
-  <button class="btn btn-primary" (click)="redirectToDesktop()">Iniciar sesión en la app</button>
+  <button class="btn btn-primary" (click)="redirectToDesktop()" i18n="@@auth.desktop.signInApp">Sign in to the app</button>
 }

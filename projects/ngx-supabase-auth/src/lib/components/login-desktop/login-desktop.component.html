@@ -1,6 +1,6 @@
   <section class="relative flex flex-col items-center gap-6 text-center px-4">
     @if (store.loading()) {
-      <div class="alert">Verificando autenticación...</div>
+      <div class="alert" i18n="@@auth.desktop.verifying">Verifying authentication...</div>
     }
 
     @if (store.error()) {
@@ -8,11 +8,11 @@
     }
 
     @if (store.user() && !store.loading() && !store.error()) {
-      <div class="alert alert-success">¡Autenticación exitosa!</div>
-      <p>Bienvenido, {{ store.user()?.email }}</p>
+      <div class="alert alert-success" i18n="@@auth.desktop.authSuccess">Authentication successful!</div>
+      <p i18n="@@auth.desktop.welcome">Welcome, {{ store.user()?.email }}</p>
     }
     <div class="flex flex-col items-center justify-center gap-3 w-full">
-      <button class="btn btn-primary w-[320px]" (click)="login()">Iniciar sesión</button>
-      <button class="btn btn-secondary w-[320px]" (click)="signup()">Registrarse</button>
+      <button class="btn btn-primary w-[320px]" (click)="login()" i18n="@@auth.desktop.signIn">Sign In</button>
+      <button class="btn btn-secondary w-[320px]" (click)="signup()" i18n="@@auth.desktop.signUp">Sign Up</button>
     </div>
   </section>

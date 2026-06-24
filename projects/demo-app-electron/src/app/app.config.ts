@@ -2,6 +2,7 @@ import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { LOCALE_STORAGE_KEY } from '../../demo-app/src/app/i18n/locale.storage';
 import { routes } from './app.routes';
 import { AuthProvider, provideSupabaseAuth } from '@dotted-labs/ngx-supabase-auth';
 import { environment } from '../environments/environment';
@@ -29,6 +30,7 @@ export const appConfig: ApplicationConfig = {
       enabledAuthProviders: [AuthProvider.EMAIL_PASSWORD, AuthProvider.GOOGLE, AuthProvider.GITHUB],
       webAppAuthUrl: environment.electron.webAppAuthUrl,
       electronDeepLinkProtocol: environment.electron.deepLinkProtocol,
+      localeStorageKey: LOCALE_STORAGE_KEY,
     }),
   ],
 };

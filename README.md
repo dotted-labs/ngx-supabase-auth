@@ -99,6 +99,7 @@ provideSupabaseAuth({
   authRequiredRedirect: '/login', // Default: '/login'
   enabledAuthProviders: [AuthProvider.EMAIL_PASSWORD, AuthProvider.GOOGLE],
   socialLoginCallbackPath: '/auth/callback', // Default: '/auth/callback'
+  localeStorageKey: 'fanship.locale', // Default: 'fanship.locale' — localStorage key for desktop locale handoff
   firstTimeProfileRedirect: '/complete-profile', // For first-time users
   electronDeepLinkProtocol: 'myapp://auth', // For Electron apps
   // ... other options
@@ -328,14 +329,71 @@ export const routes: Routes = [
 - **`<sup-password-reset>`:** Form for requesting password reset email and setting a new password. Emits `backToLogin`.
 - **`<sup-profile>`:** Displays user information (email, metadata) and allows updating profile data and password.
 - **`<sup-social-login>`:** Displays buttons for configured social OAuth providers.
-- **`<sup-login-desktop>`:** Login component optimized for Electron/desktop flows. Initiates OAuth via system browser.
+- **`<sup-login-desktop>`:** Login component optimized for Electron/desktop flows. Opens the system browser for authentication and passes the active locale via query param (`?desktop=true&locale=...`).
 - **`<sup-login-desktop-redirect>`:** Helper component used in the desktop redirect handler page to process the login callback.
 
 ## Electron / Desktop Integration
 
 Handling authentication, especially social logins, in desktop applications requires a specific flow:
 
-1.  Use `<sup-login-desktop>` in your main application window. When a user clicks a social login button, it triggers `signInWithSocialProvider`, which opens the system browser for authentication.
+### Locale handoff (Electron → system browser)
+
+Electron and the system browser do **not** share `localStorage`. When `<sup-login-desktop>` opens the web app for login/signup, it reads the active locale from `localStorage` (key: `localeStorageKey`, default `'fanship.locale'`) and appends it to the handoff URL:
+
+```
+{webAppAuthUrl}/login?desktop=true&locale=en-US
+{webAppAuthUrl}/signup?desktop=true&locale=es
+```
+
+| Query param | Required | Notes |
+|-------------|----------|-------|
+| `desktop` | Yes | Existing flag; indicates Electron auth flow |
+| `locale` | Yes (emitted by library) | Must match your app's supported locales |
+
+**Electron app configuration:**
+
+```typescript
+provideSupabaseAuth({
+  supabaseClient,
+  webAppAuthUrl: 'https://your-web-app.com',
+  localeStorageKey: 'fanship.locale', // Must match the key your app uses for locale persistence
+});
+```
+
+**Web app reception (consumer responsibility):**
+
+The library only **emits** the locale. Your web app must persist it **before** i18n bootstrap:
+
+```typescript
+// main.ts — call synchronously before resolveActiveLocale() / loadTranslations
+function syncLocaleFromDesktopHandoff(): void {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('desktop') !== 'true') return;
+
+  const localeParam = params.get('locale');
+  if (!localeParam) return;
+
+  const match = matchLocale(localeParam); // Validate against your SUPPORTED_LOCALES
+  if (!match) return;
+
+  localStorage.setItem('fanship.locale', match);
+
+  params.delete('locale');
+  const newSearch = params.toString();
+  history.replaceState(null, '', `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}${window.location.hash}`);
+}
+
+syncLocaleFromDesktopHandoff();
+// then: resolveActiveLocale(), applyLocale(), bootstrapApplication(...)
+```
+
+The `locale` param only takes effect when `desktop=true`. Invalid or missing values fall back to your existing locale resolution (localStorage → navigator → default).
+
+See `projects/demo-app/src/app/i18n/sync-locale-from-desktop-handoff.ts` for a working demo implementation.
+
+### Authentication flow
+
+1.  Use `<sup-login-desktop>` in your main application window. When a user clicks Sign In or Sign Up, it opens the system browser at `{webAppAuthUrl}/login?desktop=true&locale=...` (or `/signup`).
 2.  Configure Supabase OAuth to redirect to a custom URI scheme (e.g., `myapp://auth-callback/`) that your Electron app listens for.
 3.  Your Electron main process (e.g., `electron/main.ts` or `electron/main.js`) needs to capture this custom URI activation.
 

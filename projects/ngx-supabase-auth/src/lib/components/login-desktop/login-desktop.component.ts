@@ -3,6 +3,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { SUPABASE_AUTH_CONFIG } from '../../config/supabase-auth.config';
 import { AuthStore } from '../../store/auth.store';
 
 /**
@@ -16,6 +17,7 @@ import { AuthStore } from '../../store/auth.store';
 export class LoginDesktopComponent implements OnInit {
   public readonly store = inject(AuthStore);
   public readonly router = inject(Router);
+  public readonly config = inject(SUPABASE_AUTH_CONFIG);
 
   ngOnInit() {
     // Verificar si estamos en un entorno de Electron
@@ -46,15 +48,19 @@ export class LoginDesktopComponent implements OnInit {
    * Iniciar autenticación abriendo una ventana de navegador externa
    */
   login() {
-    // Esto abre el navegador web para autenticación
-    this.store.openExternalAuthWindow('login');
+    this.openDesktopAuth('login');
   }
 
   /**
    * Iniciar registro abriendo una ventana de navegador externa
    */
   signup() {
-    // Esto abre el navegador web para registro
-    this.store.openExternalAuthWindow('signup');
+    this.openDesktopAuth('signup');
+  }
+
+  private openDesktopAuth(path: 'login' | 'signup'): void {
+    const storageKey = this.config.localeStorageKey ?? 'fanship.locale';
+    const locale = localStorage.getItem(storageKey);
+    this.store.openExternalAuthWindow(path, locale ? { locale } : {});
   }
 }

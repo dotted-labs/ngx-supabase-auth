@@ -72,15 +72,17 @@ Similar to the web demo, the library is initialized in `app.config.ts` using `pr
 ```typescript
 // src/app/app.config.ts (snippet)
 import { provideSupabaseAuth } from '@dotted-labs/ngx-supabase-auth';
+import { LOCALE_STORAGE_KEY } from '../../demo-app/src/app/i18n/locale.storage';
 import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     // ... other providers
     provideSupabaseAuth({
-      supabaseUrl: environment.supabaseUrl,
-      supabaseKey: environment.supabaseKey,
-      // No specific desktop config needed here usually
+      supabaseClient,
+      webAppAuthUrl: environment.electron.webAppAuthUrl,
+      electronDeepLinkProtocol: environment.electron.deepLinkProtocol,
+      localeStorageKey: LOCALE_STORAGE_KEY, // Align with demo-app locale storage ('demo-app-locale')
     }),
   ],
 };
@@ -197,3 +199,14 @@ export const routes: Routes = [
 - Handling redirects securely and reliably is the most complex part of Electron authentication. Ensure the deep link/protocol handling in `electron/main.ts` is robust.
 - Test social login flows thoroughly, as provider requirements and OS behaviors can vary.
 - Consider security implications of passing tokens between the main and renderer processes (use context isolation and secure IPC channels).
+
+## Locale handoff verification
+
+Electron and the system browser do not share `localStorage`. The library passes the active locale in the handoff URL so the web demo renders auth UI in the same language.
+
+1. Run the web demo (`npm run start:demo-app`) and the Electron demo (`npm run start:demo-app-electron`) in parallel.
+2. In Electron, switch locale to **EN** using the header toggle.
+3. Click **Sign In** — the browser should open `http://localhost:4200/login?desktop=true&locale=en` and show English auth UI.
+4. Switch Electron locale to **ES**, click **Sign Up** — browser should show Spanish signup UI.
+5. Open `/login?desktop=true&locale=fr` directly — invalid locale is ignored; fallback behavior applies.
+6. Open `/login?desktop=true&locale=en-US` — demo maps `en-US` to `en` for compatibility with production-style URLs.

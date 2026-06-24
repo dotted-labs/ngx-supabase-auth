@@ -93,6 +93,13 @@ export interface SupabaseAuthConfig {
    * @default '/auth/callback'
    */
   socialLoginCallbackPath?: string;
+
+  /**
+   * localStorage key where the app stores the active locale
+   * Used by desktop auth handoff to pass locale to the external browser
+   * @default 'fanship.locale'
+   */
+  localeStorageKey?: string;
 }
 
 /**

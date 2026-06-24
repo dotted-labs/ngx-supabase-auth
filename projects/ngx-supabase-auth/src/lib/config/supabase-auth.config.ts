@@ -52,6 +52,7 @@ export function provideSupabaseAuth(config: SupabaseAuthConfig): (Provider | Env
         firstTimeCheckEndpoint: null,
         skipFirstTimeCheck: false,
         socialLoginCallbackPath: '/auth/callback',
+        localeStorageKey: 'fanship.locale',
         // Override with provided config
         ...config,
       },

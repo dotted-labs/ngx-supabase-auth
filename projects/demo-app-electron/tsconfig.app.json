@@ -4,7 +4,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "../../out-tsc/app",
-    "types": [],
+    "types": ["node"],
     "paths": {
       "@dotted-labs/ngx-supabase-auth": ["../ngx-supabase-auth/src/public-api"],
       "@dotted-labs/ngx-supabase-auth/i18n": ["../ngx-supabase-auth/i18n/src/public-api"]

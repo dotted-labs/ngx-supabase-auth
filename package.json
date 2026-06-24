@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test demo-app --no-watch --browsers=ChromeHeadless",
-    "build:lib": "ng build ngx-supabase-auth --project ngx-supabase-auth  ",
+    "build:lib": "ng build ngx-supabase-auth --project ngx-supabase-auth",
     "start:demo-app": "ng serve demo-app",
     "start:demo-app-electron": "concurrently \"ng serve demo-app-electron\" \"wait-on http://localhost:4300 && node projects/demo-app-electron/electron/electron.js\"",
     "start:demo-server": "node projects/demo-server/main.js"

@@ -360,37 +360,6 @@ provideSupabaseAuth({
 });
 ```
 
-**Web app reception (consumer responsibility):**
-
-The library only **emits** the locale. Your web app must persist it **before** i18n bootstrap:
-
-```typescript
-// main.ts — call synchronously before resolveActiveLocale() / loadTranslations
-function syncLocaleFromDesktopHandoff(): void {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('desktop') !== 'true') return;
-
-  const localeParam = params.get('locale');
-  if (!localeParam) return;
-
-  const match = matchLocale(localeParam); // Validate against your SUPPORTED_LOCALES
-  if (!match) return;
-
-  localStorage.setItem('fanship.locale', match);
-
-  params.delete('locale');
-  const newSearch = params.toString();
-  history.replaceState(null, '', `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}${window.location.hash}`);
-}
-
-syncLocaleFromDesktopHandoff();
-// then: resolveActiveLocale(), applyLocale(), bootstrapApplication(...)
-```
-
-The `locale` param only takes effect when `desktop=true`. Invalid or missing values fall back to your existing locale resolution (localStorage → navigator → default).
-
-See `projects/demo-app/src/app/i18n/sync-locale-from-desktop-handoff.ts` for a working demo implementation.
-
 ### Authentication flow
 
 1.  Use `<sup-login-desktop>` in your main application window. When a user clicks Sign In or Sign Up, it opens the system browser at `{webAppAuthUrl}/login?desktop=true&locale=...` (or `/signup`).
